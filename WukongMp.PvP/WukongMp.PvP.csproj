@@ -1,0 +1,127 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <LangVersion>14</LangVersion>
+        <OutputType>Library</OutputType>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <Nullable>enable</Nullable>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <RootNamespace>WukongMp.PvP</RootNamespace>
+        <TargetName>WukongMp.PvP</TargetName>
+        <Configurations>Debug;Release;NoDisconnect;Testing</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <UseSdkProjectReferences Condition="'$(UseSdkProjectReferences)' == ''">false</UseSdkProjectReferences>
+        <SdkDllPath Condition="'$(SdkDllPath)' == ''">$(MSBuildThisFileDirectory)..\Dependencies\SDK</SdkDllPath>
+        <GameDllPath Condition="'$(GameDllPath)' == ''">$(MSBuildThisFileDirectory)..\Dependencies\Game</GameDllPath>
+        <LoaderDllPath Condition="'$(CoreDllPath)' == ''">$(MSBuildThisFileDirectory)..\Dependencies\Loader</LoaderDllPath>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'true'">
+        <ProjectReference Include="..\..\WukongMp.Sdk\WukongMp.Sdk.csproj"/>
+        <ProjectReference Include="..\..\readym-gameserver\src\ReadyM.Api.Generators\ReadyM.Api.Generators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer"/>
+    </ItemGroup>
+
+    <ItemGroup Label="SDK DLLs" Condition="'$(UseSdkProjectReferences)' == 'false'">
+        <Analyzer Include="$(SdkDllPath)\ReadyM.Api.Generators.dll"/>
+        <Reference Include="WukongMp.Api">
+            <HintPath>$(SdkDllPath)\WukongMp.Api.dll</HintPath>
+        </Reference>
+        <Reference Include="WukongMp.Sdk">
+            <HintPath>$(SdkDllPath)\WukongMp.Sdk.dll</HintPath>
+        </Reference>
+        <Reference Include="ReadyM.Api">
+            <HintPath>$(SdkDllPath)\ReadyM.Api.dll</HintPath>
+        </Reference>
+        <Reference Include="ReadyM.Api.Multiplayer">
+            <HintPath>$(SdkDllPath)\ReadyM.Api.Multiplayer.dll</HintPath>
+        </Reference>
+        <Reference Include="ReadyM.Relay.Client">
+            <HintPath>$(SdkDllPath)\ReadyM.Relay.Client.dll</HintPath>
+        </Reference>
+        <Reference Include="ReadyM.Wukong.Common">
+            <HintPath>$(SdkDllPath)\ReadyM.Wukong.Common.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Third-party game and core DLLs. Paths overridable via Directory.Build.props. -->
+    <ItemGroup Label="Game DLLs">
+        <Reference Include="b1.Managed">
+            <HintPath>$(GameDllPath)\b1.Managed.dll</HintPath>
+        </Reference>
+        <Reference Include="b1.Native">
+            <HintPath>$(GameDllPath)\b1.Native.dll</HintPath>
+        </Reference>
+        <Reference Include="b1.NativePlugins">
+            <HintPath>$(GameDllPath)\b1.NativePlugins.dll</HintPath>
+        </Reference>
+        <Reference Include="B1UI_GSE.Script">
+            <HintPath>$(GameDllPath)\B1UI_GSE.Script.dll</HintPath>
+        </Reference>
+        <Reference Include="BtlSvr.Main">
+            <HintPath>$(GameDllPath)\BtlSvr.Main.dll</HintPath>
+        </Reference>
+        <Reference Include="Google.Protobuf">
+            <HintPath>$(GameDllPath)\Google.Protobuf.dll</HintPath>
+        </Reference>
+        <Reference Include="GSE.Core">
+            <HintPath>$(GameDllPath)\GSE.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="GSE.ProtobufDB">
+            <HintPath>$(GameDllPath)\GSE.ProtobufDB.dll</HintPath>
+        </Reference>
+        <Reference Include="Protobuf.RunTime">
+            <HintPath>$(GameDllPath)\Protobuf.RunTime.dll</HintPath>
+        </Reference>
+        <Reference Include="UnrealEngine">
+            <HintPath>$(GameDllPath)\UnrealEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnrealEngine.Runtime">
+            <HintPath>$(GameDllPath)\UnrealEngine.Runtime.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup Label="Mod loader DLLs">
+        <Reference Include="0Harmony">
+            <HintPath>$(LoaderDllPath)\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="CSharpModBase">
+            <HintPath>$(LoaderDllPath)\CSharpModBase.dll</HintPath>
+        </Reference>
+        <Reference Include="CSharpModBaseV2">
+            <HintPath>$(LoaderDllPath)\CSharpModBaseV2.dll</HintPath>
+        </Reference>
+        <Reference Include="PreludeLib">
+            <HintPath>$(LoaderDllPath)\PreludeLib.dll</HintPath>
+        </Reference>
+        <Reference Include="LiteNetLib" Condition="'$(UseSdkProjectReferences)' == 'false'">
+            <HintPath>$(LoaderDllPath)\LiteNetLib.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.7"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Resources\PvpTexts.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>PvpTexts.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\PvpTexts.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>PvpTexts.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
+</Project>

@@ -1,9 +1,10 @@
 {
-  "uniqueId": "ExampleMod",
-  "version": "1.0.0",
-  "name": "CHANGE ME",
-  "author": "CHANGE ME",
-  "description": "CHANGE ME",
+  "uniqueId": "WukongMp.PvP",
+  "version": "0.2.1",
+  "name": "WukongMp PvP",
+  "author": "ReadyM Team",
+  "link": "https://docs.ready.mp",
+  "description": "The PvP mod for WukongMp, allowing players to battle in many of the game's iconic areas.",
   "dependencies": [
     {
       "uniqueId": "WukongMp.Sdk",
