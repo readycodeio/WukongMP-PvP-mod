@@ -5,27 +5,20 @@ using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP;
 
-public class PvpSynchronizer : IHostedService
+public sealed class PvpSynchronizer : IHostedService
 {
-    public void OnScopeStart()
+    public void OnScopeStart() 
+        => WukongApi.Events.OnJoinedArea += OnJoinedAreaHandler;
+
+    public void Dispose() 
+        => WukongApi.Events.OnJoinedArea -= OnJoinedAreaHandler;
+
+    private static void OnJoinedAreaHandler(AreaId areaId)
     {
-        WukongApi.Events.OnJoinedArea += OnJoinedAreaHandler;
-    }
-
-    public void Dispose()
-    {
-        WukongApi.Events.OnJoinedArea -= OnJoinedAreaHandler;
-    }
-
-    private void OnJoinedAreaHandler(AreaId areaId)
-    {
-        var isFirst = WukongApi.Sync.IsMasterClient;
-
-        Logging.LogDebug("Joined area {AreaId}, is master client: {IsMasterClient}", areaId, isFirst);
-
-        if (isFirst)
-        {
+        var isMasterClient = WukongApi.Sync.IsMasterClient;
+        Logging.LogDebug("Joined area {AreaId}, is master client: {IsMasterClient}", areaId, isMasterClient);
+        
+        if (isMasterClient)
             WukongApi.PvP.InitializeAreaPvpState();
-        }
     }
 }
