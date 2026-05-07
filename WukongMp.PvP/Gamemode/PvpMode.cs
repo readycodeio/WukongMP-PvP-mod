@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using b1;
 using CSharpModBase;
 using HarmonyLib;
-using ReadyM.Api.DI;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer.Client;
 using ReadyM.Api.Multiplayer.Generators;

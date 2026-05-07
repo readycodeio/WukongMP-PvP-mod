@@ -1,6 +1,4 @@
-﻿using Friflo.Engine.ECS;
-using ReadyM.Wukong.Common.ECS.Components;
-using WukongMp.PvP.Configuration;
+﻿using WukongMp.PvP.Configuration;
 using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.UI;
