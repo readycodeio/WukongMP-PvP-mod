@@ -13,6 +13,15 @@ documentation for general mod development instructions.
 Refer to the [WukongMP SDK documentation](https://docs.ready.mp) for detailed information on how to use the SDK and
 contribute to this mod's development.
 
+## Caveats
+
+Until the server-side scripting support is implemented, the PvP mod uses the [PvP API](https://docs.ready.mp/wukong-mp/api-reference/WukongMp.Sdk.Api/WukongMp.Sdk.Api.IWukongPvpApi) and the [Cheats API](https://docs.ready.mp/wukong-mp/api-reference/WukongMp.Sdk.Api/WukongMp.Sdk.Api.IWukongCheatsApi).
+
+These APIs are temporary solutions arising from the tight coupling of PvP features with the SDK,
+in particular having custom data components defined in the SDK and not in the mod itself.
+
+Once the server-side scripting support is implemented, the PvP mod will be refactored to use server-side scripts instead of these APIs, and the APIs will be removed.
+
 ## Contributing
 
 The place for discussions about this mod is the official [ReadyM Forum](https://forum.ready.mp). 
