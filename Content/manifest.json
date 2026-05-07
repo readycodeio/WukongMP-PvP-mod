@@ -1,0 +1,13 @@
+{
+  "uniqueId": "ExampleMod",
+  "version": "1.0.0",
+  "name": "CHANGE ME",
+  "author": "CHANGE ME",
+  "description": "CHANGE ME",
+  "dependencies": [
+    {
+      "uniqueId": "WukongMp.Sdk",
+      "minimumVersion": "0.2.1"
+    }
+  ]
+}

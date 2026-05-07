@@ -1,0 +1,504 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ReadyM.Api.Multiplayer</name>
+    </assembly>
+    <members>
+        <member name="T:ReadyM.Api.Multiplayer.Client.IRelayClient">
+            <summary>
+            `IRelayClient` is a transport layer. All it is responsible for is wrapping buffers of data in appropriate
+            packets / headers so that they can be addressed to the right players. It also handles player ID assignment.
+            It does NOT handle any protocol specific logic. In particular, it should know nothing of:
+            1) specific RPC calls
+            2) ECS components and their state.
+            This is important because:
+            1) There will be many implementations of `IRelayClient` and we want to keep these implementations minimal and
+            with as little duplication as possible.
+            2) Relay client cannot be responsible for the entire protocol anyway. Therefore, by the principle of single responsibility
+            it cannot be responsible for just part of the protocol. It would create a confusion as to which parts of the
+            protocol belong where exactly. Over time this would lead to a difficult to maintain code.
+            `IRelayClient` has to know about areas of interest, because these are necessary to handle routing efficiently.
+            In particular, for most use-cases we don't want send messages using a recipient list but rather using the area
+            of interest.
+            `IRelayClient` also has to know of entity ownership, at least to the extent that this feature is used for
+            addressing messages. In particular, one of the addressing modes allows us to indicate that the entity should be
+            relayed to the owner of the entity. This owner cannot be pre-concretized because while the message is in flight,
+            ownership could be transferred to another player. Retaining the owner addressing mode allows the old owner to
+            re-relay the message to the new owner in that specific rare case.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnStart">
+            <summary>
+            Fired immediately after the client requests connection to the server. The client is not yet connected when
+            this is fired.
+            Always called from the thread calling `Start()`.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnRequestedStop">
+            <summary>
+            Fired immediately after the client requests disconnection from the server. This will NOT fire if the client
+            got disconnected from the server unwillingly, e.g. due to a network error.
+            Always called from the MAIN thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnConnected">
+            <summary>
+            Fired when the client-server handshake got completed and the client is able to receive
+            and send messages to/from the server. Before the `OnConnected` event `IRelayClient` guarantees that it will
+            not fire any events related to messages from the server. Sending messages to the server before the `OnConnected`
+            event fires will result in an exception.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnDisconnected">
+            <summary>
+            Fired when an expected or unexpected disconnection from the server. After this event is fired,
+            no further events related to messages from the server will be fired untile successful reconnection. Similarly,
+            attempting to send messages in the disconnected state will result in an exception.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnOtherPlayerConnected">
+            <summary>
+            Fired when another player has connected to the server. This will fire for all players regardless
+            of their area of interest. This is so that we can enumerate all players regardless of where we are in the game,
+            e.g. show statistics about the total number of players on the server. Or to be able to send whisper messages
+            to players in different areas of interest.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnOtherPlayerDisconnected">
+            <summary>
+            Fired when another player has been disconnected from the server. This is the counterpart to
+            `OnOtherPlayerConnected`.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnRequestedJoinArea">
+            <summary>
+            Fired immediately after the client requests to join an area of interest. The client is not yet in the area
+            of interest when this is fired.
+            Always called from the MAIN thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnJoinedArea">
+            <summary>
+            Fired when the client has successfully joined an area of interest. Before this event is fired, the client
+            will not receive any messages addressed to the area of interest. The client will always leave an area of
+            interest before joining a new one. It is currently impossible to be in multiple areas of interest at the same
+            time.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnRequestedLeaveArea">
+            <summary>
+            Fired immediately after the client requests to leave an area of interest. The client has not yet left the
+            area of interest when this is fired. In particular, it is possible to still receive messages addressed to the
+            "stale" area of interest before the `OnLeftArea` event is fired. 
+            Always called from the MAIN thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnLeftArea">
+            <summary>
+            Fired when the client has successfully left an area of interest. Before joining another area of interest,
+            the client will not receive any area of interest addressed messages. The client is considered to be in no
+            area of interest at this point (similarly to when it first gets connected to the server).
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnOtherPlayerJoinedArea">
+            <summary>
+            Fired when another player joins our area of interest. We are not going to be informed about players joining
+            areas of interest where we ourselves are not joined. When we join a new area of interest, this event will fire
+            for each player already in that area of interest. If a new player joins the area of interest, this will fire
+            as well. We will always first be informed of a new player connecting to the server before we get informed about
+            it joining our area of interest. Even when dealing with a reconnection.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnOtherPlayerLeftArea">
+            <summary>
+            Counterpart to `OnOtherPlayerJoinedArea`. Fires when another player leaves our area of interest. This will
+            also fire for players that were in the area of interest and got disconnected. This will fire before the
+            `OnOtherPlayerDisconnected` event in that case. When leaving an area of interest, we will receive this event
+            for each player that was in the area of interest before we left and that we knew of. Also, will be fired if
+            a player gets disconnected or if they leave the area of interest on request.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnPingUpdated">
+            <summary>
+            Used to measure ping. Currently only measures round-trip ping to the server.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnAnyBuiltInMessage">
+            <summary>
+            Fired for each message successfully received by us. The following messages will be received:
+            1) Directly addressed to us.
+            2) Address to all players in the area of interest where we are.
+            3) Global messages send to everyone on the server regardless of area of interest. TODO: Rate limiting?
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnClientUpdate">
+            <summary>
+            Fired on each server update tick.
+            This is called from the thread calling `RunAsync()`.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.Client.IRelayClientNetworkThreadContext.IsConnected">
+            <summary>
+            Whether the client is currently connected to the server - including having a valid `PlayerId` assigned. If
+            the client disconnects as a result of a network error, this will be set to `false`, while `IsRunning` will
+            remain `true` until `Stop()` is called.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Client.RelayMessage.ToPeers(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId,ReadyM.Api.Idents.PlayerId[],LiteNetLib.DeliveryMethod)">
+            <summary>
+            Send an event to a specific player or group of players.
+            This overload does not support event caching, as cached events must either be sent to all other players or all players.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Client.RelayMessage.ByRelayMode(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId,ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode,LiteNetLib.DeliveryMethod)">
+            <summary>
+            Send an event with a specific delivery method. This overload does not support event caching.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.INetworkedComponent">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Managers.IPlayerIdProvider">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.GetMaxPacketSize">
+            <returns>null if unbound, otherwise the max packet size in bytes</returns>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.SentOwners">
+            Returns a bitmask of player IDs to send to. Bit 0 = PlayerId 0, Bit 1 = PlayerId 1, etc.
+            This in an optimization to avoid allocating HashSets every tick.
+            This replaces the old bool OwnsEntity(_) check.
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Tags.DisallowOwnershipTransferTag">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Values.NetworkId.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Values.NetworkId.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.ECS.Values.NetworkId,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Extensions.SerializationExtensions">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Generators.DeriveINetSerializableAttribute">
+            <summary>
+            Decorate a struct with this attribute to make it available for use as an RPC parameter.
+            </summary>
+            <param name="mode">Determines which members of the struct are serialized. See <see cref="T:ReadyM.Api.Serialization.SerializableMode"/> for details.</param>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Generators.DeriveINetSerializableAttribute.#ctor(ReadyM.Api.Serialization.SerializableMode)">
+            <summary>
+            Decorate a struct with this attribute to make it available for use as an RPC parameter.
+            </summary>
+            <param name="mode">Determines which members of the struct are serialized. See <see cref="T:ReadyM.Api.Serialization.SerializableMode"/> for details.</param>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Generators.DeriveINetworkedComponentAttribute">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Generators.DeriveINetworkedComponentAttribute.#ctor(ReadyM.Api.Serialization.SerializableMode)">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Generators.ExcludeSerializableAttribute">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Generators.IncludeSerializableAttribute">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Generators.RpcEventAttribute">
+            <summary>
+            Marks a method as an RPC event handler.
+            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase"/>.
+            </summary>
+            <param name="relayMode">Determines how the event is relayed to other clients.</param>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Generators.RpcEventAttribute.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode)">
+            <summary>
+            Marks a method as an RPC event handler.
+            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase"/>.
+            </summary>
+            <param name="relayMode">Determines how the event is relayed to other clients.</param>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.Field`2">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Data.Field`2.#ctor(System.Int32,System.Func{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},System.Func{`0,System.Boolean})">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.Field`3">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Data.Field`3.#ctor(System.Int32,System.Func{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},System.Func{`0,System.Boolean})">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate`2">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.InvokeInGameAndNotifyEcs``2(``0@,``1)">
+            Propagate the event to both the ECS and the game, regardless of the policy.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.NotifyEcsIfApplicable``2(``0@,``1)">
+            Propagate the event to the ECS if the event policy allows it.
+            <returns>Whether the event was propagated.</returns>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.InvokeInGameIfApplicable``2(``0@,``1)">
+            Propagate the event to the game if the event policy allows it.
+            <returns>Whether the event was propagated.</returns>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.MappedEventManager.NotifyEcsIfApplicable``2(``0@,``1)">
+            <inheritdoc/>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.MappedEventManager.InvokeInGameIfApplicable``2(``0@,``1)">
+            <inheritdoc/>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.ShouldGameCopyToEcs(`0@)">
+            Should data be copied from the game object to the ECS entity
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.ShouldEcsCopyToGame(`0@)">
+            Should data be copied from the ECS entity to the game object
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.CanSetFromApi(`0@)">
+            Should data be allowed to be set from the API.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.CanGameSetLocally(`0@)">
+            Should data be allowed to be stored / set locally (analogous to ShouldRunLocally for events).
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToEcsOnlyEventPolicy`1">
+            Used with events that are only happening on the game-side and it makes no sense to trigger them manually.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToEcsOnlyEventPolicy`1.#ctor(ReadyM.Api.Helpers.DataSideChannel)">
+            Used with events that are only happening on the game-side and it makes no sense to trigger them manually.
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToGameOnlyEventPolicy`1">
+            Used for events that are only sent to clients from the server and therefore are never triggered locally.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToGameOnlyEventPolicy`1.#ctor(ReadyM.Api.Helpers.DataSideChannel)">
+            Used for events that are only sent to clients from the server and therefore are never triggered locally.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcs(`1@)">
+            <inheritdoc cref="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcsImpl(`1@)"/>
+            Always returns <c>false</c> if the event is already propagating to the game, to avoid recursion.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcsImpl(`1@)">
+            Returns whether the event should be allowed to propagate to the ECS or not, based on the provided context.
+            This is usually called in patches to game code.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEvent(`1@)">
+            <inheritdoc cref="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEventImpl(`1@)"/>
+            Always returns <c>false</c> if the event is already propagating to the ECS, to avoid recursion.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEventImpl(`1@)">
+            Returns whether the event should be allowed to propagate to the game or not, based on the provided context.
+            This is usually called in network event handlers.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventRunLocally(`1@)">
+            Returns whether the game is allowed to run the game code related to the event locally, or not.
+            This is used exclusively in game code patches, to avoid running events for entities we are not responsible for.
+            Always returns <c>true</c> if the event is propagating from the ECS to the game, to allow the game code to run for the event.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventRunLocallyImpl(`1@)">
+            Returns whether the game is allowed to run the game code related to the event locally, or not.
+            This is used exclusively in game code patches, to avoid running events for entities we are not responsible for.
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.EmptyContext">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagates">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagatesToEcsOnly">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagatesToGameOnly">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IMappingContext`1">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IOwnershipManaged">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IReadyComponent">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader">
+            <summary>
+            Spans 4 bytes in standard relay modes and (6 + 2 * peers) in peer-targeted relay mode.
+            - 1 byte for eventCode
+            - 2 bytes for sender
+            - 1 byte for relayMode and eventCaching (bit packed)
+            - 2 bytes for peers count
+            - peers * 2 bytes for peers
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId,ReadyM.Api.Idents.PlayerId[],ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode)">
+            <summary>
+            Spans 4 bytes in standard relay modes and (6 + 2 * peers) in peer-targeted relay mode.
+            - 1 byte for eventCode
+            - 2 bytes for sender
+            - 1 byte for relayMode and eventCaching (bit packed)
+            - 2 bytes for peers count
+            - peers * 2 bytes for peers
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode">
+            <summary>
+            A unique identifier of a single RPC message type.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode">
+            <summary>
+            Indicates how an RPC message should be relayed to other players in the game.
+            </summary>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.AreaOfInterestOthers">
+            <summary>
+            Sends the message to all players in the area of interest of the sender, other than the sender.
+            </summary>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.AreaOfInterestAll">
+            <summary>
+            Sends the message to all players in the area of interest of the sender, including the sender.
+            </summary>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.GlobalOthers">
+            <summary>
+            Sends the message to all players in the game, other than the sender.
+            </summary>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.GlobalAll">
+            <summary>
+            Sends the message to all players in the game, including the sender.
+            </summary>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.EntityOwner">
+            <summary>
+            Sends the message to the owner of an entity, possibly back to the sender.
+            </summary>
+            <remarks>
+            Not part of stable API.
+            </remarks>
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode.Peers">
+            <summary>
+            Sends the message to a specific list of players.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader">
+            <summary>
+            Spans 3 bytes.
+            - 1 byte for eventCode
+            - 2 bytes for sender
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId)">
+            <summary>
+            Spans 3 bytes.
+            - 1 byte for eventCode
+            - 2 bytes for sender
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.Protocol.ServerEventHeader,System.Text.Json.JsonSerializerOptions)">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase">
+            <summary>
+            Base class for an RPC container.
+            Each class that defines RPC methods with [RpcEvent] attributes must inherit from this class.
+            </summary>
+            <param name="client">RPC client to use for sending RPCs. This is injected by the DI container.</param>
+            <param name="serializer">Serializer to use for serializing RPC parameters. This is injected by the DI container.</param>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.#ctor(ReadyM.Api.Multiplayer.Client.IRpcClient,ReadyM.Api.Multiplayer.Serialization.IRelaySerializer)">
+            <summary>
+            Base class for an RPC container.
+            Each class that defines RPC methods with [RpcEvent] attributes must inherit from this class.
+            </summary>
+            <param name="client">RPC client to use for sending RPCs. This is injected by the DI container.</param>
+            <param name="serializer">Serializer to use for serializing RPC parameters. This is injected by the DI container.</param>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.EventsCount">
+            <summary>
+            Number of RPC events defined in this class.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.InitRpc">
+            <summary>
+            Initializes the RPC class, e.g. by registering RPC handlers.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.DeInitRpc">
+            <summary>
+            De-initializes the RPC class, e.g. by unregistering RPC handlers.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Offset">
+            <summary>
+            Event code offset assigned to this RPC class.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.RelayClient">
+            <summary>
+            RPC client to use for sending RPCs. This is injected by the DI container.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Serializer">
+            <summary>
+            Serializer to use for serializing RPC parameters. This is injected by the DI container.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Serialization.RelaySerializer.SerializeObject(LiteNetLib.Utils.NetDataWriter,System.Object)">
+            <summary>
+            Writes the object to the stream.
+            Format:
+            - PlayerId size (2 bytes)
+            - byte type code (1 byte)
+            - data
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.Serialization.RelaySerializer.DeserializeObject(LiteNetLib.Utils.NetDataReader)">
+            <summary>
+            Deserializes the object from the stream.
+            The data must be in the same format as serialized by SerializeObject.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ServerRpcEventAttribute">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ServerRpcEventAttribute.#ctor(System.String)">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ServerRpcHandlerAttribute">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ServerRpcHandlerAttribute.#ctor(System.String)">
+            <exclude />
+        </member>
+    </members>
+</doc>
