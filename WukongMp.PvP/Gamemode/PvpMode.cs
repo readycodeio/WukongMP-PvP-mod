@@ -199,7 +199,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         var playerEntities = AllPvPPlayers.ToList();
         var teamsIds = playerEntities.Select(p => p.TeamId).Distinct().ToList();
         var teamsCount = teamsIds.Count;
-        var teamAngleStep = 2 * MathF.PI / teamsCount;
+        var teamAngleStep = 2 * Math.PI / teamsCount;
 
         var entityOffsetAngle = 0.15f;
         var teamMemberIndex = new Dictionary<int, int>();
@@ -217,24 +217,24 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
             var teamBaseAngle = teamIndex[team] * teamAngleStep;
 
             FVector spawnLocation;
-            float teamAngleOffset = 0f;
+            var teamAngleOffset = 0.0;
 
             if (customPositions != null && customPositions.TryGetSpawnPosition(team, out var teamSpawn))
             {
                 var dir = teamSpawn - center;
-                var customTeamAngle = MathF.Atan2(dir.Y, dir.X);
+                var customTeamAngle = Math.Atan2(dir.Y, dir.X);
                 teamAngleOffset = customTeamAngle - teamBaseAngle;
 
                 var angle = customTeamAngle + memberIndex * entityOffsetAngle;
-                var x = center.X + radius * MathF.Cos(angle);
-                var y = center.Y + radius * MathF.Sin(angle);
+                var x = center.X + radius * Math.Cos(angle);
+                var y = center.Y + radius * Math.Sin(angle);
                 spawnLocation = new FVector(x, y, center.Z);
             }
             else
             {
                 var angle = teamBaseAngle + teamAngleOffset + memberIndex * entityOffsetAngle;
-                var x = center.X + radius * MathF.Cos(angle);
-                var y = center.Y + radius * MathF.Sin(angle);
+                var x = center.X + radius * Math.Cos(angle);
+                var y = center.Y + radius * Math.Sin(angle);
                 spawnLocation = new FVector(x, y, center.Z);
             }
 
