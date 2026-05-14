@@ -22,6 +22,6 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.lock.json') }}
           restore-keys: ${{ runner.os }}-nuget-
 
-      - run: dotnet restore WukongMp.PvP.sdk.sln
+      - run: dotnet restore WukongMp.PvP.sln
 
-      - run: dotnet build WukongMp.PvP.sdk.sln --configuration Debug --no-restore
+      - run: dotnet build WukongMp.PvP.sln --configuration Debug --no-restore
