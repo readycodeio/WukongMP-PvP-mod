@@ -43,7 +43,7 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
     private float _activeTimer;
 
     private float _roomEngagementScore;
-    private readonly Dictionary<PlayerId, float> _playerEngagementMultipliers = [];
+    private readonly Dictionary<PlayerId, double> _playerEngagementMultipliers = [];
     private readonly Dictionary<PlayerId, PlayerEngagementData> _playerEngagement = [];
     private readonly Random _rng = new();
 
@@ -148,15 +148,15 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
         var playerFacingDictionary = CalculatePlayerFacing();
         foreach (var playerId in _playerEngagement.Keys)
         {
-            float current = _playerEngagementMultipliers.TryGetValue(playerId, out var val) ? val : 1.0f;
+            double current = _playerEngagementMultipliers.TryGetValue(playerId, out var val) ? val : 1.0;
 
             if (playerFacingDictionary.TryGetValue(playerId, out var isFacing) && isFacing)
             {
-                current = MathF.Max(current - AntiStallConfig.PlayerEngagementMultiplierIncrease * _elapsedTime, AntiStallConfig.PlayerEngagementMultiplierMin);
+                current = Math.Max(current - AntiStallConfig.PlayerEngagementMultiplierIncrease * _elapsedTime, AntiStallConfig.PlayerEngagementMultiplierMin);
             }
             else
             {
-                current = MathF.Min(current + AntiStallConfig.PlayerEngagementMultiplierDecay * _elapsedTime, AntiStallConfig.PlayerEngagementMultiplierMax);
+                current = Math.Min(current + AntiStallConfig.PlayerEngagementMultiplierDecay * _elapsedTime, AntiStallConfig.PlayerEngagementMultiplierMax);
             }
 
             _playerEngagementMultipliers[playerId] = current;
@@ -242,7 +242,7 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
             var randomCoefficient = GetRandomCoefficient();
             var scaledDecay = baseDecayRate * multiplier * AntiStallConfig.ActiveDuration * randomCoefficient;
             Logging.LogDebug("Applying anti-stall decay to player {0}: baseDecayRate={1}, multiplier={2}, random={3}, scaledDecay={4}", playerId, baseDecayRate, multiplier, randomCoefficient, scaledDecay);
-            rpc.SendStallDamage(playerId, scaledDecay);
+            rpc.SendStallDamage(playerId, (float)scaledDecay);
         }
     }
 

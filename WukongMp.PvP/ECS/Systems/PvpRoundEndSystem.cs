@@ -36,7 +36,7 @@ public class PvpRoundEndSystem(PvpMode pvpMode) : ModSystemBase
         foreach (var tamer in WukongApi.Sync.AreaTamers)
         {
             if (tamer.IsDead || !PvpConstants.CompetingTeamIds.Contains(tamer.TeamId))
-                return;
+                break;
 
             aliveMonsters.Add(tamer.TeamId);
         }
