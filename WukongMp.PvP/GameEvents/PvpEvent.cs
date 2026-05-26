@@ -1,9 +1,8 @@
 ﻿using System;
-using ReadyM.Api.Multiplayer.Mapping.Tags;
 
 namespace WukongMp.PvP.GameEvents;
 
-public readonly struct PvpEvent(PvpEventKind kind, int data = 0) : IEquatable<PvpEvent>, IAlwaysPropagates
+public readonly struct PvpEvent(PvpEventKind kind, int data = 0) : IEquatable<PvpEvent>
 {
     public readonly PvpEventKind Kind = kind;
     public readonly int Data = data;
