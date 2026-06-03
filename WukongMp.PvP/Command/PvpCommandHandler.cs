@@ -22,7 +22,8 @@ public class PvpCommandHandler(
     IWukongChatApi chatApi,
     IWukongPvpApi pvpApi,
     IWukongCheatsApi cheatsApi,
-    IWukongSynchronizationApi syncApi
+    IWukongSynchronizationApi syncApi,
+    PvpServerRpc serverRpc
 ) : IHostedService
 {
     public void OnScopeStart()
@@ -39,6 +40,7 @@ public class PvpCommandHandler(
         consoleApi.AddCommand("arena", ConsoleCommand.Create(TeleportToArena, false));
         consoleApi.AddCommand("shrine", ConsoleCommand.Create(TeleportToShrine, false));
         consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel, true));
+        consoleApi.AddCommand("cheats", ConsoleCommand.Create(ToggleCheats, isDebugOnly: true));
     }
 
     public void Dispose() { }
@@ -144,6 +146,16 @@ public class PvpCommandHandler(
             {
                 RebirthPointId = levelData.BirthPointID,
             }, EPlayerTeleportReason.RebirthPoint);
+        }
+    }
+
+    private void ToggleCheats()
+    {
+        if (WukongApi.Sync.IsMasterClient && WukongApi.Sync.CurrentAreaId is { } area)
+        {
+            var enabledAlready = cheatsApi.CheatsAllowed;
+            chatApi.SendServerMessage(enabledAlready ? BuiltinTexts.CheatsDisabled : BuiltinTexts.CheatsEnabled);
+            serverRpc.SendEnableCheats(area, !enabledAlready);
         }
     }
 }

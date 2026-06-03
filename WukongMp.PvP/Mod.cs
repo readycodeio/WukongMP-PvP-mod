@@ -29,6 +29,7 @@ public class Mod : ModBase
         services.RegisterSingleton<PvpMode>();
         services.RegisterSingleton<PvpCommandHandler>();
         services.RegisterSingleton<PvpSynchronizer>();
+        services.RegisterSingleton<PvpServerRpc>();
     }
 
     public override void LateInit()
