@@ -25,6 +25,7 @@
 
     <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'true'">
         <ProjectReference Include="..\..\WukongMp.Sdk\WukongMp.Sdk.csproj"/>
+        <ProjectReference Include="..\..\readym-gameserver\src\WukongMp.Pvp.Common\WukongMp.Pvp.Common.csproj" />
         <ProjectReference Include="..\..\readym-gameserver\src\ReadyM.Api.Generators\ReadyM.Api.Generators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer"/>
     </ItemGroup>
 
@@ -47,6 +48,9 @@
         </Reference>
         <Reference Include="ReadyM.Wukong.Common">
             <HintPath>$(SdkDllPath)\ReadyM.Wukong.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="WukongMp.Pvp.Common">
+            <HintPath>$(SdkDllPath)\WukongMp.Pvp.Common.dll</HintPath>
         </Reference>
     </ItemGroup>
 
@@ -122,10 +126,6 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>PvpTexts.Designer.cs</LastGenOutput>
       </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\readym-gameserver\src\WukongMp.Pvp.Common\WukongMp.Pvp.Common.csproj" />
     </ItemGroup>
 
 </Project>

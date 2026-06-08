@@ -3,6 +3,4 @@ using ReadyM.Api.Multiplayer.RPC;
 
 namespace WukongMp.PvP;
 
-public partial class PvpServerRpc(IRpcClient rpcClient) : ServerRpcClientBase(rpcClient)
-{
-}
+public partial class PvpServerRpc(IRpcClient rpc) : ServerRpcClientBase(rpc);
