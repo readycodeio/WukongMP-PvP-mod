@@ -9,7 +9,10 @@ using WukongMp.Api;
 using WukongMp.Api.Configuration;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
@@ -20,17 +23,16 @@ namespace WukongMp.PvP.Command;
 public class PvpCommandHandler(
     IWukongConsoleApi consoleApi,
     IWukongChatApi chatApi,
-    IWukongPvpApi pvpApi,
+    WukongPvpApi pvpApi,
+    PvpMode pvpMode,
     IWukongCheatsApi cheatsApi,
-    IWukongSynchronizationApi syncApi,
-    PvpServerRpc serverRpc
+    IWukongSynchronizationApi syncApi
 ) : IHostedService
 {
     public void OnScopeStart()
     {
         var allmonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
         consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn, false), allmonsterNames);
-
         consoleApi.AddCommand("spectator", ConsoleCommand.Create(SetSpectatorStatus, false));
         consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatsApi.ToggleNoSkillsCooldown, false));
         consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatsApi.ToggleInfiniteMana, false));
@@ -91,7 +93,7 @@ public class PvpCommandHandler(
         {
             if (!player.IsSpectator)
             {
-                syncApi.EnableSpectatorMode(player, SpectatorReason.Observer);
+                syncApi.EnableSpectatorMode(player, SpectatorReason.Api);
             }
             else
             {
@@ -105,7 +107,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
         {
             var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
             mainEntity.Location = levelData.PvpStartingLocation.ToVector3();
@@ -117,10 +119,10 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
         {
-            var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
-            UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointID, out var shrineTransform);
+            var levelData = PvpUtils.GetCurrentLevelSpawnData();
+            UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointId, out var shrineTransform);
 
             mainEntity.Location = shrineTransform.Translation.ToVector3();
             mainEntity.Rotation = shrineTransform.Rotation.Rotator().ToVector3();
@@ -132,20 +134,15 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
         {
             if (pvpLevelId < 0)
             {
                 consoleApi.LogMessage(BuiltinTexts.InvalidCommand);
                 return;
             }
-
-            WukongApi.PvP.LevelId = pvpLevelId;
-            var levelData = LevelSpawnConfig.GetLevelSpawnData(pvpLevelId);
-            BPS_EventCollectionCS.GetLocal(GameUtils.GetWorld()).Evt_BPS_TeleportTo.Invoke(ETeleportTypeV2.RebirthPointTeleportOnly, new TeleportParam_RebirthPoint
-            {
-                RebirthPointId = levelData.BirthPointID,
-            }, EPlayerTeleportReason.RebirthPoint);
+            
+            pvpMode.SendChangeLevel(pvpLevelId);
         }
     }
 
@@ -155,7 +152,7 @@ public class PvpCommandHandler(
         {
             var enabledAlready = cheatsApi.CheatsAllowed;
             chatApi.SendServerMessage(enabledAlready ? BuiltinTexts.CheatsDisabled : BuiltinTexts.CheatsEnabled);
-            serverRpc.SendEnableCheats(area, !enabledAlready);
+            pvpMode.SendEnableCheats(area, !enabledAlready);
         }
     }
 }

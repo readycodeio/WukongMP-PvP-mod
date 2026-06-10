@@ -21,7 +21,7 @@ namespace WukongMp.PvP.Configuration
             configuration.SetDisableTamerAttackQuery(ShouldDisableTamerAttack);
             configuration.SetIsSkillEnabledQuery(IsSkillEnabled);
 
-            configuration.SetIsPlayerInBattleQuery(() => WukongApi.PvP.InPvP);
+            configuration.SetIsPlayerInBattleQuery(() => WukongApi.Services.Resolve<WukongPvpApi>().InPvP);
             configuration.SetIsInteractionAllowedQuery(IsInteractAllowed);
             configuration.SetIsTamerNotSynchronizedQuery(IsTamerNotSynchronized);
             configuration.SetIsAreaOverlapDisabledQuery(IsAreaOverlapDisabled);
@@ -35,7 +35,7 @@ namespace WukongMp.PvP.Configuration
 
         private static bool ShouldDisableTamerAttack()
         {
-            return !WukongApi.PvP.InPvP;
+            return !WukongApi.Services.Resolve<WukongPvpApi>().InPvP;
         }
 
         private static bool IsSkillEnabled(int skillId)
@@ -43,9 +43,9 @@ namespace WukongMp.PvP.Configuration
             switch (skillId)
             {
                 // Note: Phantom Rush is not a skill in code
-                case PvpConstants.ImmobilizeSkillId when !WukongApi.PvP.ImmobilizeAllowed:
-                case PvpConstants.GourdSkillId when !WukongApi.PvP.GourdAllowed:
-                case PvpConstants.ConsumableBuffSkillId when !WukongApi.PvP.ConsumablesAllowed:
+                case PvpConstants.ImmobilizeSkillId when !WukongApi.Services.Resolve<WukongPvpApi>().ImmobilizeAllowed:
+                case PvpConstants.GourdSkillId when !WukongApi.Services.Resolve<WukongPvpApi>().GourdAllowed:
+                case PvpConstants.ConsumableBuffSkillId when !WukongApi.Services.Resolve<WukongPvpApi>().ConsumablesAllowed:
                 case PvpConstants.IncenseTrailTalismanSkillId:
                 case PvpConstants.RuyiScrollSkillId:
                     return false;

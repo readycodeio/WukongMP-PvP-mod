@@ -19,7 +19,7 @@ public class PvpChatter : IHostedService
 
     private void OnPlayerDead(ReadyMainCharacter victim, ReadyCharacter? attacker)
     {
-        if (!WukongApi.PvP.InPvP || !attacker.HasValue) 
+        if (!WukongApi.Services.Resolve<WukongPvpApi>().InPvP || !attacker.HasValue) 
             return;
 
         if (victim.PlayerId != WukongApi.Sync.LocalPlayerId)

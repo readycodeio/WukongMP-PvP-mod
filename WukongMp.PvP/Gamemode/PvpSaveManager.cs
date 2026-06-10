@@ -4,7 +4,9 @@ using b1;
 using B1UI.GSSvc;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.WukongUtils;
 
 namespace WukongMp.PvP.GameMode;
 
@@ -75,10 +77,10 @@ public class PvpSaveManager
         OutArchiveData.StateMachineArchiveData = gameArchiveData.GameArchiveData.StateMachineArchiveData;
         OutArchiveData.TaskArchiveData = gameArchiveData.GameArchiveData.TaskArchiveData;
 
-        var levelConfig = LevelSpawnConfig.GetCurrentLevelSpawnData();
+        var levelConfig = PvpUtils.GetCurrentLevelSpawnData();
         OutArchiveData.PersistentECSData.BPCData.BPCPlayerRoleData.MapId = levelConfig.MapId;
         OutArchiveData.PersistentECSData.BPCData.BPCPlayerRoleData.MapAreaId = levelConfig.MapAreaId;
-        OutArchiveData.PersistentECSData.BPCData.BPCRebirthPointData.CurrentBirthPoint.PointID = levelConfig.BirthPointID;
+        OutArchiveData.PersistentECSData.BPCData.BPCRebirthPointData.CurrentBirthPoint.PointID = levelConfig.BirthPointId;
 
         _redirectSaveFiles = false;
     }

@@ -1,9 +1,11 @@
 ﻿using CSharpModBase.Input;
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
+using ReadyM.Api.ECS.Registry;
 using WukongMp.PvP.Chat;
 using WukongMp.PvP.Command;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.ECS;
 using WukongMp.PvP.GameMode;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
@@ -20,7 +22,8 @@ public class Mod : ModBase
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
         
-        services.RegisterSingleton<PvpRpc>();
+        services.RegisterSingleton<IArchetypeRegistration, PvpComponentRegistration>();
+        services.RegisterSingleton<WukongPvpApi>();
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpChatter>();
         services.RegisterSingleton<PvpGameplayConfiguration>();
@@ -28,8 +31,6 @@ public class Mod : ModBase
         services.RegisterSingleton<PvpWidgetManager>();
         services.RegisterSingleton<PvpMode>();
         services.RegisterSingleton<PvpCommandHandler>();
-        services.RegisterSingleton<PvpSynchronizer>();
-        services.RegisterSingleton<PvpServerRpc>();
     }
 
     public override void LateInit()

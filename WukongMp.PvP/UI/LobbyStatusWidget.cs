@@ -5,6 +5,7 @@ using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
+using WukongMp.Pvp.Common;
 using WukongMp.PvP.Configuration;
 
 namespace WukongMp.PvP.UI;
@@ -41,15 +42,15 @@ public class LobbyStatusWidget() : GameWidgetBase(LobbyStatusWidgetPath)
     public void UpdatePlayerTeam(string nickName, int teamId)
     {
         RemovePlayerFromTeams(nickName);
-        if (teamId == PvpConstants.SpectatorTeamId)
+        if (teamId == CommonConstants.SpectatorTeamId)
         {
             AddSpectator(nickName);
         }
-        else if (teamId == PvpConstants.CompetingTeamIds[0])
+        else if (teamId == CommonConstants.CompetingTeamIds[0])
         {
             AddToTeam1(nickName);
         }
-        else if (teamId == PvpConstants.CompetingTeamIds[1])
+        else if (teamId == CommonConstants.CompetingTeamIds[1])
         {
             AddToTeam2(nickName);
         }
