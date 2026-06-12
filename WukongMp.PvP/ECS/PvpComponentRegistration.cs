@@ -13,5 +13,10 @@ public class PvpComponentRegistration(ClientWukongArchetypeRegistration wukongAr
         {
             b.Add<PvPComponent>();
         });
+
+        registry.RegisterArchetype(b =>
+        {
+            b.Add<PvpStateComponent>();
+        });
     }
 }

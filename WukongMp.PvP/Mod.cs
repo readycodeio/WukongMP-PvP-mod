@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
 using ReadyM.Api.ECS.Registry;
+using ReadyM.Api.Multiplayer.ECS.Registry;
 using WukongMp.PvP.Chat;
 using WukongMp.PvP.Command;
 using WukongMp.PvP.Configuration;
@@ -17,11 +18,13 @@ namespace WukongMp.PvP;
 public class Mod : ModBase
 {
     public override string Name => "WukongMp PvP";
-    
+
     protected override void Initialize(IDependencyContainer services)
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
-        
+
+        // TODO: leaky internals
+        services.RegisterSingleton<INetworkedComponentRegistration, PvpNetworkedComponentRegistration>();
         services.RegisterSingleton<IArchetypeRegistration, PvpComponentRegistration>();
         services.RegisterSingleton<WukongPvpApi>();
         services.RegisterSingleton<TimerController>();
@@ -36,7 +39,7 @@ public class Mod : ModBase
     public override void LateInit()
     {
         base.LateInit();
-        
+
         WukongApi.Input.RegisterKeyBind(Key.J, () =>
         {
             Logger.LogDebug("J");
