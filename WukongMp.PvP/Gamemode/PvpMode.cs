@@ -134,7 +134,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
     private void OnMainCharacterEntityInitialized(ReadyMainCharacter mainCharacter)
     {
         var spawnPosition = PvpUtils.GetSpawnPosition(GameUtils.GetControlledPawn(), mainCharacter.PlayerId.RawValue, PvpConstants.MaxPlayers);
-        mainCharacter.Teleport(spawnPosition.ToVector3(), Vector3.Zero);
+        mainCharacter.Location = spawnPosition.ToVector3();
 
         // Set IsSpectator if joining during fight.
         if (WukongApi.PvP.InPvP)
@@ -210,8 +210,10 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
             teamIndex[teamsIds[i]] = i;
         }
 
-        foreach (var mainEntity in playerEntities)
+        // ReSharper disable once ForCanBeConvertedToForeach
+        for (var i = 0; i < playerEntities.Count; i++)
         {
+            var mainEntity = playerEntities[i];
             var team = mainEntity.TeamId;
             var memberIndex = teamMemberIndex[team];
             var teamBaseAngle = teamIndex[team] * teamAngleStep;
@@ -223,7 +225,6 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
             {
                 var dir = teamSpawn - center;
                 var customTeamAngle = Math.Atan2(dir.Y, dir.X);
-                teamAngleOffset = customTeamAngle - teamBaseAngle;
 
                 var angle = customTeamAngle + memberIndex * entityOffsetAngle;
                 var x = center.X + radius * Math.Cos(angle);
@@ -240,7 +241,9 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
 
             teamMemberIndex[team]++;
             var newPlayerLocation = PvpUtils.AdjustSpawnLocation(mainEntity.Pawn, spawnLocation);
-            mainEntity.Teleport(newPlayerLocation.ToVector3(), UMathLibrary.FindLookAtRotation(newPlayerLocation, center - new FVector(0, 0, 500)).ToVector3());
+            
+            mainEntity.Location = newPlayerLocation.ToVector3();
+            mainEntity.Rotation = UMathLibrary.FindLookAtRotation(newPlayerLocation, center - new FVector(0, 0, 500)).ToVector3();
         }
     }
 
