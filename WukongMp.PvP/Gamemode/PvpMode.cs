@@ -242,8 +242,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
             teamMemberIndex[team]++;
             var newPlayerLocation = PvpUtils.AdjustSpawnLocation(mainEntity.Pawn, spawnLocation);
             
-            mainEntity.Location = newPlayerLocation.ToVector3();
-            mainEntity.Rotation = UMathLibrary.FindLookAtRotation(newPlayerLocation, center - new FVector(0, 0, 500)).ToVector3();
+            mainEntity.Teleport(newPlayerLocation.ToVector3(), UMathLibrary.FindLookAtRotation(newPlayerLocation, center - new FVector(0, 0, 500)).ToVector3());
         }
     }
 
