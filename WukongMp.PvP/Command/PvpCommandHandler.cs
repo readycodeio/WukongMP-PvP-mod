@@ -106,7 +106,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
         {
             var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
-            mainEntity.Teleport(levelData.PvpStartingLocation.ToVector3(), Vector3.Zero);
+            mainEntity.Location = levelData.PvpStartingLocation.ToVector3();
         }
     }
 
@@ -120,7 +120,8 @@ public class PvpCommandHandler(
             var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
             UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointID, out var shrineTransform);
 
-            mainEntity.Teleport(shrineTransform.Translation.ToVector3(), shrineTransform.Rotation.Rotator().ToVector3());
+            mainEntity.Location = shrineTransform.Translation.ToVector3();
+            mainEntity.Rotation = shrineTransform.Rotation.Rotator().ToVector3();
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using b1;
@@ -10,6 +11,7 @@ using GSE.GSUI;
 using HarmonyLib;
 using LiteNetLib;
 using PreludeLib.Attributes;
+using ReadyM.Api.Multiplayer.Protocol;
 using ResB1;
 using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
@@ -48,7 +50,25 @@ public static class PatchStartGameUiPvp
         }
         else if (!isConnected)
         {
-            WukongApi.Sync.GetDisconnectReasonAndInvoke(reason => { Utils.TryRunOnGameThread(() => { WukongApi.Local.ShowInfoMessage(reason == DisconnectReason.ConnectionRejected ? BuiltinTexts.ConnectionRejectedByServer : BuiltinTexts.Disconnected); }); });
+            WukongApi.Sync.GetDisconnectReasonAndInvoke(reason =>
+            {
+                Utils.TryRunOnGameThread(() =>
+                {
+                    WukongApi.Local.ShowInfoMessage(reason switch
+                    {
+                        DisconnectedReason.Unknown => BuiltinTexts.Disconnected,
+                        DisconnectedReason.Timeout => BuiltinTexts.Disconnected,
+                        DisconnectedReason.IncompatibleVersion => BuiltinTexts.IncompatibleVersion,
+                        DisconnectedReason.ExpiredTicket => BuiltinTexts.ConnectionRejectedByServer,
+                        DisconnectedReason.AlreadyConnected => BuiltinTexts.AlreadyConnected,
+                        DisconnectedReason.ClientDisconnected => BuiltinTexts.Disconnected,
+                        DisconnectedReason.ServerFull => BuiltinTexts.ServerFull,
+                        DisconnectedReason.Kicked => BuiltinTexts.Kicked,
+                        DisconnectedReason.Banned => BuiltinTexts.Banned,
+                        _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null)
+                    });
+                });
+            });
             Logging.LogError(" PvP Disconnected. Could not continue game.");
         }
 
