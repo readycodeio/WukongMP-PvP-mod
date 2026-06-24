@@ -134,7 +134,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
     private void OnMainCharacterEntityInitialized(ReadyMainCharacter mainCharacter)
     {
         var spawnPosition = PvpUtils.GetSpawnPosition(GameUtils.GetControlledPawn(), mainCharacter.PlayerId.RawValue, PvpConstants.MaxPlayers);
-        mainCharacter.Location = spawnPosition.ToVector3();
+        mainCharacter.Teleport(spawnPosition.ToVector3(), Vector3.Zero);
 
         // Set IsSpectator if joining during fight.
         if (WukongApi.PvP.InPvP)
