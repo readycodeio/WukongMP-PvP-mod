@@ -6,6 +6,7 @@ public static class PvpConstants
     public const int CharacterArchiveId = 10;
     public const int WorldArchiveId = 0;
     public const int NewCharacterArchiveId = 1;
+    public const int SharedPvpArchiveId = 2;
     public const float FloatComparisonTolerance = 0.1f;
     public const int MaxPlayers = 10;
 

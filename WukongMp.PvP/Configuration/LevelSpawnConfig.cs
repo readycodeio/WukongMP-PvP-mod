@@ -42,9 +42,6 @@ namespace WukongMp.PvP.Configuration
 
         public static LevelSpawnData GetCurrentLevelSpawnData()
         {
-            if (WukongApi.Sync.LocalMainCharacter is not { } main)
-                return GetLevelSpawnData(0);
-            
             var levelId = WukongApi.PvP.LevelId;            
             return GetLevelSpawnData(levelId);
         }

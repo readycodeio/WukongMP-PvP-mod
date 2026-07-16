@@ -86,17 +86,22 @@ public static class PatchStartGameUiPvp
                 var slot = GSE_SaveGameUtil.GetArchiveSlotName(SaveFileType.Archive, PvpConstants.CharacterArchiveId);
                 var savePath = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{slot}.sav");
 
-                if (!hasPak || !isConnected)
+                var isMachmaking = bool.TryParse(WukongApi.Configuration.GetLaunchParameter("USE_SHARED_SAVE", "false"), out var flag) && flag;
+                
+                if (!hasPak || !isConnected || isMachmaking)
                 {
+                    // Hidden when using shared save file (in matchmaking)
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
                 }
                 else if (File.Exists(savePath))
                 {
+                    // Quick Join when there's a cached character save file
                     ___StartGameBtnList[j].SetTxtName(FText.FromString(PvpTexts.QuickJoin));
                 }
                 else
                 {
+                    // Hide "Quick launch", players must choose their save file
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
                 }
