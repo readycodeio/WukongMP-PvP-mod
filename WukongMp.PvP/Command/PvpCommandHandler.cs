@@ -98,7 +98,7 @@ public class PvpCommandHandler(
         }
     }
 
-    private void TeleportToArena()
+    public void TeleportToArena()
     {
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
@@ -110,7 +110,7 @@ public class PvpCommandHandler(
         }
     }
 
-    private void TeleportToShrine()
+    public void TeleportToShrine()
     {
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;

@@ -43,6 +43,8 @@ public static class PatchStartGameUiPvp
         var playerMarkerActorClass = BGW_PreloadAssetMgr.Get(GameUtils.GetWorld()).TryGetCachedResourceObj<UClass>(PvpConstants.PlayerMarkerPath, ELoadResourceType.SyncLoadAndCache);
         var hasPak = playerMarkerActorClass != null;
         var isConnected = WukongApi.Sync.IsConnected;
+        var isMachmaking = bool.TryParse(WukongApi.Configuration.GetLaunchParameter("USE_SHARED_SAVE", "false"), out var flag) && flag;
+
         if (!hasPak)
         {
             WukongApi.Local.ShowTip(BuiltinTexts.MissingPak, false);
@@ -72,9 +74,9 @@ public static class PatchStartGameUiPvp
             Logging.LogError(" PvP Disconnected. Could not continue game.");
         }
 
-        for (int j = ___DataStore.BtnDataList.Count - 1; j >= 0; j--)
+        for (var j = ___DataStore.BtnDataList.Count - 1; j >= 0; j--)
         {
-            DSButtonBase BtnBase2 = ___DataStore.BtnDataList[j];
+            var BtnBase2 = ___DataStore.BtnDataList[j];
             var buttonName = BtnBase2.Name.Value.ToString();
 
             Logging.LogDebug("Button name: {Name}, id: {Id}", buttonName, BtnBase2.Id.Value);
@@ -86,17 +88,15 @@ public static class PatchStartGameUiPvp
                 var slot = GSE_SaveGameUtil.GetArchiveSlotName(SaveFileType.Archive, PvpConstants.CharacterArchiveId);
                 var savePath = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{slot}.sav");
 
-                var isMachmaking = bool.TryParse(WukongApi.Configuration.GetLaunchParameter("USE_SHARED_SAVE", "false"), out var flag) && flag;
-                
-                if (!hasPak || !isConnected || isMachmaking)
+                if (!hasPak || !isConnected)
                 {
-                    // Hidden when using shared save file (in matchmaking)
+                    // Hidden on error
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
                 }
-                else if (File.Exists(savePath))
+                else if (isMachmaking || File.Exists(savePath))
                 {
-                    // Quick Join when there's a cached character save file
+                    // Quick Join when there's a cached character save file, or we're in matchmaking mode
                     ___StartGameBtnList[j].SetTxtName(FText.FromString(PvpTexts.QuickJoin));
                 }
                 else
@@ -114,7 +114,7 @@ public static class PatchStartGameUiPvp
             else if (buttonName == GSB1UIUtil.GetUIWordDescFText(EUIWordID.NEW_GAME).ToString())
             {
                 Logging.LogDebug("New game UI name desc: {Description}", GSB1UIUtil.GetUIWordDescFText(EUIWordID.NEW_GAME));
-                if (!hasPak || !isConnected)
+                if (!hasPak || !isConnected || isMachmaking)
                 {
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
@@ -127,7 +127,7 @@ public static class PatchStartGameUiPvp
             else if (buttonName == GSB1UIUtil.GetUIWordDescFText(EUIWordID.LOAD_GAME).ToString())
             {
                 Logging.LogDebug("Load game UI name desc : {Description}", GSB1UIUtil.GetUIWordDescFText(EUIWordID.LOAD_GAME));
-                if (!hasPak || !isConnected)
+                if (!hasPak || !isConnected || isMachmaking)
                 {
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
