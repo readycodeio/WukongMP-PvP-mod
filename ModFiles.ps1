@@ -12,7 +12,8 @@ $contentFiles = @(
     # Add any non-code files here, e.g. save files or .paks.
     "manifest.json",
     "ArchiveSaveFile.0.sav", # endgame arena save
-    "ArchiveSaveFile.1.sav"  # new character save
+    "ArchiveSaveFile.1.sav", # new character save
+    "ArchiveSaveFile.2.sav"  # matchmaking shared save
 )
 
 # Copied from build folder to mod folder root (only in Debug builds)

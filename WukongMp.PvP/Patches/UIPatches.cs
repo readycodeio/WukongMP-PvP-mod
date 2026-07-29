@@ -88,15 +88,15 @@ public static class PatchStartGameUiPvp
                 var slot = GSE_SaveGameUtil.GetArchiveSlotName(SaveFileType.Archive, PvpConstants.CharacterArchiveId);
                 var savePath = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{slot}.sav");
 
-                if (!hasPak || !isConnected)
+                if (!hasPak || !isConnected || isMachmaking)
                 {
-                    // Hidden on error
+                    // Hidden on error and in matchmaking mode
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
                 }
-                else if (isMachmaking || File.Exists(savePath))
+                else if (File.Exists(savePath))
                 {
-                    // Quick Join when there's a cached character save file, or we're in matchmaking mode
+                    // Quick Join when there's a cached character save file
                     ___StartGameBtnList[j].SetTxtName(FText.FromString(PvpTexts.QuickJoin));
                 }
                 else
@@ -114,10 +114,15 @@ public static class PatchStartGameUiPvp
             else if (buttonName == GSB1UIUtil.GetUIWordDescFText(EUIWordID.NEW_GAME).ToString())
             {
                 Logging.LogDebug("New game UI name desc: {Description}", GSB1UIUtil.GetUIWordDescFText(EUIWordID.NEW_GAME));
-                if (!hasPak || !isConnected || isMachmaking)
+                if (!hasPak || !isConnected)
                 {
                     ___StartGameBtnList[j].GetBUIButton().SetVisibility(ESlateVisibility.Collapsed);
                     ___StartGameBtnList.RemoveAt(j);
+                }
+                else if (isMachmaking)
+                {
+                    // in matchmaking - this is the Quick Join button
+                    ___StartGameBtnList[j].SetTxtName(FText.FromString(PvpTexts.QuickJoin));
                 }
                 else
                 {
