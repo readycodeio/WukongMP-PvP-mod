@@ -15,11 +15,11 @@ namespace WukongMp.PvP;
 public class Mod : ModBase
 {
     public override string Name => "WukongMp PvP";
-    
+
     protected override void Initialize(IDependencyContainer services)
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
-        
+
         services.RegisterSingleton<PvpRpc>();
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpChatter>();
@@ -34,7 +34,7 @@ public class Mod : ModBase
     public override void LateInit()
     {
         base.LateInit();
-        
+
         WukongApi.Input.RegisterKeyBind(Key.J, () =>
         {
             Logger.LogDebug("J");
@@ -47,6 +47,16 @@ public class Mod : ModBase
             Logger.LogDebug("L");
             if (WukongApi.Input.CanApplyInput())
                 WukongApi.Services.Resolve<PvpMode>().SwitchTeam();
+        });
+
+        WukongApi.Input.RegisterKeyBind(Key.F3, () =>
+        {
+            WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToArena();
+        });
+
+        WukongApi.Input.RegisterKeyBind(Key.F4, () =>
+        {
+            WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToShrine();
         });
     }
 }

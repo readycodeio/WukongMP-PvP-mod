@@ -5,6 +5,7 @@ using B1UI.GSSvc;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.PvP.Configuration;
+using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.GameMode;
 
@@ -29,9 +30,12 @@ public class PvpSaveManager
             BGW_EventCollection.Get(worldContext).Evt_ResetGameInstanceData(EGameInstanceResetType.StartNewGame);
         }
 
+        var isMachmaking = bool.TryParse(WukongApi.Configuration.GetLaunchParameter("USE_SHARED_SAVE", "false"), out var flag) && flag;
+
         BGW_EventCollection.Get(worldContext).Evt_BGW_TriggerGlobalFSMEvent(EGI_Global.LoadArchive, new FSMInputData_GI_Global_SubG_GI_Loading_TravelLevel
         {
-            ArchiveId = PvpConstants.NewCharacterArchiveId
+            // in matchmaking mode, load one save file for every player, so that the fight is fair
+            ArchiveId = isMachmaking ? PvpConstants.SharedPvpArchiveId : PvpConstants.NewCharacterArchiveId
         });
     }
 
