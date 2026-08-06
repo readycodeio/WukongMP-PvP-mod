@@ -30,8 +30,7 @@ using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.GameMode;
 
-public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcClient, IRelaySerializer serializer)
-    : RpcClassBase(rpcClient, serializer)
+public partial class PvpMode(PvpWidgetManager pvpWidgetManager) : ClientRpcHandler
 {
     public bool IsRoundEnding { get; private set; }
 
@@ -139,7 +138,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         // Set IsSpectator if joining during fight.
         if (WukongApi.PvP.InPvP)
         {
-            WukongApi.Sync.EnableSpectatorMode(mainCharacter, SpectatorReason.Observer);
+            WukongApi.Sync.EnableSpectatorMode(mainCharacter, SpectatorReason.Api);
         }
 
         SetLocalPlayerDamageImmunity(mainCharacter, true);

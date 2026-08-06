@@ -89,7 +89,7 @@ public class PvpCommandHandler(
         {
             if (!player.IsSpectator)
             {
-                syncApi.EnableSpectatorMode(player, SpectatorReason.Observer);
+                syncApi.EnableSpectatorMode(player, SpectatorReason.Api);
             }
             else
             {
