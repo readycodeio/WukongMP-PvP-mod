@@ -103,7 +103,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
         {
             var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
             mainEntity.Location = levelData.PvpStartingLocation.ToVector3();
@@ -115,7 +115,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
         {
             var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
             UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointID, out var shrineTransform);
@@ -130,7 +130,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !WukongApi.PvP.PvpData(mainEntity).IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
         {
             if (pvpLevelId < 0)
             {

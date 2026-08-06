@@ -31,13 +31,11 @@ public class ReadinessSystem(
         {
             if (WukongApi.Sync.TryGetPlayerInfoById(character.PlayerId, out _, out var teamId))
             {
-                var info = WukongApi.PvP.PvpData(character);
-
-                if (info.IsObserver)
+                if (character.IsObserver)
                     continue;
 
                 players++;
-                if (info.IsReadyForPvP)
+                if (WukongApi.PvP.IsReadyForPvP(character))
                 {
                     readyCount++;
                     switch (teamId)
@@ -74,7 +72,7 @@ public class ReadinessSystem(
                 }
             }
 
-            var isSpectator = WukongApi.PvP.PvpData(localPlayer.Value).IsSpectator;
+            var isSpectator = localPlayer.Value.IsSpectator;
             if (allReady)
             {
                 if (blueTeamAnyReady && redTeamAnyReady)
