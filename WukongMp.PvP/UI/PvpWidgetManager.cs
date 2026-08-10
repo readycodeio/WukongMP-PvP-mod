@@ -125,17 +125,17 @@ public class PvpWidgetManager : IHostedService
         {
             SetupLobbyUi();
         }
-        else
+        else if (WukongApi.PvP.InPvpTournament)
         {
-            SetupSpectatorUi();
+            SetupSpectatorWaitForEndUi();
         }
     }
 
     private void OnLocalPlayerChangedSpectator(bool enabled)
     {
-        if (enabled)
+        if (enabled && WukongApi.PvP.InPvpTournament)
         {
-            SetupSpectatorUi();
+            SetupSpectatorWaitForEndUi();
         }
         else if (!WukongApi.PvP.InPvP)
         {
@@ -197,7 +197,7 @@ public class PvpWidgetManager : IHostedService
         _lobbyStatusWidget.Value.SetVisibility(true);
     }
 
-    private void SetupSpectatorUi()
+    private void SetupSpectatorWaitForEndUi()
     {
         if (!_isAfterLoadingScreen)
             return;
