@@ -27,6 +27,10 @@
             re-relay the message to the new owner in that specific rare case.
             </summary>
         </member>
+        <member name="P:ReadyM.Api.Multiplayer.Client.IRelayClient.RequestedActiveCells">
+            <summary>List of cells that are requested to be set as active or a null if there is no request in progress.</summary>
+            <remarks>An empty list means that a request to deactivate all cells is in progress.</remarks>
+        </member>
         <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnStart">
             <summary>
             Fired immediately after the client requests connection to the server. The client is not yet connected when
@@ -81,12 +85,25 @@
             Always called from the MAIN thread.
             </summary>
         </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnRequestedSetActiveCells">
+            <summary>
+            Fired immediately after the client requests to set active cells.
+            The cells are not yet active for the client when this is fired.
+            Always called from the MAIN thread.
+            </summary>
+        </member>
         <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnJoinedArea">
             <summary>
             Fired when the client has successfully joined an area of interest. Before this event is fired, the client
             will not receive any messages addressed to the area of interest. The client will always leave an area of
             interest before joining a new one. It is currently impossible to be in multiple areas of interest at the same
             time.
+            Always called from the same NETWORK thread.
+            </summary>
+        </member>
+        <member name="E:ReadyM.Api.Multiplayer.Client.IRelayClient.OnActiveCellsSet">
+            <summary>
+            Fired when the server has confirmed setting the active cells.
             Always called from the same NETWORK thread.
             </summary>
         </member>
@@ -154,6 +171,20 @@
             remain `true` until `Stop()` is called.
             </summary>
         </member>
+        <member name="T:ReadyM.Api.Multiplayer.Client.IRpcClient">
+            <exclude />
+            <summary>
+            Used internally in generated RPC handlers to handle sending and receiving RPC messages.
+            The type is public because it is used in mod-generated code, but it is not intended for direct use by mod developers.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Client.RelayMessage">
+            <exclude />
+            <summary>
+            Represents a message to be sent through the relay system.
+            The type is public because it is used in mod-generated code, but it is not intended for direct use by mod developers.
+            </summary>
+        </member>
         <member name="M:ReadyM.Api.Multiplayer.Client.RelayMessage.ToPeers(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId,ReadyM.Api.Idents.PlayerId[],LiteNetLib.DeliveryMethod)">
             <summary>
             Send an event to a specific player or group of players.
@@ -164,8 +195,200 @@
             Send an event with a specific delivery method.
             </summary>
         </member>
+        <member name="T:ReadyM.Api.Multiplayer.ComponentWriteContext">
+            <exclude />
+            <summary>
+            Thread-local switch that makes plain setter writes on networked components also set the API
+            (authoritative) flag. Server mod code runs inside a "server authoring" scope (mod system ticks
+            and RPC handlers), so its writes to player-owned components override the owner without an explicit
+            MarkChangedFromApi() call. Entered in the mod runtime (where the setter runs) so it crosses the
+            AOT/mod boundary; off everywhere else, so framework bookkeeping writes aren't mistaken for overrides.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ComponentWriteContext.AutoMarkApiOnWrite">
+            <summary>True when setter writes on the current thread should auto-set the API flag.</summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ComponentWriteContext.EnterServerAuthoring">
+            <summary>Enables auto-marking for the scope (restored on dispose).</summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent">
+            <summary>
+            Holds information about the area entity, which is a scope for other entities.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.AreaId">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent._areaId"/>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.MasterClient">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent._masterClient"/>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.Fields">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.ClearApiFlag">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.ClearApiFlag(System.Int32)">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.ChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.MarkChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.WriteDelta(LiteNetLib.Utils.NetDataWriter)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.ReadDelta(LiteNetLib.Utils.NetDataReader)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.ClearDirty">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.AreaScopeComponent.IsDirty">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.FullCellId">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent._fullCellId"/>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.MasterClient">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent._masterClient"/>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.Fields">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.ClearApiFlag">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.ClearApiFlag(System.Int32)">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.ChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.MarkChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.WriteDelta(LiteNetLib.Utils.NetDataWriter)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.ReadDelta(LiteNetLib.Utils.NetDataReader)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.ClearDirty">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.IsDirty">
+            <exclude />
+        </member>
+        <member name="F:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent._doNotDeleteWhenAllPlayersLeave">
+            <summary>
+            When this is set to true, the scope and entitites inside of it will not be deleted even when all players leave it.
+            Cells and their parent areas do not inherit that value from one another.
+            This means that a cell with this flag set will still be deleted if all players leave its parent area if that area doesn't have this flag set.
+            Similarly, a cell which doesn't have this flag set will be deleted when all players deactivate it (directly or by leaving its parent area),
+            even if its parent area has this flag set.
+            Setting this flag to false on a scope that has no players in it won't cause the scope to be deleted until one or more players join it
+            and then all players leave it again.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.DoNotDeleteWhenAllPlayersLeave">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent._doNotDeleteWhenAllPlayersLeave"/>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.Fields">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.ClearApiFlag">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.ClearApiFlag(System.Int32)">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.ChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.MarkChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.WriteDelta(LiteNetLib.Utils.NetDataWriter)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.ReadDelta(LiteNetLib.Utils.NetDataReader)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.ClearDirty">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.EmptyScopeDeletionComponent.IsDirty">
+            <exclude />
+        </member>
         <member name="T:ReadyM.Api.Multiplayer.ECS.Components.INetworkedComponent">
             <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.InParentAreaScopeComponent">
+            <summary>
+            A link component placed on a cell scope entity that references the scope entity of its parent area.
+            This is a separate component from <see cref="T:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent"/> because a Friflo component can only carry a
+            single index, and <see cref="T:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent"/> already indexes cells by <see cref="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.FullCellId"/>.
+            This link enables querying all cells belonging to a given area in O(1) time, given the area's scope entity.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.InParentAreaScopeComponent.#ctor(Friflo.Engine.ECS.Entity)">
+            <summary>
+            A link component placed on a cell scope entity that references the scope entity of its parent area.
+            This is a separate component from <see cref="T:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent"/> because a Friflo component can only carry a
+            single index, and <see cref="T:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent"/> already indexes cells by <see cref="P:ReadyM.Api.Multiplayer.ECS.Components.CellScopeComponent.FullCellId"/>.
+            This link enables querying all cells belonging to a given area in O(1) time, given the area's scope entity.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent">
+            <summary>
+            Holds the ID of the global player entity.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.PlayerId">
+            <inheritdoc cref="F:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent._playerId"/>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.Fields">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.ClearApiFlag">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.ClearApiFlag(System.Int32)">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.ChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.MarkChangedFromApi">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.WriteDelta(LiteNetLib.Utils.NetDataWriter)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.ReadDelta(LiteNetLib.Utils.NetDataReader)">
+            <exclude />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.ClearDirty">
+            <exclude />
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Components.PlayerScopeComponent.IsDirty">
+            <exclude />
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Jobs.DeltaApplyContext">
+            <summary>
+            Thread-local sender of the delta batch being applied. The server sets it around
+            <see cref="M:ReadyM.Api.Multiplayer.ECS.Jobs.SerializationJobRegistry.ApplyDelta(LiteNetLib.Utils.NetDataReader)"/> so <see cref="T:ReadyM.Api.Multiplayer.ECS.Jobs.ApplyDeltaJob`1"/> can reject
+            deltas from a non-owner. Left unset on the client (deltas there are trusted server relays).
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Jobs.DeltaApplyContext.AuthoritativeSender">
+            <summary>The owner a delta's entities must match, or null to skip the check.</summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Jobs.DeltaApplyContext.WithAuthoritativeSender(ReadyM.Api.Idents.PlayerId)">
+            <summary>Sets the sender for the scope (restored on dispose). Enter on the apply thread.</summary>
         </member>
         <member name="T:ReadyM.Api.Multiplayer.ECS.Managers.IPlayerIdProvider">
             <exclude />
@@ -175,20 +398,48 @@
         </member>
         <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.SentOwners">
             Returns a bitmask of player IDs to send to. Bit 0 = PlayerId 0, Bit 1 = PlayerId 1, etc.
-            This in an optimization to avoid allocating HashSets every tick.
-            This replaces the old bool OwnsEntity(_) check.
+            This is an optimization to avoid allocating HashSets every tick.
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.ECS.Tags.DisallowOwnershipTransferTag">
-            <exclude />
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.SendExceptOwner(ReadyM.Api.Idents.PlayerId,LiteNetLib.Utils.NetDataWriter,ReadyM.Api.Multiplayer.ECS.Systems.SendContext)">
+            Sends a packet of an owner's deltas to everyone in scope EXCEPT that owner.
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.ECS.Values.NetworkId.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
-            <exclude />
+        <member name="P:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.SendApiDeltasToOwner">
+            When true, components touched by the API (ChangedFromApi) additionally have their delta
+            sent to the entity's own owner, so the server can authoritatively override the owner's state.
+            Defaults to false; the server overrides it.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.SendToOwner(ReadyM.Api.Idents.PlayerId,LiteNetLib.Utils.NetDataWriter,ReadyM.Api.Multiplayer.ECS.Systems.SendContext)">
+            Owner-directed send used for API-authored deltas. Only invoked when SendApiDeltasToOwner is true.
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.ECS.Systems.SendComponentDeltaSystemBase`1.AppendDelta(LiteNetLib.Utils.NetDataWriter,ReadyM.Api.Multiplayer.ECS.Values.NetworkId,`0@,System.Nullable{System.Int32},System.Action{LiteNetLib.Utils.NetDataWriter})">
+            Writes one entity's delta into <paramref name="writer"/>. On a bounded (unreliable) channel,
+            if the delta would overflow the packet the buffer is rewound, the partial packet is flushed,
+            a fresh header is written, and the delta is retried once. On an unbounded (reliable) channel
+            no size cap applies and the delta is written directly (the one-chunk behaviour).
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Tags.AllowOwnershipTransferOnScopeEnterTag">
+            <exclude/>
+            <summary>
+            Entities with this component get their ownership transferred to the first player that joins their scope,
+            if there are no other players in that scope when that player joins it.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ECS.Tags.DisallowOwnershipTransferOnScopeLeaveTag">
+            <exclude/>
+            <summary>
+            Entities with this tag are destroyed when their owner leaves their scope.
+            Other entities get their ownership transferred to another player in that scope or to server
+            if there are no players left and that scope is not deleted when all players leave.
+            </summary>
         </member>
         <member name="M:ReadyM.Api.Multiplayer.ECS.Values.NetworkId.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.ECS.Values.NetworkId,System.Text.Json.JsonSerializerOptions)">
             <exclude />
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.Extensions.SerializationExtensions">
+        <member name="T:ReadyM.Api.Multiplayer.Extensions.VectorSerializationExtensions">
             <exclude />
+            <summary>
+            Used in mod-generated code for serializing fields of custom components.
+            </summary>
         </member>
         <member name="T:ReadyM.Api.Multiplayer.Generators.DeriveINetSerializableAttribute">
             <summary>
@@ -205,7 +456,7 @@
         <member name="T:ReadyM.Api.Multiplayer.Generators.DeriveINetworkedComponentAttribute">
             <exclude />
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Generators.DeriveINetworkedComponentAttribute.#ctor(ReadyM.Api.Serialization.SerializableMode)">
+        <member name="M:ReadyM.Api.Multiplayer.Generators.DeriveINetworkedComponentAttribute.#ctor(ReadyM.Api.Serialization.SerializableMode,System.Boolean)">
             <exclude />
         </member>
         <member name="T:ReadyM.Api.Multiplayer.Generators.ExcludeSerializableAttribute">
@@ -217,120 +468,46 @@
         <member name="T:ReadyM.Api.Multiplayer.Generators.RpcEventAttribute">
             <summary>
             Marks a method as an RPC event handler.
-            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase"/>.
+            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.ClientRpcHandler"/>.
             </summary>
             <param name="relayMode">Determines how the event is relayed to other clients.</param>
         </member>
         <member name="M:ReadyM.Api.Multiplayer.Generators.RpcEventAttribute.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode)">
             <summary>
             Marks a method as an RPC event handler.
-            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase"/>.
+            Use this in partial classes extending from <see cref="T:ReadyM.Api.Multiplayer.RPC.ClientRpcHandler"/>.
             </summary>
             <param name="relayMode">Determines how the event is relayed to other clients.</param>
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.Field`2">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.Chunks1">
+            <exclude/>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Data.Field`2.#ctor(System.Int32,System.Func{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},System.Func{`0,System.Boolean})">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.Chunks2">
+            <exclude/>
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.Field`3">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.Chunks3">
+            <exclude/>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Data.Field`3.#ctor(System.Int32,System.Func{`0,`1},ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate{`0,`1},System.Func{`0,System.Boolean})">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.Chunks4">
+            <exclude/>
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Data.FieldSetterDelegate`2">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.Chunks5">
+            <exclude/>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.InvokeInGameAndNotifyEcs``2(``0@,``1)">
-            Propagate the event to both the ECS and the game, regardless of the policy.
+        <member name="T:ReadyM.Api.Multiplayer.Interop.ChangedFromApiDelegate">
+            <summary>1 if the component was changed from the API (a server override), else 0.</summary>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.NotifyEcsIfApplicable``2(``0@,``1)">
-            Propagate the event to the ECS if the event policy allows it.
-            <returns>Whether the event was propagated.</returns>
+        <member name="T:ReadyM.Api.Multiplayer.Interop.SizeOfHelper`1">
+            <exclude/>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.IMappedEventManager.InvokeInGameIfApplicable``2(``0@,``1)">
-            Propagate the event to the game if the event policy allows it.
-            <returns>Whether the event was propagated.</returns>
+        <member name="T:ReadyM.Api.Multiplayer.Interop.SizeOfHelper">
+            <exclude/>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.MappedEventManager.NotifyEcsIfApplicable``2(``0@,``1)">
-            <inheritdoc/>
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Events.MappedEventManager.InvokeInGameIfApplicable``2(``0@,``1)">
-            <inheritdoc/>
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.ShouldGameCopyToEcs(`0@)">
-            Should data be copied from the game object to the ECS entity
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.ShouldEcsCopyToGame(`0@)">
-            Should data be copied from the ECS entity to the game object
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.CanSetFromApi(`0@)">
-            Should data be allowed to be set from the API.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Data.IMappingDataPolicy`1.CanGameSetLocally(`0@)">
-            Should data be allowed to be stored / set locally (analogous to ShouldRunLocally for events).
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToEcsOnlyEventPolicy`1">
-            Used with events that are only happening on the game-side and it makes no sense to trigger them manually.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToEcsOnlyEventPolicy`1.#ctor(ReadyM.Api.Helpers.DataSideChannel)">
-            Used with events that are only happening on the game-side and it makes no sense to trigger them manually.
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToGameOnlyEventPolicy`1">
-            Used for events that are only sent to clients from the server and therefore are never triggered locally.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.Common.AlwaysPropagatesToGameOnlyEventPolicy`1.#ctor(ReadyM.Api.Helpers.DataSideChannel)">
-            Used for events that are only sent to clients from the server and therefore are never triggered locally.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcs(`1@)">
-            <inheritdoc cref="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcsImpl(`1@)"/>
-            Always returns <c>false</c> if the event is already propagating to the game, to avoid recursion.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventNotifyEcsImpl(`1@)">
-            Returns whether the event should be allowed to propagate to the ECS or not, based on the provided context.
-            This is usually called in patches to game code.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEvent(`1@)">
-            <inheritdoc cref="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEventImpl(`1@)"/>
-            Always returns <c>false</c> if the event is already propagating to the ECS, to avoid recursion.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanEcsInvokeGameEventImpl(`1@)">
-            Returns whether the event should be allowed to propagate to the game or not, based on the provided context.
-            This is usually called in network event handlers.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventRunLocally(`1@)">
-            Returns whether the game is allowed to run the game code related to the event locally, or not.
-            This is used exclusively in game code patches, to avoid running events for entities we are not responsible for.
-            Always returns <c>true</c> if the event is propagating from the ECS to the game, to allow the game code to run for the event.
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Mapping.Policies.Event.MappingEventPolicyBase`2.CanGameEventRunLocallyImpl(`1@)">
-            Returns whether the game is allowed to run the game code related to the event locally, or not.
-            This is used exclusively in game code patches, to avoid running events for entities we are not responsible for.
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.EmptyContext">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagates">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagatesToEcsOnly">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IAlwaysPropagatesToGameOnly">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IMappingContext`1">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IOwnershipManaged">
-            <exclude />
-        </member>
-        <member name="T:ReadyM.Api.Multiplayer.Mapping.Tags.IReadyComponent">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.Interop.TickSystemsDelegate">
+            <exclude/>
         </member>
         <member name="T:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader">
+            <exclude />
             <summary>
             Spans 4 bytes in standard relay modes and (6 + 2 * peers) in peer-targeted relay mode.
             - 1 byte for eventCode
@@ -341,6 +518,7 @@
             </summary>
         </member>
         <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId,ReadyM.Api.Idents.PlayerId[],ReadyM.Api.Multiplayer.Protocol.Enums.RelayMode)">
+            <exclude />
             <summary>
             Spans 4 bytes in standard relay modes and (6 + 2 * peers) in peer-targeted relay mode.
             - 1 byte for eventCode
@@ -349,9 +527,6 @@
             - 1 byte for relayMode
             - peers * 2 bytes for peers
             </summary>
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
-            <exclude />
         </member>
         <member name="M:ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.Protocol.CustomRelayEventHeader,System.Text.Json.JsonSerializerOptions)">
             <exclude />
@@ -407,6 +582,7 @@
             </summary>
         </member>
         <member name="T:ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode">
+            <exclude />
             <summary>
             A unique identifier of a single RPC message type.
             </summary>
@@ -453,6 +629,7 @@
             </remarks>
         </member>
         <member name="T:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader">
+            <exclude />
             <summary>
             Spans 3 bytes.
             - 1 byte for eventCode
@@ -460,70 +637,82 @@
             </summary>
         </member>
         <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.#ctor(ReadyM.Api.Multiplayer.Protocol.Enums.RelayMessageCode,ReadyM.Api.Idents.PlayerId)">
+            <exclude />
             <summary>
             Spans 3 bytes.
             - 1 byte for eventCode
             - 2 bytes for sender
             </summary>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.TextDeserialize(System.Text.Json.Utf8JsonReader@,System.Text.Json.JsonSerializerOptions)">
-            <exclude />
-        </member>
         <member name="M:ReadyM.Api.Multiplayer.Protocol.ServerEventHeader.TextSerialize(System.Text.Json.Utf8JsonWriter,ReadyM.Api.Multiplayer.Protocol.ServerEventHeader,System.Text.Json.JsonSerializerOptions)">
             <exclude />
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.RPC.RpcClassBase">
+        <member name="T:ReadyM.Api.Multiplayer.RPC.ClientRpcHandler">
             <summary>
-            Base class for an RPC container.
+            Base class for a client-side RPC handler.
             Each class that defines RPC methods with [RpcEvent] attributes must inherit from this class.
             </summary>
-            <param name="client">RPC client to use for sending RPCs. This is injected by the DI container.</param>
-            <param name="serializer">Serializer to use for serializing RPC parameters. This is injected by the DI container.</param>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.#ctor(ReadyM.Api.Multiplayer.Client.IRpcClient,ReadyM.Api.Multiplayer.Serialization.IRelaySerializer)">
-            <summary>
-            Base class for an RPC container.
-            Each class that defines RPC methods with [RpcEvent] attributes must inherit from this class.
-            </summary>
-            <param name="client">RPC client to use for sending RPCs. This is injected by the DI container.</param>
-            <param name="serializer">Serializer to use for serializing RPC parameters. This is injected by the DI container.</param>
-        </member>
-        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.EventsCount">
+        <member name="P:ReadyM.Api.Multiplayer.RPC.ClientRpcHandler.EventsCount">
             <summary>
             Number of RPC events defined in this class.
             Generated by the source generator in derived classes.
             </summary>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.InitRpc">
-            <summary>
-            Initializes the RPC class, e.g. by registering RPC handlers.
-            Generated by the source generator in derived classes.
-            </summary>
-        </member>
-        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.DeInitRpc">
-            <summary>
-            De-initializes the RPC class, e.g. by unregistering RPC handlers.
-            Generated by the source generator in derived classes.
-            </summary>
-        </member>
-        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Offset">
+        <member name="P:ReadyM.Api.Multiplayer.RPC.ClientRpcHandler.Offset">
             <summary>
             Event code offset assigned to this RPC class.
             Generated by the source generator in derived classes.
             </summary>
         </member>
-        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.RelayClient">
+        <member name="T:ReadyM.Api.Multiplayer.RPC.RpcBase">
+            <summary>
+            Base class for all RPC handlers, client and server.
+            </summary>
+        </member>
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcBase.RelayClient">
             <summary>
             RPC client to use for sending RPCs. This is injected by the DI container.
             </summary>
         </member>
-        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Serializer">
+        <member name="P:ReadyM.Api.Multiplayer.RPC.RpcBase.Serializer">
             <summary>
             Serializer to use for serializing RPC parameters. This is injected by the DI container.
             </summary>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcClassBase.Dispose">
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcBase.InitRpc">
+            <summary>
+            Initializes the RPC class, e.g. by registering RPC handlers.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcBase.DeInitRpc">
+            <summary>
+            De-initializes the RPC class, e.g. by unregistering RPC handlers.
+            Generated by the source generator in derived classes.
+            </summary>
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcBase.Dispose">
             <inheritdoc />
+        </member>
+        <member name="M:ReadyM.Api.Multiplayer.RPC.RpcBase.RunOnGameThread(System.Action)">
+            <exclude />
+            <summary>
+            Schedules a callback to be run on the game thread.
+            Client RPC handlers use this method, it's not necessary to call it directly.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.RPC.ServerRpcClient">
+            <summary>
+            Base class for server-defined RPC handlers.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.Serialization.IRelaySerializer">
+            <exclude />
+            <summary>
+            Interface for serializing and deserializing objects for relay communication.
+            The type is public because it is used in mod-generated code, but it is not intended for direct use by mod developers.
+            </summary>
         </member>
         <member name="M:ReadyM.Api.Multiplayer.Serialization.RelaySerializer.SerializeObject(LiteNetLib.Utils.NetDataWriter,System.Object)">
             <summary>
@@ -540,17 +729,43 @@
             The data must be in the same format as serialized by SerializeObject.
             </summary>
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.ServerRpcEventAttribute">
+        <member name="T:ReadyM.Api.Multiplayer.ClientToServerAttribute">
+            <summary>
+            Client-to-server (request) leg of a contract method: generates a Send on the client and an
+            On(RpcContext, ...) handler on the server. Different-shaped two-way RPCs are two overloads
+            (one per direction); identical-shape two-way is one method with both attributes. Every contract
+            method needs at least one direction attribute.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ServerToClientAttribute">
+            <summary>
+            Server-to-client (response/push) leg of a contract method: generates a Send(PlayerId, ...) on
+            the server and an On(...) handler on the client. See <see cref="T:ReadyM.Api.Multiplayer.ClientToServerAttribute"/>.
+            </summary>
+        </member>
+        <member name="T:ReadyM.Api.Multiplayer.ServerRpcContractsAttribute">
             <exclude />
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.ServerRpcEventAttribute.#ctor(System.String)">
-            <exclude />
+        <member name="T:ReadyM.Api.Multiplayer.ServerRpcForAttribute">
+            <summary>
+            Binds an RPC class (server <c>ServerRpcHandlersBase</c>, client <c>ServerRpcClient</c>) to the
+            <see cref="T:ReadyM.Api.Multiplayer.ServerRpcContractsAttribute"/> class it implements, and is required on both.
+            A project may reference several contract sets, directly or transitively; this is what tells the
+            generator which one to emit against. Only the legs declared by the named class are generated,
+            so one contract set per RPC class.
+            </summary>
         </member>
-        <member name="T:ReadyM.Api.Multiplayer.ServerRpcHandlerAttribute">
-            <exclude />
+        <member name="M:ReadyM.Api.Multiplayer.ServerRpcForAttribute.#ctor(System.Type)">
+            <summary>
+            Binds an RPC class (server <c>ServerRpcHandlersBase</c>, client <c>ServerRpcClient</c>) to the
+            <see cref="T:ReadyM.Api.Multiplayer.ServerRpcContractsAttribute"/> class it implements, and is required on both.
+            A project may reference several contract sets, directly or transitively; this is what tells the
+            generator which one to emit against. Only the legs declared by the named class are generated,
+            so one contract set per RPC class.
+            </summary>
         </member>
-        <member name="M:ReadyM.Api.Multiplayer.ServerRpcHandlerAttribute.#ctor(System.String)">
-            <exclude />
+        <member name="P:ReadyM.Api.Multiplayer.ServerRpcForAttribute.ContractsType">
+            <summary>The <c>[ServerRpcContracts]</c> class this RPC class implements.</summary>
         </member>
     </members>
 </doc>
