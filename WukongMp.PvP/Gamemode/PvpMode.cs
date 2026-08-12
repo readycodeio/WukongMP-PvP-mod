@@ -30,8 +30,7 @@ using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.GameMode;
 
-public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcClient, IRelaySerializer serializer)
-    : RpcClassBase(rpcClient, serializer)
+public partial class PvpMode(PvpWidgetManager pvpWidgetManager) : ClientRpcHandler
 {
     public bool IsRoundEnding { get; private set; }
 
@@ -42,7 +41,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
 
     private static bool GetPvPPlayerIds(ReadyMainCharacter main)
     {
-        return !WukongApi.PvP.PvpData(main).IsObserver;
+        return !main.IsObserver;
     }
 
     public IEnumerable<ReadyMainCharacter> AllPvPPlayers => WukongApi.Sync.AreaMainCharacters.Where(GetPvPPlayerIds);
@@ -104,7 +103,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         if (!WukongApi.Local.IsGameplayLevel || WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
 
-        if (enabled && WukongApi.PvP.PvpData(main).IsObserver)
+        if (enabled && main.IsObserver)
         {
             main.TeamId = PvpConstants.SpectatorTeamId;
         }
@@ -139,7 +138,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         // Set IsSpectator if joining during fight.
         if (WukongApi.PvP.InPvP)
         {
-            WukongApi.Sync.EnableSpectatorMode(mainCharacter, SpectatorReason.Observer);
+            WukongApi.Sync.EnableSpectatorMode(mainCharacter, SpectatorReason.Api);
         }
 
         SetLocalPlayerDamageImmunity(mainCharacter, true);
@@ -388,14 +387,14 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         if (WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
 
-        WukongApi.PvP.PvpData(main).IsReadyForPvP = isReady;
+        WukongApi.PvP.SetIsReadyForPvp(main, isReady);
     }
 
     public void SwitchReadyStateMulti()
     {
         if (WukongApi.Sync.InArea && !WukongApi.PvP.InPvpTournament && WukongApi.Sync.AllPlayers.Count > 0)
         {
-            if (WukongApi.Sync.LocalMainCharacter is { } main && !WukongApi.PvP.PvpData(main).IsSpectator)
+            if (WukongApi.Sync.LocalMainCharacter is { IsSpectator: false })
             {
                 SwitchReadyState();
             }
@@ -407,8 +406,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         if (WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
 
-        var pvpData = WukongApi.PvP.PvpData(main);
-        var newIsReady = !pvpData.IsReadyForPvP;
+        var newIsReady = !WukongApi.PvP.IsReadyForPvP(main);
         SetReadyState(newIsReady);
         pvpWidgetManager.SwitchReadyState(newIsReady);
 
@@ -420,10 +418,8 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
     {
         if (WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
-
-        var pvpData = WukongApi.PvP.PvpData(main);
-
-        if (force || WukongApi.Sync.InArea && !pvpData.IsReadyForPvP && !WukongApi.PvP.InPvpTournament && !pvpData.IsSpectator)
+        
+        if (force || WukongApi.Sync.InArea && !WukongApi.PvP.IsReadyForPvP(main) && !WukongApi.PvP.InPvpTournament && !main.IsSpectator)
         {
             var teamId = PvpUtils.GetOppositeTeam(main.TeamId);
             main.TeamId = teamId;
@@ -586,7 +582,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
         if (WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
 
-        var isReady = WukongApi.PvP.PvpData(main).IsReadyForPvP;
+        var isReady = WukongApi.PvP.IsReadyForPvP(main);
 
         ClearLoobyCountdown();
         pvpWidgetManager.SetMainMessage(BuiltinTexts.InMultiplayer);
@@ -601,8 +597,8 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, IRpcClient rpcCl
 
     private void RefreshReadyCounts()
     {
-        var readyForPvp = AllPlayers.Count(x => WukongApi.PvP.PvpData(x) is { IsReadyForPvP: true, IsObserver: false });
-        var available = AllPlayers.Count(x => !WukongApi.PvP.PvpData(x).IsObserver);
+        var readyForPvp = AllPlayers.Count(x => !x.IsObserver && WukongApi.PvP.IsReadyForPvP(x));
+        var available = AllPlayers.Count(x => !x.IsObserver);
         pvpWidgetManager.UpdateReadyCount(readyForPvp, available);
     }
 

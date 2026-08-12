@@ -23,11 +23,7 @@ public class PvpRoundEndSystem(PvpMode pvpMode) : ModSystemBase
 
         // check if all players but one are dead
         var playerEntities = pvpMode.AllPvPPlayers.ToList();
-        var aliveTeamIds = playerEntities.Where(p =>
-            {
-                var pvp = WukongApi.PvP.PvpData(p);
-                return !pvp.IsObserver && (!p.IsDead || p.IsTransformed);
-            })
+        var aliveTeamIds = playerEntities.Where(p => !p.IsObserver && (!p.IsDead || p.IsTransformed))
             .Select(x => x.TeamId)
             .ToList();
 

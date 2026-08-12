@@ -121,21 +121,21 @@ public class PvpWidgetManager : IHostedService
         ShowInGameWidgets();
         _isAfterLoadingScreen = true;
 
-        if (!WukongApi.PvP.PvpData(player).IsSpectator)
+        if (!player.IsSpectator)
         {
             SetupLobbyUi();
         }
-        else
+        else if (WukongApi.PvP.InPvpTournament)
         {
-            SetupSpectatorUi();
+            SetupSpectatorWaitForEndUi();
         }
     }
 
     private void OnLocalPlayerChangedSpectator(bool enabled)
     {
-        if (enabled)
+        if (enabled && WukongApi.PvP.InPvpTournament)
         {
-            SetupSpectatorUi();
+            SetupSpectatorWaitForEndUi();
         }
         else if (!WukongApi.PvP.InPvP)
         {
@@ -192,12 +192,12 @@ public class PvpWidgetManager : IHostedService
 
         _gameMessageWidget.Value.SetVisibility(true);
         _gameMessageWidget.Value.SetMainText(BuiltinTexts.InMultiplayer);
-        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, WukongApi.PvP.PvpData(player).IsReadyForPvP));
+        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, WukongApi.PvP.IsReadyForPvP(player)));
         _gameMessageWidget.Value.SetThirdText(BuiltinTexts.PressToSwitchTeam);
         _lobbyStatusWidget.Value.SetVisibility(true);
     }
 
-    private void SetupSpectatorUi()
+    private void SetupSpectatorWaitForEndUi()
     {
         if (!_isAfterLoadingScreen)
             return;
