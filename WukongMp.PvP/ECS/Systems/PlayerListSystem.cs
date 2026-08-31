@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using WukongMp.Pvp.Common;
-using WukongMp.PvP.Configuration;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;

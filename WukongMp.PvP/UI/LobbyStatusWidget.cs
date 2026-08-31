@@ -6,7 +6,6 @@ using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Pvp.Common;
-using WukongMp.PvP.Configuration;
 
 namespace WukongMp.PvP.UI;
 

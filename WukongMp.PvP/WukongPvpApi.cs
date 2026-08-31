@@ -2,7 +2,7 @@
 using System.Linq;
 using Friflo.Engine.ECS;
 using ReadyM.Api.Idents;
-using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Entities;
 
@@ -25,7 +25,19 @@ public sealed class WukongPvpApi(EntityStore world) // TODO: Do not leak Friflo 
     public int TournamentRounds => State?.TournamentRounds ?? 3;
     public bool AntiStallEnabled => State?.AntiStallEnabled ?? true;
 
-    public IEnumerable<int> RoundWinners => State?.RoundWinners ?? [];
+    public IEnumerable<int> RoundWinners
+    {
+        get
+        {
+            if (State is { } state)
+            {
+                for (var i = 0; i < state.RoundWinnersCount; i++)
+                {
+                    yield return state.GetRoundWinners(i);
+                }
+            }
+        }
+    }
 
     public ReadyObject? PvpStateEntity { get; set; }
 

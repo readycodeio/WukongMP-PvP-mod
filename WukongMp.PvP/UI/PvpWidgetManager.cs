@@ -8,14 +8,14 @@ using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
-using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.UI;
 
-public class PvpWidgetManager : IHostedService
+public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 {
     private readonly Lazy<LobbyStatusWidget> _lobbyStatusWidget = new();
     private readonly Lazy<GameMessageWidget> _gameMessageWidget = new();
@@ -126,7 +126,7 @@ public class PvpWidgetManager : IHostedService
         {
             SetupLobbyUi();
         }
-        else if (WukongApi.PvP.InPvpTournament)
+        else if (pvp.InPvpTournament)
         {
             SetupSpectatorWaitForEndUi();
         }
@@ -134,7 +134,7 @@ public class PvpWidgetManager : IHostedService
 
     private void OnLocalPlayerChangedSpectator(bool enabled)
     {
-        if (enabled && WukongApi.PvP.InPvpTournament)
+        if (enabled && pvp.InPvpTournament)
         {
             SetupSpectatorWaitForEndUi();
         }

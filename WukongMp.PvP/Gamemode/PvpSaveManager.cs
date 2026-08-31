@@ -4,8 +4,8 @@ using b1;
 using B1UI.GSSvc;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
-using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.GameMode;

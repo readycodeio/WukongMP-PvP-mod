@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
-using WukongMp.Pvp.Common;
-using WukongMp.PvP.Extensions;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Numerics;
 using b1;
 using ReadyM.Api.Command;
 using ReadyM.Api.DI;
@@ -9,8 +8,6 @@ using WukongMp.Api;
 using WukongMp.Api.Configuration;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
-using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
@@ -107,10 +104,10 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
         {
-            var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
-            mainEntity.Location = levelData.PvpStartingLocation.ToVector3();
+            var levelData = PvpUtils.GetCurrentLevelSpawnData();
+            mainEntity.Location = levelData.PvpStartingLocation;
         }
     }
 
@@ -119,7 +116,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
         {
             var levelData = PvpUtils.GetCurrentLevelSpawnData();
             UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointId, out var shrineTransform);
@@ -134,7 +131,7 @@ public class PvpCommandHandler(
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
         {
             if (pvpLevelId < 0)
             {

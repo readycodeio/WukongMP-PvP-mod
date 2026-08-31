@@ -1,22 +1,16 @@
 ﻿using ReadyM.Api.ECS.Registry;
 using ReadyM.Api.ECS.Worlds;
-using WukongMp.Api.ECS.Archetypes;
-using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
+using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.ECS;
 
-public class PvpComponentRegistration(ClientWukongArchetypeRegistration wukongArchetypes) : IArchetypeRegistration
+public class PvpComponentRegistration : IArchetypeRegistration
 {
     public void Register(IArchetypeRegistry registry)
     {
-        registry.ModifyArchetype(wukongArchetypes.MainCharacterArchetype, b =>
-        {
-            b.Add<PvPComponent>();
-        });
+        registry.ModifyArchetype(WukongApi.Archetypes.MainCharacterArchetype, b => { b.Add<PvPComponent>(); });
 
-        registry.RegisterArchetype(b =>
-        {
-            b.Add<PvpStateComponent>();
-        });
+        registry.RegisterArchetype(new ArchetypeBuilder().Add<PvpStateComponent>());
     }
 }

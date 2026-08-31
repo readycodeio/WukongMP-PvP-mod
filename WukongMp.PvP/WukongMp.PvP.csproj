@@ -76,4 +76,9 @@
              assemblies are already loaded in the game process at runtime. -->
         <PackageReference Include="ReadyM.Wukong.GameRefs" Version="1.0.21.23831" />
     </ItemGroup>
+
+
+    <ItemGroup>
+      <ProjectReference Include="..\WukongMp.Pvp.Common\WukongMp.Pvp.Common.csproj" />
+    </ItemGroup>
 </Project>

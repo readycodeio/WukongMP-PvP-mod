@@ -1,6 +1,6 @@
 ﻿using ReadyM.Api.ECS.Worlds;
-using ReadyM.Api.Idents;
-using ReadyM.Wukong.Common.ECS.Components;
+using WukongMp.Pvp.Common.ECS;
+using WukongMp.Sdk.Serverside;
 
 namespace WukongMp.PvP.Serverside;
 
@@ -8,8 +8,7 @@ public static class ArchetypeRegistration
 {
     public static void RegisterArchetypes(IArchetypeRegistry registry)
     {
-        var archetype = new ArchetypeId(3); // TODO: Un-hardcode this
-        registry.ModifyArchetype(archetype, b =>
+        registry.ModifyArchetype(WukongArchetypes.MainCharacterArchetype, b =>
         {
             b.Add<PvPComponent>();
         });

@@ -8,6 +8,7 @@ using b1;
 using BtlShare;
 using HarmonyLib;
 using ReadyM.Api.Idents;
+using ReadyM.Api.Multiplayer;
 using ReadyM.Api.Multiplayer.RPC;
 using ReadyM.Wukong.Common.ECS.Values;
 using UnrealEngine.Engine;
@@ -18,8 +19,8 @@ using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Data;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
-using WukongMp.PvP.Extensions;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.UI;
 using WukongMp.PvP.WukongUtils;
@@ -28,15 +29,14 @@ using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.GameMode;
 
+[ServerRpcFor(typeof(PvpRpcContracts))]
 public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController timerController) : ServerRpcClient
 {
     public int PendingDaShengSecondPhaseSpawns { get; private set; } // TODO: Server-side?
     private readonly HashSet<ReadyTamer> spawnedDaSheng2 = [];
 
     private readonly CountdownTimer _countdownTimer = new(1, 5);
-
-    public IEnumerable<ReadyMainCharacter> AllPvPPlayers => WukongApi.Sync.AreaMainCharacters.Where(GetPvPPlayerIds);
-
+    
     public IEnumerable<ReadyMainCharacter> AllPlayers => WukongApi.Sync.AreaMainCharacters;
 
     public IEnumerable<ReadyMainCharacter> OtherPlayers => WukongApi.Sync.AreaMainCharacters.Where(p => p.PlayerId != WukongApi.Sync.LocalPlayerId);

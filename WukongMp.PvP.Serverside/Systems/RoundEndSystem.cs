@@ -4,6 +4,7 @@ using ReadyM.Relay.Server.Sdk.Ecs.Systems;
 using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
 
 namespace WukongMp.PvP.Serverside.Systems;
 

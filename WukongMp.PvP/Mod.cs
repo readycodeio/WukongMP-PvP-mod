@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
 using ReadyM.Api.ECS.Registry;
-using ReadyM.Api.Multiplayer.ECS.Registry;
 using WukongMp.PvP.Chat;
 using WukongMp.PvP.Command;
 using WukongMp.PvP.Configuration;
@@ -23,11 +22,8 @@ public class Mod : ModBase
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
 
-        // TODO: leaky internals
-        services.RegisterSingleton<INetworkedComponentRegistration, PvpNetworkedComponentRegistration>();
         services.RegisterSingleton<IArchetypeRegistration, PvpComponentRegistration>();
         services.RegisterSingleton<WukongPvpApi>();
-        services.RegisterSingleton<PvpRpc>();
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpChatter>();
         services.RegisterSingleton<PvpGameplayConfiguration>();

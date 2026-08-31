@@ -6,10 +6,11 @@ using ReadyM.Relay.Server.Sdk.Rpc;
 using ReadyM.Wukong.Common.ECS.Components;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Data;
+using WukongMp.Pvp.Common.ECS;
 
 namespace WukongMp.PvP.Serverside;
 
-[ServerRpcFor(typeof(RpcContracts))]
+[ServerRpcFor(typeof(PvpRpcContracts))]
 public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
 {
     partial void OnEnableCheats(RpcContext context, AreaId areaId, bool enabled)

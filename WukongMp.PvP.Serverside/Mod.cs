@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using ReadyM.Api.ECS.Worlds;
 using ReadyM.Relay.Server.Sdk;
 using ReadyM.Relay.Server.Sdk.Ecs.Components;
-using ReadyM.Wukong.Common.ECS.Components;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Serverside.Systems;
 
 namespace WukongMp.PvP.Serverside;

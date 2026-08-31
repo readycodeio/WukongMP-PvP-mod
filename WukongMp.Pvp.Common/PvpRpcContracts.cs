@@ -5,7 +5,7 @@ using ReadyM.Api.Multiplayer;
 namespace WukongMp.Pvp.Common;
 
 [ServerRpcContracts]
-public static partial class RpcContracts
+public static partial class PvpRpcContracts
 {
     [ClientToServer, ServerToClient] public static partial void EnableCheats(AreaId areaId, bool enabled);
     [ClientToServer, ServerToClient] public static partial void RoundCountdown(bool start, int seconds);
