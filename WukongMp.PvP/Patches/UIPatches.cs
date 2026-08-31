@@ -239,7 +239,7 @@ public class PatchIsShowSettingUiOnly
         if (!WukongApi.Sync.InArea)
             return true;
 
-        if (WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
         {
             __result = true;
             return false;

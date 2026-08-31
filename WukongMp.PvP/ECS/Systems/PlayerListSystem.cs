@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
+using WukongMp.Pvp.Common;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
@@ -8,6 +10,7 @@ using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.ECS.Systems;
 
+[UsedImplicitly]
 public class PlayerListSystem(PvpWidgetManager widgetManager) : ModSystemBase
 {
     private readonly Stopwatch _timer = Stopwatch.StartNew();
@@ -32,13 +35,13 @@ public class PlayerListSystem(PvpWidgetManager widgetManager) : ModSystemBase
             {
                 switch (team)
                 {
-                    case PvpConstants.RedTeamId:
+                    case CommonConstants.RedTeamId:
                         redTeamList.Add(nickname);
                         break;
-                    case PvpConstants.BlueTeamId:
+                    case CommonConstants.BlueTeamId:
                         blueTeamList.Add(nickname);
                         break;
-                    case PvpConstants.SpectatorTeamId:
+                    case CommonConstants.SpectatorTeamId:
                         spectatorsList.Add(nickname);
                         break;
                 }

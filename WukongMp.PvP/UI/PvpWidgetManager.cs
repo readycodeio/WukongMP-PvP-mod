@@ -8,6 +8,7 @@ using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Entities;
@@ -137,7 +138,7 @@ public class PvpWidgetManager : IHostedService
         {
             SetupSpectatorWaitForEndUi();
         }
-        else if (!WukongApi.PvP.InPvP)
+        else if (!WukongApi.Services.Resolve<WukongPvpApi>().InPvP)
         {
             SetupLobbyUi();
         }
@@ -162,7 +163,7 @@ public class PvpWidgetManager : IHostedService
         _lobbyStatusWidget.Value.SetConnectedCount(WukongApi.Sync.AreaPlayers.Count);
     }
 
-    public void StartRound()
+    public void HideGameMessageWidget()
     {
         _gameMessageWidget.Value.SetVisibility(false);
         if (GSG.GSPageOP.FindUIPage(12) != null)
@@ -192,7 +193,7 @@ public class PvpWidgetManager : IHostedService
 
         _gameMessageWidget.Value.SetVisibility(true);
         _gameMessageWidget.Value.SetMainText(BuiltinTexts.InMultiplayer);
-        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, WukongApi.PvP.IsReadyForPvP(player)));
+        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, player.Get<PvPComponent>().IsReadyForPvP));
         _gameMessageWidget.Value.SetThirdText(BuiltinTexts.PressToSwitchTeam);
         _lobbyStatusWidget.Value.SetVisibility(true);
     }

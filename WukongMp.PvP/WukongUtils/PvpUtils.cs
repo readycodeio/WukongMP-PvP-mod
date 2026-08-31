@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Numerics;
 using b1;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
@@ -6,6 +7,8 @@ using UnrealEngine.UMG;
 using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk.Api;
 
@@ -16,54 +19,60 @@ public static class PvpUtils
     private const string RedTeamColor = "(R=1,G=0.3,B=0.3)";
     private const string BlueTeamColor = "(R=0.3,G=0.3,B=1)";
 
-    public static void ShowPvPCountDown()
+    public static LevelSpawnData GetCurrentLevelSpawnData()
     {
-        var current = WukongApi.PvP.CurrentRound;
-        var total = WukongApi.PvP.TournamentRounds;
+        var level = WukongApi.Services.Resolve<WukongPvpApi>().State?.LevelId ?? 0;
+        return LevelSpawnConfig.GetLevelSpawnData(level);
+    }
+
+    public static void ShowPvpRoundStartMessage()
+    {
+        var current = WukongApi.Services.Resolve<WukongPvpApi>().CurrentRound;
+        var total = WukongApi.Services.Resolve<WukongPvpApi>().TournamentRounds;
         WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.RoundCount, current, total), true);
     }
 
     public static string GetTeamColorString(int teamId)
     {
-        if (teamId == PvpConstants.RedTeamId)
+        if (teamId == CommonConstants.RedTeamId)
             return RedTeamColor;
-        if (teamId == PvpConstants.BlueTeamId)
+        if (teamId == CommonConstants.BlueTeamId)
             return BlueTeamColor;
         return "";
     }
 
     public static string GetLocalizedTeamName(int teamId)
     {
-        if (teamId == PvpConstants.RedTeamId)
+        if (teamId == CommonConstants.RedTeamId)
             return BuiltinTexts.RedTeam;
-        if (teamId == PvpConstants.BlueTeamId)
+        if (teamId == CommonConstants.BlueTeamId)
             return BuiltinTexts.BlueTeam;
         return "";
     }
 
     public static int GetOppositeTeam(int teamId)
     {
-        if (teamId == PvpConstants.DrawTeamId)
+        if (teamId == CommonConstants.DrawTeamId)
             return teamId;
-        return teamId == PvpConstants.RedTeamId ? PvpConstants.BlueTeamId : PvpConstants.RedTeamId;
+        return teamId == CommonConstants.RedTeamId ? CommonConstants.BlueTeamId : CommonConstants.RedTeamId;
     }
 
-    public static FVector GetSpawnPosition(BGUCharacterCS? pawn, int playerId, int maxPlayersCount)
+    public static Vector3 GetSpawnPosition(BGUCharacterCS? pawn, int playerId, int maxPlayersCount)
     {
         var angle = playerId / (float)maxPlayersCount * 2f * FMath.PI;
         var x = FMath.Cos(angle) * PvpConstants.PvpStartingRadius;
         var y = FMath.Sin(angle) * PvpConstants.PvpStartingRadius;
 
-        var levelData = LevelSpawnConfig.GetCurrentLevelSpawnData();
-        var baseLocation = levelData.PvpStartingLocation + new FVector(x, y, 0f);
+        var levelData = GetCurrentLevelSpawnData();
+        var baseLocation = levelData.PvpStartingLocation + new Vector3(x, y, 0f);
 
         return AdjustSpawnLocation(pawn, baseLocation);
     }
 
-    public static FVector AdjustSpawnLocation(BGUCharacterCS? pawn, FVector InTargetLocation)
+    public static Vector3 AdjustSpawnLocation(BGUCharacterCS? pawn, Vector3 InTargetLocation)
     {
         // For Heart of Birthstone map adjustment resulted in falling - invisible collision. So it is disabled for now.
-        if (WukongApi.PvP.LevelId == 0)
+        if (WukongApi.Services.Resolve<WukongPvpApi>().LevelId == 0)
         {
             return InTargetLocation;
         }
@@ -83,17 +92,17 @@ public static class PvpUtils
         var scaledCapsuleHalfHeight = uCapsuleComponent.GetScaledCapsuleHalfHeight();
         var scaledCapsuleHalfHeight2 = uCapsuleComponent.GetScaledCapsuleHalfHeight();
         var num = 2.4f;
-        var start = InTargetLocation + FVector.UpVector * scaledCapsuleHalfHeight * 2.0;
-        var end = InTargetLocation - FVector.UpVector * scaledCapsuleHalfHeight * 2.0;
-        if (UGSE_TraceFuncLib.CharacterCapsuleTraceSingleByProfile(GameUtils.GetWorld(), start, end, scaledCapsuleHalfHeight2, scaledCapsuleHalfHeight, B1GlobalFNames.Pawn, bTraceComplex: false, pawn, out var OutHitLocation))
+        var start = InTargetLocation + Vector3.UnitZ * scaledCapsuleHalfHeight * 2.0f;
+        var end = InTargetLocation - Vector3.UnitZ * scaledCapsuleHalfHeight * 2.0f;
+        if (UGSE_TraceFuncLib.CharacterCapsuleTraceSingleByProfile(GameUtils.GetWorld(), start.ToFVector(), end.ToFVector(), scaledCapsuleHalfHeight2, scaledCapsuleHalfHeight, B1GlobalFNames.Pawn, bTraceComplex: false, pawn, out var OutHitLocation))
         {
-            result = OutHitLocation + num + FVector.UpVector * scaledCapsuleHalfHeight;
+            result = (OutHitLocation + num).ToVector3() + Vector3.UnitZ * scaledCapsuleHalfHeight;
         }
 
         return result;
     }
 
-    public static UnitLockTargetInfo BGUSelectLockTargetInRange(
+    public static UnitLockTargetInfo BguSelectLockTargetInRange(
         ACharacter? Owner,
         float FirstFilterMaxRange,
         EBSelectTargetRangeType RangeType,
