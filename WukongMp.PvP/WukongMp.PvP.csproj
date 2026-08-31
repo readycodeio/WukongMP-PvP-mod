@@ -9,7 +9,7 @@
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <RootNamespace>WukongMp.PvP</RootNamespace>
         <TargetName>WukongMp.PvP</TargetName>
-        <Configurations>Debug;Release;NoDisconnect;Testing</Configurations>
+        <Configurations>Debug;Release;NoDisconnect</Configurations>
         <Platforms>AnyCPU</Platforms>
         <TargetFramework>netstandard2.0</TargetFramework>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>

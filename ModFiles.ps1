@@ -1,8 +1,17 @@
-#!powershell.exe -ExecutionPolicy Bypass -File
+﻿#!powershell.exe -ExecutionPolicy Bypass -File
 
-# Edit these lists to specify files that should be included in the mod folder.
+# Edit these lists to specify files that should be included in the mod output.
+#
+# MakeModFolder.ps1 produces the client mod folder twice:
+#   Output/mods/WukongMp.PvP   matches the co-op mod's layout, drop the whole mods folder into the game
+#   Output/WukongMp.PvP        the same folder at the Output root, for the existing manual workflow
+#
+# There is no server_mods output yet.
 
-# Copied from build folder (bin/Configuration/netstandard2.0)
+# Project folder name. The mod folder in Output takes its name from this.
+$clientProject = "WukongMp.PvP"
+
+# Copied from build folder ($clientProject/bin/<Configuration>/netstandard2.0)
 $buildFiles = @(
     "WukongMp.PvP.dll"
 )
