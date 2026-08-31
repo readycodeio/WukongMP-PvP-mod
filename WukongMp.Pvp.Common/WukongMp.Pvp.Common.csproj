@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="$(CoreSdkRoot)\src\ReadyM.Api.Multiplayer\ReadyM.Api.Multiplayer.csproj"/>
+        <ProjectReference Include="$(CoreSdkRoot)\src\ReadyM.Api.Generators\ReadyM.Api.Generators.csproj" ReferenceOutputAssembly="true" OutputItemType="Analyzer"/>
+        <ProjectReference Include="$(WukongSdkRoot)\ReadyM.Wukong.Common\ReadyM.Wukong.Common.csproj" />
+    </ItemGroup>
+
+</Project>
