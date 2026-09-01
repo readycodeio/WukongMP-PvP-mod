@@ -2,21 +2,25 @@
 
 # Edit these lists to specify files that should be included in the mod output.
 #
-# MakeModFolder.ps1 produces the client mod folder twice:
-#   Output/mods/WukongMp.PvP   matches the co-op mod's layout, drop the whole mods folder into the game
-#   Output/WukongMp.PvP        the same folder at the Output root, for the existing manual workflow
+# MakeModFolder.ps1 produces:
+#   Output/mods/WukongMp.PvP   the client mod folder, dropped into the game's Mods/ folder
+#   Output/server_mods         loose files, dropped into the server's server_mods/ folder
 #
-# There is no server_mods output yet.
+# NOTE: the Common project is spelled "Pvp", not "PvP", so its assembly is WukongMp.Pvp.Common.dll.
+# The casing matters on a case-sensitive filesystem, e.g. CI on Linux.
 
-# Project folder name. The mod folder in Output takes its name from this.
+# Project folder names. The client mod folder in Output takes its name from $clientProject.
 $clientProject = "WukongMp.PvP"
+$serverProject = "WukongMp.PvP.Serverside"
 
-# Copied from build folder ($clientProject/bin/<Configuration>/netstandard2.0)
-$buildFiles = @(
-    "WukongMp.PvP.dll"
+# Copied from the client build folder (WukongMp.PvP/bin/<Configuration>/netstandard2.0)
+# into the client mod folder
+$clientBuildFiles = @(
+    "WukongMp.PvP.dll",
+    "WukongMp.Pvp.Common.dll"
 )
 
-# Copied from the "Content" folder to mod folder root
+# Copied from the "Content" folder into the client mod folder root
 $contentFiles = @(
     # Add any non-code files here, e.g. save files or .paks.
     "manifest.json",
@@ -25,7 +29,21 @@ $contentFiles = @(
     "ArchiveSaveFile.2.sav"  # matchmaking shared save
 )
 
-# Copied from build folder to mod folder root (only in Debug builds)
-$debugBuildFiles = @(
-    "WukongMp.PvP.pdb"
+# Copied from the server build folder (WukongMp.PvP.Serverside/bin/<Configuration>/net10.0)
+# into server_mods. Server mods have no folder of their own, every file sits next to
+# the SDK's own server mods, so only ship what is yours.
+$serverBuildFiles = @(
+    "WukongMp.PvP.Serverside.dll",
+    "WukongMp.Pvp.Common.dll"
+)
+
+# Copied only in Debug builds
+$clientDebugBuildFiles = @(
+    "WukongMp.PvP.pdb",
+    "WukongMp.Pvp.Common.pdb"
+)
+
+$serverDebugBuildFiles = @(
+    "WukongMp.PvP.Serverside.pdb",
+    "WukongMp.Pvp.Common.pdb"
 )

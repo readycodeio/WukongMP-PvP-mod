@@ -30,7 +30,7 @@ else
     Exit 1
 }
 
-# Build solution
+# Build solution. This builds the shared, client and server projects in one go.
 Write-Output "Building solution $solutionPath in configuration $Configuration..."
 dotnet build $solutionPath -c $Configuration -v minimal /t:Rebuild | Tee-Object -FilePath (Join-Path $scriptDir 'build.log')
 
@@ -51,14 +51,12 @@ else
     Get-ChildItem $outputRoot -Recurse | Remove-Item -Force -Recurse
 }
 
-# The mod folder is produced twice: once under mods/ so the whole folder can be dropped into the
-# game the same way as the co-op mod, and once at the Output root for the existing workflow.
-$modsRoot = Join-Path (Join-Path $outputRoot 'mods') $clientProject
-$rootCopy = Join-Path $outputRoot $clientProject
-New-Item -ItemType Directory -Path $modsRoot -Force | Out-Null
-New-Item -ItemType Directory -Path $rootCopy -Force | Out-Null
-
-$destinations = @($modsRoot, $rootCopy)
+# Client mods live in a folder of their own, server mods are loose files that all
+# share one server_mods directory.
+$clientRoot = Join-Path (Join-Path $outputRoot 'mods') $clientProject
+$serverRoot = Join-Path $outputRoot 'server_mods'
+New-Item -ItemType Directory -Path $clientRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $serverRoot -Force | Out-Null
 
 # Helper for copying files from ModFiles.ps1
 function Copy-BuildArtifacts
@@ -72,23 +70,16 @@ function Copy-BuildArtifacts
         [string]$BaseDir,
 
         [Parameter(Mandatory = $true)]
-        [string[]]$DestDirs
+        [string]$DestDir
     )
 
     foreach ($file in $Files)
     {
         $sourceFile = Join-Path -Path $BaseDir -ChildPath $file
+        $destFile = Join-Path -Path $DestDir -ChildPath $file
 
-        if (-not (Test-Path -Path $sourceFile))
+        if (Test-Path -Path $sourceFile)
         {
-            Write-Warning "Warning: Source file not found: $sourceFile"
-            continue
-        }
-
-        foreach ($destRoot in $DestDirs)
-        {
-            $destFile = Join-Path -Path $destRoot -ChildPath $file
-
             # Ensure destination directory exists
             $destDir = Split-Path -Parent $destFile
             if (-not (Test-Path -Path $destDir))
@@ -97,24 +88,31 @@ function Copy-BuildArtifacts
             }
 
             Copy-Item -Path $sourceFile -Destination $destFile -Force
+            Write-Output "Copied $file to $( Split-Path $DestDir -Leaf )."
         }
-
-        Write-Output "Copied $file to $( $DestDirs.Count ) output location(s)."
+        else
+        {
+            Write-Warning "Warning: Source file not found: $sourceFile"
+        }
     }
 }
 
 # Copy files
-$buildDir = Join-Path $scriptDir "$clientProject/bin/$Configuration/netstandard2.0"
+$clientBuildDir = Join-Path $scriptDir "$clientProject/bin/$Configuration/netstandard2.0"
+$serverBuildDir = Join-Path $scriptDir "$serverProject/bin/$Configuration/net10.0"
 $contentDir = Join-Path $scriptDir "Content"
 
-$allFiles = $buildFiles
+$clientFiles = $clientBuildFiles
+$serverFiles = $serverBuildFiles
 if ($Configuration -eq "Debug")
 {
-    $allFiles += $debugBuildFiles
+    $clientFiles += $clientDebugBuildFiles
+    $serverFiles += $serverDebugBuildFiles
 }
 
-Copy-BuildArtifacts -Files $allFiles -BaseDir $buildDir -DestDirs $destinations
-Copy-BuildArtifacts -Files $contentFiles -BaseDir $contentDir -DestDirs $destinations
+Copy-BuildArtifacts -Files $clientFiles -BaseDir $clientBuildDir -DestDir $clientRoot
+Copy-BuildArtifacts -Files $contentFiles -BaseDir $contentDir -DestDir $clientRoot
+Copy-BuildArtifacts -Files $serverFiles -BaseDir $serverBuildDir -DestDir $serverRoot
 
 # Open explorer to the output directory
 if ($PSVersionTable.PSEdition -eq 'Core')

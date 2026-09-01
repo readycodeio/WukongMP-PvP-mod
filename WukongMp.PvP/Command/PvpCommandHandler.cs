@@ -22,7 +22,7 @@ public class PvpCommandHandler(
     IWukongChatApi chatApi,
     WukongPvpApi pvpApi,
     PvpMode pvpMode,
-    IWukongCheatsApi cheatsApi,
+    CheatManager cheatManager,
     IWukongSynchronizationApi syncApi
 ) : IHostedService
 {
@@ -31,11 +31,11 @@ public class PvpCommandHandler(
         var allmonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
         consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn, false), allmonsterNames);
         consoleApi.AddCommand("spectator", ConsoleCommand.Create(SetSpectatorStatus, false));
-        consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatsApi.ToggleNoSkillsCooldown, false));
-        consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatsApi.ToggleInfiniteMana, false));
-        consoleApi.AddCommand("spirit_cooldown", ConsoleCommand.Create(cheatsApi.SetSpritCooldownTime, false));
-        consoleApi.AddCommand("infinite_vessel", ConsoleCommand.Create(cheatsApi.ToggleInfiniteVessel, false));
-        consoleApi.AddCommand("infinite_transform", ConsoleCommand.Create(cheatsApi.ToggleInfiniteTransform, false));
+        consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatManager.ToggleNoSkillsCooldown, false));
+        consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatManager.ToggleInfiniteMana, false));
+        consoleApi.AddCommand("spirit_cooldown", ConsoleCommand.Create(cheatManager.SetSpritCooldownTime, false));
+        consoleApi.AddCommand("infinite_vessel", ConsoleCommand.Create(cheatManager.ToggleInfiniteVessel, false));
+        consoleApi.AddCommand("infinite_transform", ConsoleCommand.Create(cheatManager.ToggleInfiniteTransform, false));
         consoleApi.AddCommand("arena", ConsoleCommand.Create(TeleportToArena, false));
         consoleApi.AddCommand("shrine", ConsoleCommand.Create(TeleportToShrine, false));
         consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel, true));
@@ -147,7 +147,7 @@ public class PvpCommandHandler(
     {
         if (WukongApi.Sync.IsMasterClient && WukongApi.Sync.CurrentAreaId is { } area)
         {
-            var enabledAlready = cheatsApi.CheatsAllowed;
+            var enabledAlready = cheatManager.CheatsAllowed;
             chatApi.SendServerMessage(enabledAlready ? BuiltinTexts.CheatsDisabled : BuiltinTexts.CheatsEnabled);
             pvpMode.SendEnableCheats(area, !enabledAlready);
         }

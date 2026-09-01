@@ -2,8 +2,11 @@
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
 using ReadyM.Api.ECS.Registry;
+using ReadyM.Api.Multiplayer.ECS.Registry;
 using WukongMp.PvP.Chat;
 using WukongMp.PvP.Command;
+using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.ECS;
 using WukongMp.PvP.GameMode;
@@ -22,7 +25,14 @@ public class Mod : ModBase
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
 
-        services.RegisterSingleton<IArchetypeRegistration, PvpComponentRegistration>();
+        services.Resolve<IComponentRegistry>()
+            .RegisterComponent<PvPComponent>()
+            .RegisterComponent<PvpStateComponent>();
+
+        services.RegisterSingleton<IArchetypeRegistration>(new ArchetypeRegistration(WukongApi.Archetypes.MainCharacterArchetype, WukongApi.Archetypes.WorldArchetype));
+        services.RegisterSingleton<IArchetypeRegistration, CheatsComponentRegistration>();
+
+        services.RegisterSingleton<CheatManager>();
         services.RegisterSingleton<WukongPvpApi>();
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpChatter>();
@@ -51,14 +61,8 @@ public class Mod : ModBase
                 WukongApi.Services.Resolve<PvpMode>().SwitchTeam();
         });
 
-        WukongApi.Input.RegisterKeyBind(Key.F3, () =>
-        {
-            WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToArena();
-        });
+        WukongApi.Input.RegisterKeyBind(Key.F3, () => { WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToArena(); });
 
-        WukongApi.Input.RegisterKeyBind(Key.F4, () =>
-        {
-            WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToShrine();
-        });
+        WukongApi.Input.RegisterKeyBind(Key.F4, () => { WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToShrine(); });
     }
 }

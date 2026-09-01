@@ -16,7 +16,7 @@ public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
     partial void OnEnableCheats(RpcContext context, AreaId areaId, bool enabled)
     {
         // TODO: Do it only for this area
-        ecs.Query<RoomComponent>((ref room) => { room.CheatsAllowed = enabled; });
+        ecs.Query<PvpStateComponent>((ref room) => { room.CheatsAllowed = enabled; });
     }
     
     partial void OnChangeLevel(RpcContext context, int levelId)

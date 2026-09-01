@@ -158,6 +158,7 @@ public static class PatchDoPoleDrink
 
 [HarmonyPatch(typeof(BUS_PhantomRushComp), "OnTriggerPhantomRush")]
 [HarmonyPatchCategory(PatchCategory.Global)]
+[HarmonyPriority(Priority.High)]
 public static class PatchOnTriggerPhantomRush
 {
     public static bool Prefix()
@@ -165,6 +166,6 @@ public static class PatchOnTriggerPhantomRush
         if (!WukongApi.Sync.InArea)
             return true;
         
-        return WukongApi.Services.Resolve<WukongPvpApi>().PhantomRushAllowed; // TODO: Make sure this runs BEFORE the SDK patch
+        return WukongApi.Services.Resolve<WukongPvpApi>().PhantomRushAllowed;
     }
 }

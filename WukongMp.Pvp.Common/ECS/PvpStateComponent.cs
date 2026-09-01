@@ -1,6 +1,9 @@
 ﻿using System.Runtime.InteropServices;
+using ReadyM.Api.ECS.Components;
+using ReadyM.Api.Mapping.Tags;
 using ReadyM.Api.Multiplayer.Generators;
 using Yooni.Native.Container;
+using Yooni.Native.LowLevel;
 
 namespace WukongMp.Pvp.Common.ECS;
 
@@ -9,7 +12,7 @@ namespace WukongMp.Pvp.Common.ECS;
 /// </summary>
 [DeriveINetworkedComponent]
 [StructLayout(LayoutKind.Auto)]
-public partial struct PvpStateComponent
+public partial struct PvpStateComponent : IServerAuthoritative, INativeInit
 {
     // settings
     private int _levelId;
@@ -33,5 +36,10 @@ public partial struct PvpStateComponent
     public void SetLastRoundWinnerTeam(int teamId)
     {
         AddRoundWinners(teamId);
+    }
+
+    public void Init(AllocatorKind allocatorKind)
+    {
+        _roundWinners = new NativeList<int>(5, allocatorKind);
     }
 }
