@@ -132,6 +132,7 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
             void EndTournament(int winner)
             {
                 ecs.Query<PvpStateComponent>((ref s) => { s.InTournament = false; });
+                ecs.Query<PvPComponent>((ref pvp) => { pvp.IsReadyForPvP = false; });
                 ecs.Query<MainCharacterComponent>((ref player) => { rpc.SendEndTournament(player.PlayerId, winner); });
             }
 
