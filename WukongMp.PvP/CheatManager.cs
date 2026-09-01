@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using BtlShare;
 using UnrealEngine.Runtime;
 using WukongMp.Api.Resources;
@@ -16,7 +16,7 @@ namespace WukongMp.PvP;
 
 public sealed class CheatManager
 {
-    public bool CheatsAllowed => WukongApi.Sync.GetGlobalComponent<PvpStateComponent>().CheatsAllowed;
+    public bool CheatsAllowed => WukongApi.Sync.TryGetGlobalComponent<PvpStateComponent>(out var state) && state.CheatsAllowed;
 
     public void ToggleInfiniteMana()
     {
@@ -39,7 +39,7 @@ public sealed class CheatManager
         }
 
         cheatsComp.HasInfiniteMana = !cheatsComp.HasInfiniteMana;
-        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteMana ? nameof(BuiltinTexts.InfManaEnabled) : nameof(BuiltinTexts.InfManaDisabled), mainEntity.Nickname), FLinearColor.Gray);
+        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteMana ? BuiltinTexts.InfManaEnabled : BuiltinTexts.InfManaDisabled, mainEntity.Nickname), FLinearColor.Gray);
     }
 
     public void SetSpritCooldownTime(float spiritCooldownTime)
@@ -95,7 +95,7 @@ public sealed class CheatManager
         ref var cheatsComp = ref mainEntity.Get<CheatsComponent>();
 
         cheatsComp.HasInfiniteVessel = !cheatsComp.HasInfiniteVessel;
-        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteVessel ? nameof(BuiltinTexts.InfVesselEnabled) : nameof(BuiltinTexts.InfVesselDisabled), mainEntity.Nickname), FLinearColor.Gray);
+        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteVessel ? BuiltinTexts.InfVesselEnabled : BuiltinTexts.InfVesselDisabled, mainEntity.Nickname), FLinearColor.Gray);
     }
 
     public void ToggleInfiniteTransform()
@@ -118,7 +118,7 @@ public sealed class CheatManager
         ref var cheatsComp = ref mainEntity.Get<CheatsComponent>();
         cheatsComp.HasInfiniteTransform = !cheatsComp.HasInfiniteTransform;
 
-        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteTransform ? nameof(BuiltinTexts.InfTransformEnabled) : nameof(BuiltinTexts.InfTransformDisabled), mainEntity.Nickname), FLinearColor.Gray);
+        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.HasInfiniteTransform ? BuiltinTexts.InfTransformEnabled : BuiltinTexts.InfTransformDisabled, mainEntity.Nickname), FLinearColor.Gray);
     }
 
     public void ToggleNoSkillsCooldown()
@@ -138,6 +138,6 @@ public sealed class CheatManager
         ref var cheatsComp = ref mainEntity.Get<CheatsComponent>();
         cheatsComp.InstantSkillCooldown = !cheatsComp.InstantSkillCooldown;
 
-        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.InstantSkillCooldown ? nameof(BuiltinTexts.InstantCooldownEnabled) : nameof(BuiltinTexts.InstantCooldownDisabled), mainEntity.Nickname), FLinearColor.Gray);
+        WukongApi.Chat.ShowLocalMessage(string.Format(cheatsComp.InstantSkillCooldown ? BuiltinTexts.InstantCooldownEnabled : BuiltinTexts.InstantCooldownDisabled, mainEntity.Nickname), FLinearColor.Gray);
     }
 }

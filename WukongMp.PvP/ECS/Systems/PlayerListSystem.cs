@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
-using WukongMp.Pvp.Common;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
@@ -24,30 +22,7 @@ public class PlayerListSystem(PvpWidgetManager widgetManager) : ModSystemBase
 
         _timer.Restart();
 
-        List<string> redTeamList = [];
-        List<string> blueTeamList = [];
-        List<string> spectatorsList = [];
-
-        foreach (var areaPlayer in WukongApi.Sync.AreaPlayers)
-        {
-            if (WukongApi.Sync.TryGetPlayerInfoById(areaPlayer, out var nickname, out var team))
-            {
-                switch (team)
-                {
-                    case CommonConstants.RedTeamId:
-                        redTeamList.Add(nickname);
-                        break;
-                    case CommonConstants.BlueTeamId:
-                        blueTeamList.Add(nickname);
-                        break;
-                    case CommonConstants.SpectatorTeamId:
-                        spectatorsList.Add(nickname);
-                        break;
-                }
-            }
-        }
-
-        widgetManager.SetTeams(redTeamList, blueTeamList, spectatorsList);
+        widgetManager.RefreshPlayerLists();
         widgetManager.RefreshWidgets();
     }
 }

@@ -4,10 +4,12 @@ using B1UI;
 using B1UI.GSUI;
 using ReadyM.Api.DI;
 using ReadyM.Api.Idents;
+using ReadyM.Api.Multiplayer.Protocol;
 using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk.Api;
@@ -20,6 +22,8 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
     private readonly Lazy<LobbyStatusWidget> _lobbyStatusWidget = new();
     private readonly Lazy<GameMessageWidget> _gameMessageWidget = new();
     private readonly Lazy<CountdownWidget> _countdownWidget = new();
+
+    private static readonly StringComparer NicknameOrder = StringComparer.InvariantCultureIgnoreCase;
 
     private bool _isAfterLoadingScreen;
 
@@ -36,6 +40,8 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
         WukongApi.Events.OnPlayerChangedTeam += UpdatePlayerTeam;
         WukongApi.Events.OnLocalPlayerChangedSpectator += OnLocalPlayerChangedSpectator;
+
+        WukongApi.Events.OnDisconnected += OnDisconnected;
     }
 
     public void Dispose()
@@ -51,16 +57,53 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
         WukongApi.Events.OnPlayerChangedTeam -= UpdatePlayerTeam;
         WukongApi.Events.OnLocalPlayerChangedSpectator -= OnLocalPlayerChangedSpectator;
+
+        WukongApi.Events.OnDisconnected -= OnDisconnected;
     }
 
-    private void UpdatePlayerTeam(ReadyMainCharacter character)
+    /// The SDK's disconnect message lands on top of these.
+    private void OnDisconnected(PlayerId playerId, DisconnectedReason reason)
     {
-        if (WukongApi.Sync.TryGetPlayerInfoById(character.PlayerId, out var nickname, out var team))
+        _gameMessageWidget.Value.SetVisibility(false);
+        _countdownWidget.Value.SetVisibility(false);
+    }
+
+    private void UpdatePlayerTeam(ReadyMainCharacter _)
+    {
+        RefreshPlayerLists();
+        RefreshWidgets();
+    }
+
+    public void RefreshPlayerLists()
+    {
+        List<string> redTeamList = [];
+        List<string> blueTeamList = [];
+        List<string> spectatorsList = [];
+
+        foreach (var areaPlayer in WukongApi.Sync.AreaPlayers)
         {
-            _lobbyStatusWidget.Value.UpdatePlayerTeam(nickname, team.Value);
+            if (!WukongApi.Sync.TryGetPlayerInfoById(areaPlayer, out var nickname, out var team))
+                continue;
+
+            switch (team)
+            {
+                case CommonConstants.RedTeamId:
+                    redTeamList.Add(nickname);
+                    break;
+                case CommonConstants.BlueTeamId:
+                    blueTeamList.Add(nickname);
+                    break;
+                case CommonConstants.SpectatorTeamId:
+                    spectatorsList.Add(nickname);
+                    break;
+            }
         }
 
-        RefreshWidgets();
+        redTeamList.Sort(NicknameOrder);
+        blueTeamList.Sort(NicknameOrder);
+        spectatorsList.Sort(NicknameOrder);
+
+        _lobbyStatusWidget.Value.SetTeams(redTeamList, blueTeamList, spectatorsList);
     }
 
     public void SetMainMessage(string message)
@@ -181,11 +224,10 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
         return _lobbyStatusWidget.Value.SetReadyCount(readyCount, maxCount);
     }
 
-    public void SetTeams(List<string> redTeamList, List<string> blueTeamList, List<string> spectatorsList) => _lobbyStatusWidget.Value.SetTeams(redTeamList, blueTeamList, spectatorsList);
 
     public void SetupLobbyUi()
     {
-        if (!_isAfterLoadingScreen)
+        if (!_isAfterLoadingScreen || !WukongApi.Sync.IsConnected)
             return;
 
         if (WukongApi.Sync.LocalMainCharacter is not { } player)
@@ -200,7 +242,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     private void SetupSpectatorWaitForEndUi()
     {
-        if (!_isAfterLoadingScreen)
+        if (!_isAfterLoadingScreen || !WukongApi.Sync.IsConnected)
             return;
 
         _gameMessageWidget.Value.SetVisibility(true);

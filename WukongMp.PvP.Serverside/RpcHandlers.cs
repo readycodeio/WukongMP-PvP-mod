@@ -1,4 +1,4 @@
-using System.Numerics;
+﻿using System.Numerics;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer;
 using ReadyM.Relay.Server.Sdk.Ecs;
@@ -45,12 +45,20 @@ public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
     public void SendRoundStartToAll()
     {
         var levelId = 0;
-        ecs.Query<PvpStateComponent>((ref state) => { levelId = state.LevelId; });
+        var round = 1;
+        var totalRounds = 1;
+
+        ecs.Query<PvpStateComponent>((ref state) =>
+        {
+            levelId = state.LevelId;
+            round = state.DisplayedRound;
+            totalRounds = state.DisplayedTournamentRounds;
+        });
 
         var levelData = LevelSpawnConfig.GetLevelSpawnData(levelId);
         foreach (var (player, placement) in PlacePlayers(levelData))
         {
-            SendStartRound(player, placement, levelData.PvpStartingLocation);
+            SendStartRound(player, placement, levelData.PvpStartingLocation, round, totalRounds);
         }
     }
     

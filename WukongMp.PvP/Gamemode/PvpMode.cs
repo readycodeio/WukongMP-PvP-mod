@@ -32,11 +32,10 @@ namespace WukongMp.PvP.GameMode;
 [ServerRpcFor(typeof(PvpRpcContracts))]
 public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController timerController) : ServerRpcClient
 {
-    public int PendingDaShengSecondPhaseSpawns { get; private set; } // TODO: Server-side?
     private readonly HashSet<ReadyTamer> spawnedDaSheng2 = [];
 
     private readonly CountdownTimer _countdownTimer = new(1, 5);
-    
+
     public IEnumerable<ReadyMainCharacter> AllPlayers => WukongApi.Sync.AreaMainCharacters;
 
     public IEnumerable<ReadyMainCharacter> OtherPlayers => WukongApi.Sync.AreaMainCharacters.Where(p => p.PlayerId != WukongApi.Sync.LocalPlayerId);
@@ -394,15 +393,10 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
             if (spawnedDaSheng2.Add(victim))
             {
-                PendingDaShengSecondPhaseSpawns++;
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(5000);
-                    RunOnGameThread(() =>
-                    {
-                        WukongApi.Sync.SpawnEnemy(TamerKinds.DaSheng2, location.ToVector3(), 1, teamId);
-                        PendingDaShengSecondPhaseSpawns--;
-                    });
+                    RunOnGameThread(() => { WukongApi.Sync.SpawnEnemy(TamerKinds.DaSheng2, location.ToVector3(), 1, teamId); });
                 });
             }
             else
@@ -454,7 +448,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
         pvpWidgetManager.SetThirdText(PvpTexts.BothTeamsNeedReadyPlayers);
     }
 
-    partial void OnStartRound(Vector3 placement, Vector3 lookAt)
+    partial void OnStartRound(Vector3 placement, Vector3 lookAt, int round, int totalRounds)
     {
         var mainEntity = WukongApi.Sync.LocalMainCharacter;
         if (!mainEntity.HasValue)
@@ -462,7 +456,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
             return;
         }
 
-        PvpUtils.ShowPvpRoundStartMessage();
+        PvpUtils.ShowPvpRoundStartMessage(round, totalRounds);
         ResetPlayer(mainEntity.Value);
         ClearLoobyCountdown();
         pvpWidgetManager.HideGameMessageWidget();
@@ -514,7 +508,8 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
         Task.Run(async () =>
         {
-            await Task.Delay(1000);
+            // Let the winner banner clear before the lobby UI replaces it.
+            await Task.Delay(5000);
 
             RunOnGameThread(() =>
             {
@@ -530,7 +525,6 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
             {
                 pvpWidgetManager.SetupLobbyUi();
                 EnablePlayerImmunity();
-                SetReadyState(false);
             });
         });
     }

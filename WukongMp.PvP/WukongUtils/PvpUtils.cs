@@ -25,11 +25,9 @@ public static class PvpUtils
         return LevelSpawnConfig.GetLevelSpawnData(level);
     }
 
-    public static void ShowPvpRoundStartMessage()
+    public static void ShowPvpRoundStartMessage(int round, int totalRounds)
     {
-        var current = WukongApi.Services.Resolve<WukongPvpApi>().CurrentRound;
-        var total = WukongApi.Services.Resolve<WukongPvpApi>().TournamentRounds;
-        WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.RoundCount, current, total), true);
+        WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.RoundCount, round, totalRounds), true);
     }
 
     public static string GetTeamColorString(int teamId)

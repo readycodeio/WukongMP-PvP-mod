@@ -29,9 +29,16 @@ public partial struct PvpStateComponent : IServerAuthoritative, INativeInit
     private bool _inPvP;
     private bool _inTournament;
 
+    /// Only one player team is competing, so the tournament is decided by a single round.
+    private bool _isSingleRoundTournament;
+
     private NativeList<int> _roundWinners;
 
     public int CurrentRound => RoundWinnersCount + 1;
+
+    public int DisplayedRound => IsSingleRoundTournament ? 1 : CurrentRound;
+
+    public int DisplayedTournamentRounds => IsSingleRoundTournament ? 1 : TournamentRounds;
 
     public void SetLastRoundWinnerTeam(int teamId)
     {

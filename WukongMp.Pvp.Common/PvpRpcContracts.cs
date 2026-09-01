@@ -10,7 +10,7 @@ public static partial class PvpRpcContracts
     [ClientToServer, ServerToClient] public static partial void EnableCheats(AreaId areaId, bool enabled);
     [ClientToServer, ServerToClient] public static partial void RoundCountdown(bool start, int seconds);
     [ClientToServer, ServerToClient] public static partial void PlayerReadinessWarning();
-    [ClientToServer, ServerToClient] public static partial void StartRound(Vector3 placement, Vector3 lookAt);
+    [ClientToServer, ServerToClient] public static partial void StartRound(Vector3 placement, Vector3 lookAt, int round, int totalRounds);
     [ClientToServer, ServerToClient] public static partial void EndRound(int winnerTeam);
     [ClientToServer, ServerToClient] public static partial void EndTournament(int winnerTeam);
     [ClientToServer, ServerToClient] public static partial void ResetStats();
