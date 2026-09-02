@@ -211,33 +211,42 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
     private void EnableHostility()
     {
         Logging.LogInformation("Enabled PvP");
-
-        if (WukongApi.Sync.LocalMainCharacter is not { } main)
-            return;
-
-        var myTeam = main.TeamId;
-        var otherTeams = OtherPlayers
-            .Where(p => p.TeamId != myTeam)
-            .Select(p => p.TeamId)
-            .Distinct()
-            .ToList();
-
-        Logging.LogDebug("My team: {Team}", myTeam);
-        Logging.LogDebug("Other teams: {Teams}", string.Join(", ", otherTeams));
-
-        foreach (var team1 in CommonConstants.AllTeamIds)
-        {
-            foreach (var team2 in CommonConstants.AllTeamIds)
-            {
-                HostilityUtils.RegisterTeamHostility(team1, team2);
-            }
-        }
+        LogTeams();
+        SetTeamHostility(true);
     }
 
     private void DisableHostility()
     {
         Logging.LogInformation("Disabled PvP");
+        LogTeams();
+        SetTeamHostility(false);
+    }
 
+    /// <summary>
+    /// The game's <c>BGC_TeamRelationData.IsEnemyTeam</c> returns true when either team is absent from its
+    /// relation table, so a peaceful lobby needs our team ids present with empty hostile lists. Deliberately
+    /// independent of the local player: this has to run before the main character exists.
+    /// </summary>
+    private static void SetTeamHostility(bool hostile)
+    {
+        foreach (var team1 in CommonConstants.AllTeamIds)
+        {
+            foreach (var team2 in CommonConstants.AllTeamIds)
+            {
+                if (hostile)
+                {
+                    HostilityUtils.RegisterTeamHostility(team1, team2);
+                }
+                else
+                {
+                    HostilityUtils.UnregisterTeamHostility(team1, team2);
+                }
+            }
+        }
+    }
+
+    private void LogTeams()
+    {
         if (WukongApi.Sync.LocalMainCharacter is not { } main)
             return;
 
@@ -250,14 +259,6 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
         Logging.LogDebug("My team: {Team}", myTeam);
         Logging.LogDebug("Other teams: {Teams}", string.Join(", ", otherTeams));
-
-        foreach (var team1 in CommonConstants.AllTeamIds)
-        {
-            foreach (var team2 in CommonConstants.AllTeamIds)
-            {
-                HostilityUtils.UnregisterTeamHostility(team1, team2);
-            }
-        }
     }
 
     private void DisablePlayerImmunity()
@@ -361,11 +362,19 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
     private void OnBeginPlayGameplayLevel()
     {
         DestroyTamersOnArena();
+
+        // A fresh world starts with our team ids missing from the relation table, which the game reads
+        // as hostile. Without this the lobby is fightable until the first round ends.
+        SetTeamHostility(false);
     }
 
     private void OnJoinedAreaHandler(AreaId areaId)
     {
         Logging.LogInformation("Joined room");
+
+        // Also here, so reconnecting to a new server without reloading the level cannot inherit the
+        // hostility of a round that was cut short by the previous server going away.
+        DisableHostility();
 
         RefreshReadyCounts();
     }
