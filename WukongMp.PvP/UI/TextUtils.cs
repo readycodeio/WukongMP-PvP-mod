@@ -1,4 +1,5 @@
 ﻿using WukongMp.Api.Resources;
+using WukongMp.PvP.Resources;
 
 namespace WukongMp.PvP.UI;
 
@@ -8,8 +9,8 @@ public static class TextUtils
     {
         if (playersCount == 0)
         {
-            return isReady ? BuiltinTexts.PressToCancelMatch : BuiltinTexts.PressToPlayWithBots;
+            return isReady ? PvpTexts.PressToCancelMatch : PvpTexts.PressToPlayWithBots;
         }
-        return isReady ? BuiltinTexts.PressToBeNotReady : BuiltinTexts.PressToBeReady;
+        return isReady ? PvpTexts.PressToBeNotReady : PvpTexts.PressToBeReady;
     }
 }

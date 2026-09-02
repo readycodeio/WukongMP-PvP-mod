@@ -144,4 +144,112 @@
   <data name="CheatsForbidden" xml:space="preserve">
     <value>Los trucos no están permitidos en este servidor</value>
   </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>Equipo Azul</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>Equipo Rojo</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>Espectadores</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>más</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>En Lobby Multijugador</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0} está listo</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0} no está listo</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>Pulsa J para estar listo</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>Pulsa J para no estar listo</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>Pulsa L para cambiar de equipo</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>Pulsa I para cancelar partida</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>Pulsa I para jugar con bots</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>Estás listo</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>Espera a que termine la partida</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>Iniciando partida PvP</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>Ronda {0} de {1}</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>Ronda terminada. Empate</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>Ronda terminada. {0} ganó</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>Empate</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>Ganador: {0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>Los trucos están desactivados</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} activó el maná infinito</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} desactivó el maná infinito</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} activó la energía de recipiente infinita</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} desactivó la energía de recipiente infinita</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} activó la energía de transformación infinita</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} desactivó la energía de transformación infinita</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} activó la reutilización instantánea de habilidades</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} desactivó la reutilización instantánea de habilidades</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>Valor de reutilización no válido</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>{0} estableció el tiempo de reutilización de espíritu en {1} s</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>¡Atacad!</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>Retrasando el combate – pérdida de HP</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Comando no válido: {0}</value>
+  </data>
 </root>

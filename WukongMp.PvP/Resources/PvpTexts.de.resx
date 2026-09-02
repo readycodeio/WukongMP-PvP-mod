@@ -144,4 +144,112 @@
   <data name="CheatsForbidden" xml:space="preserve">
     <value>Cheats sind auf diesem Server nicht erlaubt</value>
   </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>Team Blau</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>Team Rot</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>Zuschauer</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Bereit</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>mehr</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>In Mehrspieler-Lobby</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0} ist bereit</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0} ist nicht bereit</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>Drücke J um bereit zu sein</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>Drücke J um nicht bereit zu sein</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>Drücke L um das Team zu wechseln</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>Drücke I um das Spiel abzubrechen</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>Drücke I um mit Bots zu spielen</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>Du bist bereit</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>Warte bis das Spiel endet</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>PvP-Spiel wird gestartet</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>Runde {0} von {1}</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>Runde beendet. Unentschieden</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>Runde beendet. {0} hat gewonnen</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>Unentschieden</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>Gewinner: {0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>Cheats sind deaktiviert</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} hat unendliches Mana aktiviert</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} hat unendliches Mana deaktiviert</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} hat unendliche Gefäßenergie aktiviert</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} hat unendliche Gefäßenergie deaktiviert</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} hat unendliche Verwandlungsenergie aktiviert</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} hat unendliche Verwandlungsenergie deaktiviert</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} hat sofortige Fähigkeiten-Abklingzeit aktiviert</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} hat sofortige Fähigkeiten-Abklingzeit deaktiviert</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>Ungültiger Abklingzeitwert</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>{0} hat die Geist-Abklingzeit auf {1} s gesetzt</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>Angreifen!</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>Zeitspiel – HP-Verlust</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Ungültiger Befehl: {0}</value>
+  </data>
 </root>

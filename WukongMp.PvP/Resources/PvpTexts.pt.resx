@@ -144,4 +144,112 @@
   <data name="CheatsForbidden" xml:space="preserve">
     <value>A batota não é permitida neste servidor</value>
   </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>Time Azul</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>Time Vermelho</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>Espectadores</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Pronto</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>mais</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>No Lobby Multijogador</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0} está pronto</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0} não está pronto</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>Pressione J para estar pronto</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>Pressione J para não estar pronto</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>Pressione L para trocar de time</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>Pressione I para cancelar partida</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>Pressione I para jogar com bots</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>Você está pronto</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>Aguarde o fim da partida</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>Iniciando partida PvP</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>Rodada {0} de {1}</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>Rodada terminada. Empate</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>Rodada terminada. {0} venceu</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>Empate</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>Vencedor: {0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>A batota está desativada</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} ativou a mana infinita</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} desativou a mana infinita</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} ativou a energia de recipiente infinita</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} desativou a energia de recipiente infinita</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} ativou a energia de transformação infinita</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} desativou a energia de transformação infinita</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} ativou a recarga instantânea de habilidades</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} desativou a recarga instantânea de habilidades</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>Valor de recarga inválido</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>{0} definiu o tempo de recarga do espírito para {1} s</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>Atacar!</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>Atraso no combate – perda de HP</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Comando inválido: {0}</value>
+  </data>
 </root>

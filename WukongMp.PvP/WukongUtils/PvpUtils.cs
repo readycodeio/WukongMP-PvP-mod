@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
+using WukongMp.PvP.Resources;
 using b1;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
@@ -27,7 +28,7 @@ public static class PvpUtils
 
     public static void ShowPvpRoundStartMessage(int round, int totalRounds)
     {
-        WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.RoundCount, round, totalRounds), true);
+        WukongApi.Widgets.ShowTip(string.Format(PvpTexts.RoundCount, round, totalRounds), true);
     }
 
     public static string GetTeamColorString(int teamId)
@@ -42,9 +43,9 @@ public static class PvpUtils
     public static string GetLocalizedTeamName(int teamId)
     {
         if (teamId == CommonConstants.RedTeamId)
-            return BuiltinTexts.RedTeam;
+            return PvpTexts.RedTeam;
         if (teamId == CommonConstants.BlueTeamId)
-            return BuiltinTexts.BlueTeam;
+            return PvpTexts.BlueTeam;
         return "";
     }
 

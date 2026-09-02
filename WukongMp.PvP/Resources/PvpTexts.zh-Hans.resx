@@ -144,4 +144,112 @@
   <data name="CheatsForbidden" xml:space="preserve">
     <value>本服务器不允许使用作弊功能</value>
   </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>蓝方阵营方</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>红色阵营方</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>观战排队玩家</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>准备开始</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>排队</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>生成物</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>在多人游戏准备大厅中</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0}已准备好战斗</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0}未准备好战斗</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>按J键准备</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>按J键取消准备</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>按L键切换战斗阵营</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>按I键取消匹配</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>按I键与Ai大圣套装天命对战（仅限房间单人）</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>你已准备好战斗</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>等待比赛结束</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>开始PvP对战</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>第{0}回合（共{1}回合）</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>回合结束。平局</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>回合结束。{0}获胜</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>平局</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>胜者：{0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>作弊功能目前已禁用</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} 启用无限法力</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} 无限法力禁用</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} 启用无限容器能量</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} 禁用无限容器能量</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} 启用无限变形能量</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} 禁用无限变形能量</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} 启用瞬发技能冷却</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} 禁用瞬发技能冷却时间</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>无效冷却时间值</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>玩家{0}将精神冷却时间设置为{1}秒</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>进攻！</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>消极战斗——HP 减少</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>无效命令：{0}</value>
+  </data>
 </root>

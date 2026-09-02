@@ -135,7 +135,7 @@ public class PvpCommandHandler(
         {
             if (pvpLevelId < 0)
             {
-                consoleApi.LogMessage(BuiltinTexts.InvalidCommand);
+                consoleApi.LogMessage(PvpTexts.InvalidCommand);
                 return;
             }
 

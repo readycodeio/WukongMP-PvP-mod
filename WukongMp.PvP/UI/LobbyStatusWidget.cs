@@ -5,6 +5,7 @@ using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
+using WukongMp.PvP.Resources;
 using WukongMp.Pvp.Common;
 
 namespace WukongMp.PvP.UI;
@@ -162,7 +163,7 @@ public class LobbyStatusWidget() : GameWidgetBase(LobbyStatusWidgetPath)
 
     protected override void PostInitialize()
     {
-        SetStaticTexts(BuiltinTexts.RedTeam, BuiltinTexts.BlueTeam, BuiltinTexts.Spectators, BuiltinTexts.Ready, BuiltinTexts.Connected, BuiltinTexts.More);
+        SetStaticTexts(PvpTexts.RedTeam, PvpTexts.BlueTeam, PvpTexts.Spectators, PvpTexts.Ready, BuiltinTexts.Connected, PvpTexts.More);
         InitNativeFunctions();
     }
 

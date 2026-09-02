@@ -9,6 +9,7 @@ using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
+using WukongMp.PvP.Resources;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
@@ -215,7 +216,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     public void SwitchReadyState(bool isReady)
     {
-        _gameMessageWidget.Value.SetThirdText(isReady ? BuiltinTexts.YouAreReady : BuiltinTexts.PressToSwitchTeam);
+        _gameMessageWidget.Value.SetThirdText(isReady ? PvpTexts.YouAreReady : PvpTexts.PressToSwitchTeam);
         _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, isReady));
     }
 
@@ -234,9 +235,9 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
             return;
 
         _gameMessageWidget.Value.SetVisibility(true);
-        _gameMessageWidget.Value.SetMainText(BuiltinTexts.InMultiplayer);
+        _gameMessageWidget.Value.SetMainText(PvpTexts.InMultiplayer);
         _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, player.Get<PvPComponent>().IsReadyForPvP));
-        _gameMessageWidget.Value.SetThirdText(BuiltinTexts.PressToSwitchTeam);
+        _gameMessageWidget.Value.SetThirdText(PvpTexts.PressToSwitchTeam);
         _lobbyStatusWidget.Value.SetVisibility(true);
     }
 
@@ -246,8 +247,8 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
             return;
 
         _gameMessageWidget.Value.SetVisibility(true);
-        _gameMessageWidget.Value.SetMainText(BuiltinTexts.InMultiplayer);
-        _gameMessageWidget.Value.SetSecondText(BuiltinTexts.WaitForEnd);
+        _gameMessageWidget.Value.SetMainText(PvpTexts.InMultiplayer);
+        _gameMessageWidget.Value.SetSecondText(PvpTexts.WaitForEnd);
         _gameMessageWidget.Value.SetThirdText("");
         _lobbyStatusWidget.Value.SetVisibility(true);
     }

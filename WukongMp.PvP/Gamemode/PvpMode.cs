@@ -105,13 +105,13 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
     private void OnLanguageChanged(CultureInfo culture)
     {
-        PvpTexts.Culture = culture;
+        // PvpTexts is generated code keyed on CurrentUICulture, which the SDK sets for us.
     }
 
     private void OnMonsterSpawned(ReadyTamer entity)
     {
         var teamColor = PvpUtils.GetTeamColorString(entity.TeamId);
-        entity.SetMarkerMessage(BuiltinTexts.BotName, teamColor);
+        entity.SetMarkerMessage(PvpTexts.BotName, teamColor);
     }
 
     private void OnPlayerPawnSpawned(ReadyMainCharacter mainCharacter)
@@ -192,7 +192,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
         SetReadyState(newIsReady);
         pvpWidgetManager.SwitchReadyState(newIsReady);
 
-        var message = string.Format(newIsReady ? BuiltinTexts.PlayerIsReady : BuiltinTexts.PlayerIsNotReady, main.Nickname);
+        var message = string.Format(newIsReady ? PvpTexts.PlayerIsReady : PvpTexts.PlayerIsNotReady, main.Nickname);
         WukongApi.Chat.SendServerMessage(message);
     }
 
@@ -445,7 +445,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
     {
         if (start)
         {
-            pvpWidgetManager.SetMainMessage(BuiltinTexts.StartingGame);
+            pvpWidgetManager.SetMainMessage(PvpTexts.StartingGame);
             pvpWidgetManager.UpdateRoundCountdown(0, seconds);
             pvpWidgetManager.ShowCountdown();
 
@@ -460,7 +460,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
             var isReady = main.Get<PvPComponent>().IsReadyForPvP;
 
             ClearLoobyCountdown();
-            pvpWidgetManager.SetMainMessage(BuiltinTexts.InMultiplayer);
+            pvpWidgetManager.SetMainMessage(PvpTexts.InMultiplayer);
             pvpWidgetManager.SwitchReadyState(isReady);
         }
     }
@@ -500,11 +500,11 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
         if (winnerTeam == CommonConstants.DrawTeamId)
         {
-            WukongApi.Widgets.ShowTip(BuiltinTexts.RoundDraw, true);
+            WukongApi.Widgets.ShowTip(PvpTexts.RoundDraw, true);
         }
         else
         {
-            WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.RoundEndedWinner, PvpUtils.GetLocalizedTeamName(winnerTeam)), true);
+            WukongApi.Widgets.ShowTip(string.Format(PvpTexts.RoundEndedWinner, PvpUtils.GetLocalizedTeamName(winnerTeam)), true);
         }
 
         if (winnerTeam == CommonConstants.DrawTeamId)
@@ -524,11 +524,11 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
     {
         if (winnerTeam == CommonConstants.DrawTeamId)
         {
-            WukongApi.Widgets.ShowTip(BuiltinTexts.TournamentDraw, true);
+            WukongApi.Widgets.ShowTip(PvpTexts.TournamentDraw, true);
         }
         else
         {
-            WukongApi.Widgets.ShowTip(string.Format(BuiltinTexts.TournamentEndedWinner, PvpUtils.GetLocalizedTeamName(winnerTeam)), true);
+            WukongApi.Widgets.ShowTip(string.Format(PvpTexts.TournamentEndedWinner, PvpUtils.GetLocalizedTeamName(winnerTeam)), true);
         }
 
         Task.Run(async () =>
@@ -593,7 +593,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
         if (mainEntity.IsDead || mainEntity.IsSpectator)
             return;
 
-        WukongApi.Local.ShowInfoMessage(BuiltinTexts.AntiStallWarning);
+        WukongApi.Local.ShowInfoMessage(PvpTexts.AntiStallWarning);
         timerController.SetTimer(0, seconds);
         timerController.StartTimer();
         Logging.LogDebug("OnShowAntiStallWarning received");
@@ -607,7 +607,7 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
         if (mainEntity.IsDead || mainEntity.IsSpectator)
             return;
 
-        WukongApi.Local.ShowInfoMessage(BuiltinTexts.StallingMessage);
+        WukongApi.Local.ShowInfoMessage(PvpTexts.StallingMessage);
         Logging.LogDebug("OnShowAntiStallAction received");
     }
 
