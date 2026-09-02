@@ -40,9 +40,9 @@ public class PvpChatter(CheatManager cheatManager) : IHostedService
 
     private void OnLoadingScreenClose()
     {
-        if (WukongApi.Local.IsGameplayLevel && cheatManager.CheatsAllowed)
+        if (WukongApi.Local.IsGameplayLevel && cheatManager.CheatsEnabled)
         {
-            WukongApi.Chat.ShowLocalMessage(BuiltinTexts.CheatsEnabled, FLinearColor.Gray);
+            WukongApi.Chat.ShowLocalMessage(PvpTexts.CheatsEnabled, FLinearColor.Gray);
         }
     }
 }

@@ -28,10 +28,21 @@ public class Mod : ModBase
         services.Resolve<IComponentRegistry>()
             .RegisterComponent<PvPComponent>()
             .RegisterComponent<PvpStateComponent>();
+        
+        RegisterArchetypes(registry =>
+        {
+            registry.ModifyArchetype(WukongApi.Archetypes.MainCharacterArchetype, b =>
+            {
+                b.Add<PvPComponent>();
+                b.Add<CheatsComponent>();
+            });
 
-        services.RegisterSingleton<IArchetypeRegistration>(new ArchetypeRegistration(WukongApi.Archetypes.MainCharacterArchetype, WukongApi.Archetypes.WorldArchetype));
-        services.RegisterSingleton<IArchetypeRegistration, CheatsComponentRegistration>();
-
+            registry.ModifyArchetype(WukongApi.Archetypes.WorldArchetype, b =>
+            {
+                b.Add<PvpStateComponent>();
+            });
+        });
+        
         services.RegisterSingleton<CheatManager>();
         services.RegisterSingleton<WukongPvpApi>();
         services.RegisterSingleton<TimerController>();

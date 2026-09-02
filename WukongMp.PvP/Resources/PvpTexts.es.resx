@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -134,5 +134,14 @@
   </data>
   <data name="PlayerKilledPlayer" xml:space="preserve">
     <value>{0} mató a {1}</value>
+  </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>Trucos activados</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>Trucos desactivados</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>Los trucos no están permitidos en este servidor</value>
   </data>
 </root>

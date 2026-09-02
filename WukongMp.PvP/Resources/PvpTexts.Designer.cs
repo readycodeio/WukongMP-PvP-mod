@@ -69,6 +69,33 @@ namespace WukongMp.PvP.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cheats disabled.
+        /// </summary>
+        internal static string CheatsDisabled {
+            get {
+                return ResourceManager.GetString("CheatsDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cheats enabled.
+        /// </summary>
+        internal static string CheatsEnabled {
+            get {
+                return ResourceManager.GetString("CheatsEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cheats are not allowed on this server.
+        /// </summary>
+        internal static string CheatsForbidden {
+            get {
+                return ResourceManager.GetString("CheatsForbidden", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to New Character.
         /// </summary>
         internal static string NewCharacter {

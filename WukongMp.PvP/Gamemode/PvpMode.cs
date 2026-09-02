@@ -425,6 +425,22 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
 
     #region RPC
 
+    partial void OnCheatsEnabledResponse(CheatsStatus status)
+    {
+        if (status == CheatsStatus.Enabled)
+        {
+            WukongApi.Chat.ShowLocalMessage(PvpTexts.CheatsEnabled, FLinearColor.Gray);
+        }
+        else if (status == CheatsStatus.Disabled)
+        {
+            WukongApi.Chat.ShowLocalMessage(PvpTexts.CheatsDisabled, FLinearColor.Gray);
+        }
+        else if (status == CheatsStatus.Forbidden)
+        {
+            WukongApi.Chat.ShowLocalMessage(PvpTexts.CheatsForbidden, FLinearColor.OrangeRed);
+        }
+    }
+
     partial void OnRoundCountdown(bool start, int seconds)
     {
         if (start)

@@ -11,19 +11,26 @@ using WukongMp.Pvp.Common.ECS;
 namespace WukongMp.PvP.Serverside;
 
 [ServerRpcFor(typeof(PvpRpcContracts))]
-public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
+public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandlersBase
 {
-    partial void OnEnableCheats(RpcContext context, AreaId areaId, bool enabled)
+    partial void OnEnableCheats(RpcContext context, bool enabled)
     {
-        // TODO: Do it only for this area
-        ecs.Query<PvpStateComponent>((ref room) => { room.CheatsAllowed = enabled; });
+        if (config.CheatsAllowed)
+        {
+            ecs.Query<PvpStateComponent>((ref room) => { room.CheatsEnabled = enabled; });
+            SendCheatsEnabledResponse(context.Sender, enabled ? CheatsStatus.Enabled : CheatsStatus.Disabled);
+        }
+        else
+        {
+            SendCheatsEnabledResponse(context.Sender, CheatsStatus.Forbidden);
+        }
     }
-    
+
     partial void OnChangeLevel(RpcContext context, int levelId)
     {
         if (!LevelSpawnConfig.IsValidLevel(levelId))
             return;
-        
+
         var inTournament = false;
         ecs.Query<PvpStateComponent>((ref pvp) => { inTournament = pvp.InTournament; });
 
@@ -61,7 +68,7 @@ public partial class RpcHandlers(EcsApi ecs) : ServerRpcHandlersBase
             SendStartRound(player, placement, levelData.PvpStartingLocation, round, totalRounds);
         }
     }
-    
+
     // This code is generalized to support more than 2 teams
     private IEnumerable<(PlayerId, Vector3)> PlacePlayers(LevelSpawnData levelData)
     {

@@ -16,11 +16,11 @@ namespace WukongMp.PvP;
 
 public sealed class CheatManager
 {
-    public bool CheatsAllowed => WukongApi.Sync.TryGetGlobalComponent<PvpStateComponent>(out var state) && state.CheatsAllowed;
+    public bool CheatsEnabled => WukongApi.Sync.TryGetGlobalComponent<PvpStateComponent>(out var state) && state.CheatsEnabled;
 
     public void ToggleInfiniteMana()
     {
-        if (!CheatsAllowed)
+        if (!CheatsEnabled)
         {
             WukongApi.Chat.ShowLocalMessage(BuiltinTexts.CheatsAreDisabled, FLinearColor.Gray);
             return;
@@ -47,7 +47,7 @@ public sealed class CheatManager
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (!CheatsAllowed)
+        if (!CheatsEnabled)
         {
             WukongApi.Console.LogMessage(BuiltinTexts.CheatsAreDisabled);
             return;
@@ -80,7 +80,7 @@ public sealed class CheatManager
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (!CheatsAllowed)
+        if (!CheatsEnabled)
         {
             WukongApi.Console.LogMessage(BuiltinTexts.CheatsAreDisabled);
             return;
@@ -103,7 +103,7 @@ public sealed class CheatManager
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (!CheatsAllowed)
+        if (!CheatsEnabled)
         {
             WukongApi.Console.LogMessage(BuiltinTexts.CheatsAreDisabled);
             return;
@@ -126,7 +126,7 @@ public sealed class CheatManager
         if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (!CheatsAllowed)
+        if (!CheatsEnabled)
         {
             WukongApi.Console.LogMessage(BuiltinTexts.CheatsAreDisabled);
             return;

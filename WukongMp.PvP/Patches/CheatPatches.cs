@@ -25,7 +25,7 @@ internal static class PatchAttributeCheats
             return true;
 
         var owner = __instance.GetOwner();
-        var cheatsEnabled = WukongApi.Services.Resolve<CheatManager>().CheatsAllowed;
+        var cheatsEnabled = WukongApi.Services.Resolve<CheatManager>().CheatsEnabled;
 
         if (!cheatsEnabled)
             return true;
@@ -95,7 +95,7 @@ internal static class PatchSkillCooldownTime
         
         var cheats = WukongApi.Services.Resolve<CheatManager>();
 
-        if (cheats.CheatsAllowed && WukongApi.Sync.LocalMainCharacter is {} player)
+        if (cheats.CheatsEnabled && WukongApi.Sync.LocalMainCharacter is {} player)
         {
             __result *= player.Get<CheatsComponent>().InstantSkillCooldown ? 0f : 1f;
         }

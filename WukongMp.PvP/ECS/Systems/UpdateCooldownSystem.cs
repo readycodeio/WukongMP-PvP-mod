@@ -20,7 +20,7 @@ public class UpdateCooldownSystem(CheatManager cheats) : ModSystemBase
         if (!WukongApi.Local.IsGameplayLevel)
             return;
 
-        if (!cheats.CheatsAllowed)
+        if (!cheats.CheatsEnabled)
             return;
 
         if (WukongApi.Sync.LocalMainCharacter is not { } player)

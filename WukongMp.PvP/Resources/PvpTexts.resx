@@ -115,4 +115,13 @@
   <data name="PlayerKilledPlayer" xml:space="preserve">
 	  <value>{0} killed {1}</value>
   </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>Cheats enabled</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>Cheats disabled</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>Cheats are not allowed on this server</value>
+  </data>
 </root>

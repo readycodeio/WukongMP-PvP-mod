@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -134,5 +134,14 @@
   </data>
   <data name="PlayerKilledPlayer" xml:space="preserve">
     <value>{0}击杀了{1}</value>
+  </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>作弊功能已启用</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>作弊功能已禁用</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>本服务器不允许使用作弊功能</value>
   </data>
 </root>

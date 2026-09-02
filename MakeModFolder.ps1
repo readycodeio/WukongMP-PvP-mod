@@ -115,6 +115,7 @@ Copy-BuildArtifacts -Files $clientFiles -BaseDir $clientBuildDir -DestDir $clien
 Copy-BuildArtifacts -Files $manifestFiles -BaseDir $contentDir -DestDir $modRoot
 Copy-BuildArtifacts -Files $clientContentFiles -BaseDir $contentDir -DestDir $clientRoot
 Copy-BuildArtifacts -Files $serverFiles -BaseDir $serverBuildDir -DestDir $serverRoot
+Copy-BuildArtifacts -Files $serverContentFiles -BaseDir $contentDir -DestDir $serverRoot
 
 # Open explorer to the output directory
 if ($NoExplorer)

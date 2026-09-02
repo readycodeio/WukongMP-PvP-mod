@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -134,5 +134,14 @@
   </data>
   <data name="PlayerKilledPlayer" xml:space="preserve">
     <value>{0} matou {1}</value>
+  </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>Batota ativada</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>Batota desativada</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>A batota não é permitida neste servidor</value>
   </data>
 </root>

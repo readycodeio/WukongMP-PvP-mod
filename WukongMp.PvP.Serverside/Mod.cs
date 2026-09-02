@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
-using ReadyM.Api.ECS.Registry;
 using ReadyM.Relay.Server.Sdk;
 using ReadyM.Relay.Server.Sdk.Ecs.Components;
 using WukongMp.Pvp.Common;
@@ -21,13 +20,21 @@ public class Mod : ServerModBase
 
     protected override void Init()
     {
+        RegisterConfig<PvpConfig>();
+        var initialPvpState = Services.Resolve<PvpConfig>().ToInitialState();
+
+        RegisterArchetypes(registry =>
+        {
+            registry.ModifyArchetype(WukongArchetypes.MainCharacterArchetype, b => { b.Add<PvPComponent>(); });
+
+            registry.ModifyArchetype(WukongArchetypes.WorldArchetype, b => b.Add(initialPvpState));
+        });
+
         Services.RegisterSingleton<RpcHandlers>();
 
         Services.RegisterSystem<RoundStartTimerSystem>();
         Services.RegisterSystem<RoundEndSystem>();
         Services.RegisterSystem<AntiStallSystem>();
-
-        Services.RegisterSingleton<IArchetypeRegistration>(new ArchetypeRegistration(WukongArchetypes.MainCharacterArchetype, WukongArchetypes.WorldArchetype));
 
         var logger = Services.Resolve<ILogger>();
         logger.LogInformation("Serverside PvP mod initialized");

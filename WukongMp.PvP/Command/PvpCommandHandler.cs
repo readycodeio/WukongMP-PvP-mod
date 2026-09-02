@@ -138,18 +138,14 @@ public class PvpCommandHandler(
                 consoleApi.LogMessage(BuiltinTexts.InvalidCommand);
                 return;
             }
-            
+
             pvpMode.SendChangeLevel(pvpLevelId);
         }
     }
 
     private void ToggleCheats()
     {
-        if (WukongApi.Sync.IsMasterClient && WukongApi.Sync.CurrentAreaId is { } area)
-        {
-            var enabledAlready = cheatManager.CheatsAllowed;
-            chatApi.SendServerMessage(enabledAlready ? BuiltinTexts.CheatsDisabled : BuiltinTexts.CheatsEnabled);
-            pvpMode.SendEnableCheats(area, !enabledAlready);
-        }
+        var enabledAlready = cheatManager.CheatsEnabled;
+        pvpMode.SendEnableCheats(!enabledAlready);
     }
 }
