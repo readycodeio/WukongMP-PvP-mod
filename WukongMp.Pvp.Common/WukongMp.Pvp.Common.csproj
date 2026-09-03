@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,10 +6,24 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
+    <PropertyGroup>
+        <UseSdkProjectReferences Condition="'$(UseSdkProjectReferences)' == ''">false</UseSdkProjectReferences>
+        <!-- Where the SDK sources live when building in source mode. An uberrepo overrides
+             these; the defaults assume the repositories sit side by side. -->
+        <WukongSdkRoot Condition="'$(WukongSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\..\wukongmp-sdk</WukongSdkRoot>
+        <CoreSdkRoot Condition="'$(CoreSdkRoot)' == ''">$(MSBuildThisFileDirectory)..\..\readym-core-sdk</CoreSdkRoot>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'true'">
         <ProjectReference Include="$(CoreSdkRoot)\src\ReadyM.Api.Multiplayer\ReadyM.Api.Multiplayer.csproj"/>
         <ProjectReference Include="$(CoreSdkRoot)\src\ReadyM.Api.Generators\ReadyM.Api.Generators.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer"/>
         <ProjectReference Include="$(WukongSdkRoot)\ReadyM.Wukong.Common\ReadyM.Wukong.Common.csproj" />
+    </ItemGroup>
+
+    <!-- The Common package carries ReadyM.Wukong.Common's assembly and the generator, so the
+         three references above all come from this one. -->
+    <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'false'">
+        <PackageReference Include="ReadyM.SDK.Wukong.Common" Version="0.4.0" />
     </ItemGroup>
 
 </Project>
