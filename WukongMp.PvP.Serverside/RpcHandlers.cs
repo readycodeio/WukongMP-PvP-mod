@@ -17,7 +17,7 @@ public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandle
     {
         if (config.CheatsAllowed)
         {
-            ecs.Query<PvpStateComponent>((ref room) => { room.CheatsEnabled = enabled; });
+            ecs.Query<PvpStateComponent>((ref state) => { state.CheatsEnabled = enabled; });
             SendCheatsEnabledResponse(context.Sender, enabled ? CheatsStatus.Enabled : CheatsStatus.Disabled);
         }
         else
@@ -32,17 +32,17 @@ public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandle
             return;
 
         var inTournament = false;
-        ecs.Query<PvpStateComponent>((ref pvp) => { inTournament = pvp.InTournament; });
+        ecs.Query<PvpStateComponent>((ref state) => { inTournament = state.InTournament; });
 
         if (inTournament)
             return;
 
-        ecs.Query<PvpStateComponent>((ref pvp) =>
+        ecs.Query<PvpStateComponent>((ref state) =>
         {
-            pvp.InPvP = false;
-            pvp.InTournament = false;
-            pvp.LevelId = levelId;
-            pvp.ClearRoundWinners();
+            state.InPvP = false;
+            state.InTournament = false;
+            state.LevelId = levelId;
+            state.ClearRoundWinners();
         });
 
         ecs.Query<MainCharacterComponent>((ref player) => { SendChangeLevel(player.PlayerId, levelId); });

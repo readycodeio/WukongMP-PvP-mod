@@ -29,17 +29,17 @@ public class PvpCommandHandler(
     public void OnScopeStart()
     {
         var allmonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
-        consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn, false), allmonsterNames);
-        consoleApi.AddCommand("spectator", ConsoleCommand.Create(SetSpectatorStatus, false));
-        consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatManager.ToggleNoSkillsCooldown, false));
-        consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatManager.ToggleInfiniteMana, false));
-        consoleApi.AddCommand("spirit_cooldown", ConsoleCommand.Create(cheatManager.SetSpritCooldownTime, false));
-        consoleApi.AddCommand("infinite_vessel", ConsoleCommand.Create(cheatManager.ToggleInfiniteVessel, false));
-        consoleApi.AddCommand("infinite_transform", ConsoleCommand.Create(cheatManager.ToggleInfiniteTransform, false));
-        consoleApi.AddCommand("arena", ConsoleCommand.Create(TeleportToArena, false));
-        consoleApi.AddCommand("shrine", ConsoleCommand.Create(TeleportToShrine, false));
-        consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel, true));
-        consoleApi.AddCommand("cheats", ConsoleCommand.Create(ToggleCheats, isDebugOnly: true));
+        consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn), allmonsterNames);
+        consoleApi.AddCommand("spectator", ConsoleCommand.Create(SetSpectatorStatus));
+        consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatManager.ToggleNoSkillsCooldown));
+        consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatManager.ToggleInfiniteMana));
+        consoleApi.AddCommand("spirit_cooldown", ConsoleCommand.Create(cheatManager.SetSpritCooldownTime));
+        consoleApi.AddCommand("infinite_vessel", ConsoleCommand.Create(cheatManager.ToggleInfiniteVessel));
+        consoleApi.AddCommand("infinite_transform", ConsoleCommand.Create(cheatManager.ToggleInfiniteTransform));
+        consoleApi.AddCommand("arena", ConsoleCommand.Create(TeleportToArena));
+        consoleApi.AddCommand("shrine", ConsoleCommand.Create(TeleportToShrine));
+        consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel));
+        consoleApi.AddCommand("cheats", ConsoleCommand.Create(ToggleCheats));
     }
 
     public void Dispose() { }

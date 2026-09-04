@@ -227,18 +227,27 @@ public partial class PvpMode(PvpWidgetManager pvpWidgetManager, TimerController 
     /// relation table, so a peaceful lobby needs our team ids present with empty hostile lists. Deliberately
     /// independent of the local player: this has to run before the main character exists.
     /// </summary>
+    /// <remarks>
+    /// Only the competing teams ever become hostile. The spectator team still has to appear in the table,
+    /// or the fail-open above would make spectators attackable, but pairing it with the competing teams did
+    /// the same thing on purpose: spectators were invisible and still damageable.
+    /// </remarks>
     private static void SetTeamHostility(bool hostile)
     {
         foreach (var team1 in CommonConstants.AllTeamIds)
         {
             foreach (var team2 in CommonConstants.AllTeamIds)
             {
-                if (hostile)
+                var competing = CommonConstants.CompetingTeamIds.Contains(team1)
+                    && CommonConstants.CompetingTeamIds.Contains(team2);
+
+                if (hostile && competing)
                 {
                     HostilityUtils.RegisterTeamHostility(team1, team2);
                 }
                 else
                 {
+                    // Also clears a spectator pairing left behind by an earlier round.
                     HostilityUtils.UnregisterTeamHostility(team1, team2);
                 }
             }
