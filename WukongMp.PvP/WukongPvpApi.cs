@@ -8,7 +8,7 @@ using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP;
 
-public sealed class WukongPvpApi(EntityStore world) // TODO: Do not leak Friflo types
+public sealed class WukongPvpApi
 {
     public int LevelId => State?.LevelId ?? 0;
 
@@ -39,27 +39,5 @@ public sealed class WukongPvpApi(EntityStore world) // TODO: Do not leak Friflo 
         }
     }
 
-    public ReadyObject? PvpStateEntity { get; set; }
-
-    private AreaId? CurrentArea => WukongApi.Sync.CurrentAreaId;
-
-    public PvpStateComponent? State
-    {
-        get
-        {
-            if (!CurrentArea.HasValue)
-                PvpStateEntity = null;
-
-            if (!PvpStateEntity.HasValue && CurrentArea.HasValue)
-            {
-                var entity = world
-                    .Query<PvpStateComponent>()
-                    // .HasValue<InScopeComponent, Entity>(CurrentArea.Value.Entity)
-                    .Entities.FirstOrDefault();
-                PvpStateEntity = entity != default ? new ReadyObject(WukongApi.Sync, entity) : null; // TODO: This constructor has to be internal
-            }
-
-            return PvpStateEntity?.Get<PvpStateComponent>();
-        }
-    }
+    public PvpStateComponent? State => WukongApi.Sync.GetGlobalComponent<PvpStateComponent>();
 }
