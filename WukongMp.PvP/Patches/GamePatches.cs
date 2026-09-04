@@ -6,6 +6,7 @@ using PreludeLib.Attributes;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
 using WukongMp.Api.Configuration;
+using WukongMp.Pvp.Common;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
@@ -27,7 +28,7 @@ public static class PatchGetNewGamePlusCount
         if (WukongApi.Sync.CurrentAreaId == null)
             return true;
 
-        __result = WukongApi.PvP.EnemiesNgPlusLevel + 1;
+        __result = WukongApi.Services.Resolve<WukongPvpApi>().EnemiesNgPlusLevel + 1;
         return false;
     }
 }
@@ -52,7 +53,7 @@ public class TamerResetPatch
             return true;
 
         var teamId = ___OwnerAsCharacterCS.GetTeamIDInCS();
-        return !PvpConstants.CompetingTeamIds.Contains(teamId);
+        return !CommonConstants.CompetingTeamIds.Contains(teamId);
     }
 }
 
@@ -131,7 +132,40 @@ public class PatchBGUSelectLockTargetInRange
         AActor PreferActor,
         float PreferActorDistTolerance = 0.0f)
     {
-        __result = PvpUtils.BGUSelectLockTargetInRange(Owner, FirstFilterMaxRange, RangeType, AngleMax, MyDir, DistScoreRating, PreferActor, PreferActorDistTolerance);
+        __result = PvpUtils.BguSelectLockTargetInRange(Owner, FirstFilterMaxRange, RangeType, AngleMax, MyDir, DistScoreRating, PreferActor, PreferActorDistTolerance);
         return false;
+    }
+}
+
+[HarmonyPatch]
+[HarmonyPatchCategory(PatchCategory.Connected)]
+public static class PatchDoPoleDrink
+{
+    [HarmonyTargetMethodHint("b1.BUS_PoleDrinkComp", "DoPoleDrink")]
+    private static MethodBase TargetMethod()
+    {
+        return AccessTools.Method("b1.BUS_PoleDrinkComp:DoPoleDrink");
+    }
+
+    public static bool Prefix()
+    {
+        if (!WukongApi.Sync.InArea)
+            return true;
+
+        return WukongApi.Services.Resolve<WukongPvpApi>().GourdAllowed;
+    }
+}
+
+[HarmonyPatch(typeof(BUS_PhantomRushComp), "OnTriggerPhantomRush")]
+[HarmonyPatchCategory(PatchCategory.Global)]
+[HarmonyPriority(Priority.High)]
+public static class PatchOnTriggerPhantomRush
+{
+    public static bool Prefix()
+    {
+        if (!WukongApi.Sync.InArea)
+            return true;
+        
+        return WukongApi.Services.Resolve<WukongPvpApi>().PhantomRushAllowed;
     }
 }

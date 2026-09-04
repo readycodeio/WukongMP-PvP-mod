@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -134,5 +134,122 @@
   </data>
   <data name="PlayerKilledPlayer" xml:space="preserve">
     <value>{0} a tué {1}</value>
+  </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>Oszustwa włączone</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>Oszustwa wyłączone</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>Oszustwa są zabronione na tym serwerze</value>
+  </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>Zespół Niebieski</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>Zespół Czerwony</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>Widzowie</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Gotowi</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>więcej</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>W lobby trybu wieloosobowego</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0} jest gotowy</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0} jest niegotowy</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>Naciśnij J aby oznaczyć gotowość</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>Naciśnij J aby odznaczyć gotowość</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>Naciśnij L aby zmienić zespół</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>Naciśnij I aby anulować mecz</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>Naciśnij I aby grać z botami</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>Gotowy</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>Czekaj na koniec meczu</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>Rozpoczynanie meczu PvP</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>Runda {0} z {1}</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>Runda zakończona. Remis</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>Runda zakończona. {0} wygrał</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>Remis</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>Zwycięzca: {0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>Oszustwa są wyłączone</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} włączył nieskończoną manę</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} wyłączył nieskończoną manę</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} włączył nieskończoną energię naczyń</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} wyłączył nieskończoną energię naczyń</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} włączył nieskończoną energię transformacji</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} wyłączył nieskończoną energię transformacji</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} włączył natychmiastowe odnawianie umiejętności</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} wyłączył natychmiastowe odnawianie umiejętności</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>Nieprawidłowa wartość czasu odnowienia</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>{0} ustawił czas odnowienia ducha na {1} s</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>Do ataku!</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>Przeciąganie walki – utrata HP</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Nieznana komenda: {0}</value>
   </data>
 </root>

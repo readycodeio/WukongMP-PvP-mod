@@ -1,5 +1,8 @@
+﻿#!powershell.exe -ExecutionPolicy Bypass -File
+
 param (
-    [string] $Configuration
+    [string] $Configuration,
+    [switch] $NoExplorer
 )
 
 # Check params
@@ -9,39 +12,52 @@ if (-not $Configuration)
     Exit 1
 }
 
+$scriptDir = $PSScriptRoot
+
 # Source the mod file list
-. ./ModFiles.ps1
+. (Join-Path $scriptDir 'ModFiles.ps1')
 
 # Find .sln files
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $solutionFiles = Get-ChildItem -Path $scriptDir -Filter *.sln
 
 # Check if exactly one .sln file was found
-if ($solutionFiles.Count -eq 1) {
+if ($solutionFiles.Count -eq 1)
+{
     $solutionPath = $solutionFiles[0].FullName
-} else {
-    Write-Host "Error: Expected exactly one .sln file in $scriptDir, found $($solutionFiles.Count)."
+}
+else
+{
+    Write-Host "Error: Expected exactly one .sln file in $scriptDir, found $( $solutionFiles.Count )."
     Exit 1
 }
 
-# Build solution
+# Build solution. This builds the shared, client and server projects in one go.
 Write-Output "Building solution $solutionPath in configuration $Configuration..."
-$buildOutput = dotnet build $solutionPath -c $Configuration /t:Rebuild
+dotnet build $solutionPath -c $Configuration -v minimal /t:Rebuild | Tee-Object -FilePath (Join-Path $scriptDir 'build.log')
 
-# Prepare temporary output directory
+if ($LASTEXITCODE -ne 0)
+{
+    Write-Error "Build failed, see build.log for details."
+    Exit 1
+}
+
+# Prepare output directory
 $outputRoot = Join-Path $scriptDir 'Output'
 if (-not (Test-Path $outputRoot))
 {
     New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
-} else {
+}
+else
+{
     Get-ChildItem $outputRoot -Recurse | Remove-Item -Force -Recurse
 }
 
-# Extract solution name from path
-$solutionName = [System.IO.Path]::GetFileNameWithoutExtension($solutionPath)
-
-$destRoot = Join-Path $outputRoot $solutionName
-New-Item -ItemType Directory -Path $destRoot -Force | Out-Null
+# One folder per mod, holding a client and a server side plus the shared manifest.
+$modRoot = Join-Path (Join-Path $outputRoot 'mods') $clientProject
+$clientRoot = Join-Path $modRoot 'client'
+$serverRoot = Join-Path $modRoot 'server'
+New-Item -ItemType Directory -Path $clientRoot -Force | Out-Null
+New-Item -ItemType Directory -Path $serverRoot -Force | Out-Null
 
 # Helper for copying files from ModFiles.ps1
 function Copy-BuildArtifacts
@@ -52,15 +68,23 @@ function Copy-BuildArtifacts
         [string[]]$Files,
 
         [Parameter(Mandatory = $true)]
-        [string]$BaseDir
+        [string]$BaseDir,
+
+        [Parameter(Mandatory = $true)]
+        [string]$DestDir
     )
 
     foreach ($file in $Files)
     {
         $sourceFile = Join-Path -Path $BaseDir -ChildPath $file
-        $destFile = Join-Path -Path $destRoot -ChildPath $file
+        $destFile = Join-Path -Path $DestDir -ChildPath $file
 
-        if (Test-Path -Path $sourceFile)
+        if (Test-Path -Path $sourceFile -PathType Container)
+        {
+            Copy-Item -Path $sourceFile -Destination $destFile -Recurse -Force
+            Write-Output "Copied $file/ to $( Split-Path $DestDir -Leaf )."
+        }
+        elseif (Test-Path -Path $sourceFile)
         {
             # Ensure destination directory exists
             $destDir = Split-Path -Parent $destFile
@@ -70,7 +94,7 @@ function Copy-BuildArtifacts
             }
 
             Copy-Item -Path $sourceFile -Destination $destFile -Force
-            Write-Output "Copied $file to output directory."
+            Write-Output "Copied $file to $( Split-Path $DestDir -Leaf )."
         }
         else
         {
@@ -80,20 +104,30 @@ function Copy-BuildArtifacts
 }
 
 # Copy files
-$buildDir = Join-Path $scriptDir "$solutionName/bin/$Configuration/netstandard2.0"
+$clientBuildDir = Join-Path $scriptDir "$clientProject/bin/$Configuration/netstandard2.0"
+$serverBuildDir = Join-Path $scriptDir "$serverProject/bin/$Configuration/net10.0"
 $contentDir = Join-Path $scriptDir "Content"
 
-$allFiles = $buildFiles
+$clientFiles = $clientBuildFiles
+$serverFiles = $serverBuildFiles
 if ($Configuration -eq "Debug")
 {
-    $allFiles += $debugBuildFiles
+    $clientFiles += $clientDebugBuildFiles
+    $serverFiles += $serverDebugBuildFiles
 }
 
-Copy-BuildArtifacts -Files $allFiles -BaseDir $buildDir
-Copy-BuildArtifacts -Files $contentFiles -BaseDir $contentDir
+Copy-BuildArtifacts -Files $clientFiles -BaseDir $clientBuildDir -DestDir $clientRoot
+Copy-BuildArtifacts -Files $manifestFiles -BaseDir $contentDir -DestDir $modRoot
+Copy-BuildArtifacts -Files $clientContentFiles -BaseDir $contentDir -DestDir $clientRoot
+Copy-BuildArtifacts -Files $serverFiles -BaseDir $serverBuildDir -DestDir $serverRoot
+Copy-BuildArtifacts -Files $serverContentFiles -BaseDir $contentDir -DestDir $serverRoot
 
 # Open explorer to the output directory
-if ($PSVersionTable.PSEdition -eq 'Core')
+if ($NoExplorer)
+{
+    # nothing to open, this run is scripted
+}
+elseif ($PSVersionTable.PSEdition -eq 'Core')
 {
     Start-Process "explorer.exe" -ArgumentList $outputRoot
 }

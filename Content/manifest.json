@@ -1,14 +1,14 @@
-{
-  "uniqueId": "WukongMp.PvP",
-  "version": "0.3.1",
-  "name": "WukongMp PvP",
-  "author": "ReadyM Team",
+﻿{
+  "uniqueId": "WukongMP.PvP",
+  "version": "0.4.0",
+  "name": "WukongMP PvP",
+  "author": "ReadyM",
   "link": "https://docs.ready.mp",
-  "description": "The PvP mod for WukongMp, allowing players to battle in many of the game's iconic areas.",
+  "description": "The PvP mod for WukongMP, allowing players to battle in many of the game's iconic areas.",
   "dependencies": [
     {
-      "uniqueId": "WukongMp.Sdk",
-      "minimumVersion": "0.3.1"
+      "uniqueId": "WukongMP.SDK",
+      "minimumVersion": "0.4.0"
     }
   ]
 }

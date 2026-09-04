@@ -24,13 +24,4 @@ public static class PvpConstants
     public const int RuyiScrollSkillId = 10912;
     public const int ConsumableBuffSkillId = 10913;
     public const int IronBodySkillId = 10505;
-
-    public const int DrawTeamId = 9999;
-
-    public const int CountdownSeconds = 5;
-    public const int RedTeamId = -9999;
-    public const int BlueTeamId = -9998;
-    public const int SpectatorTeamId = -9997;
-    public static readonly int[] CompetingTeamIds = [RedTeamId, BlueTeamId];
-    public static readonly int[] AllTeamIds = [RedTeamId, BlueTeamId, SpectatorTeamId];
 }

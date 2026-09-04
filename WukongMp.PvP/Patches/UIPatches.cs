@@ -9,7 +9,6 @@ using B1UI.GSUI;
 using CSharpModBase;
 using GSE.GSUI;
 using HarmonyLib;
-using LiteNetLib;
 using PreludeLib.Attributes;
 using ReadyM.Api.Multiplayer.Protocol;
 using ResB1;
@@ -239,7 +238,7 @@ public class PatchIsShowSettingUiOnly
         if (!WukongApi.Sync.InArea)
             return true;
 
-        if (WukongApi.PvP.InPvpTournament)
+        if (WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
         {
             __result = true;
             return false;

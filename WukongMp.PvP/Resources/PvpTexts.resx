@@ -115,4 +115,121 @@
   <data name="PlayerKilledPlayer" xml:space="preserve">
 	  <value>{0} killed {1}</value>
   </data>
+  <data name="CheatsEnabled" xml:space="preserve">
+    <value>Cheats enabled</value>
+  </data>
+  <data name="CheatsDisabled" xml:space="preserve">
+    <value>Cheats disabled</value>
+  </data>
+  <data name="CheatsForbidden" xml:space="preserve">
+    <value>Cheats are not allowed on this server</value>
+  </data>
+  <data name="BlueTeam" xml:space="preserve">
+    <value>Team Blue</value>
+  </data>
+  <data name="RedTeam" xml:space="preserve">
+    <value>Team Red</value>
+  </data>
+  <data name="Spectators" xml:space="preserve">
+    <value>Spectators</value>
+  </data>
+  <data name="Ready" xml:space="preserve">
+    <value>Ready</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>more</value>
+  </data>
+  <data name="BotName" xml:space="preserve">
+    <value>Bot</value>
+  </data>
+  <data name="InMultiplayer" xml:space="preserve">
+    <value>In Multiplayer Lobby</value>
+  </data>
+  <data name="PlayerIsReady" xml:space="preserve">
+    <value>{0} is ready</value>
+  </data>
+  <data name="PlayerIsNotReady" xml:space="preserve">
+    <value>{0} is not ready</value>
+  </data>
+  <data name="PressToBeReady" xml:space="preserve">
+    <value>Press J to be ready</value>
+  </data>
+  <data name="PressToBeNotReady" xml:space="preserve">
+    <value>Press J to be not ready</value>
+  </data>
+  <data name="PressToSwitchTeam" xml:space="preserve">
+    <value>Press L to switch team</value>
+  </data>
+  <data name="PressToCancelMatch" xml:space="preserve">
+    <value>Press I to cancel match</value>
+  </data>
+  <data name="PressToPlayWithBots" xml:space="preserve">
+    <value>Press I to play with bots</value>
+  </data>
+  <data name="YouAreReady" xml:space="preserve">
+    <value>You are ready</value>
+  </data>
+  <data name="WaitForEnd" xml:space="preserve">
+    <value>Wait for the match to end</value>
+  </data>
+  <data name="StartingGame" xml:space="preserve">
+    <value>Starting PvP match</value>
+  </data>
+  <data name="RoundCount" xml:space="preserve">
+    <value>Round {0} of {1}</value>
+  </data>
+  <data name="RoundDraw" xml:space="preserve">
+    <value>Round ended. Draw</value>
+  </data>
+  <data name="RoundEndedWinner" xml:space="preserve">
+    <value>Round ended. {0} won</value>
+  </data>
+  <data name="TournamentDraw" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="TournamentEndedWinner" xml:space="preserve">
+    <value>Winner: {0}</value>
+  </data>
+  <data name="CheatsAreDisabled" xml:space="preserve">
+    <value>Cheats are disabled</value>
+  </data>
+  <data name="InfManaEnabled" xml:space="preserve">
+    <value>{0} enabled infinite mana</value>
+  </data>
+  <data name="InfManaDisabled" xml:space="preserve">
+    <value>{0} disabled infinite mana</value>
+  </data>
+  <data name="InfVesselEnabled" xml:space="preserve">
+    <value>{0} enabled infinite vessel energy</value>
+  </data>
+  <data name="InfVesselDisabled" xml:space="preserve">
+    <value>{0} disabled infinite vessel energy</value>
+  </data>
+  <data name="InfTransformEnabled" xml:space="preserve">
+    <value>{0} enabled infinite transform energy</value>
+  </data>
+  <data name="InfTransformDisabled" xml:space="preserve">
+    <value>{0} disabled infinite transform energy</value>
+  </data>
+  <data name="InstantCooldownEnabled" xml:space="preserve">
+    <value>{0} enabled instant skill cooldown</value>
+  </data>
+  <data name="InstantCooldownDisabled" xml:space="preserve">
+    <value>{0} disabled instant skill cooldown</value>
+  </data>
+  <data name="InvalidCooldown" xml:space="preserve">
+    <value>Invalid cooldown value</value>
+  </data>
+  <data name="CustomSpiritCooldown" xml:space="preserve">
+    <value>{0} set spirit cooldown to {1} s</value>
+  </data>
+  <data name="AntiStallWarning" xml:space="preserve">
+    <value>Engage!</value>
+  </data>
+  <data name="StallingMessage" xml:space="preserve">
+    <value>Stalling - losing HP</value>
+  </data>
+  <data name="InvalidCommand" xml:space="preserve">
+    <value>Invalid command: {0}</value>
+  </data>
 </root>

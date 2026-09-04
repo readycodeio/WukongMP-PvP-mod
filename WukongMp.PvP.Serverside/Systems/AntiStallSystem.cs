@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using b1;
-using BtlShare;
+﻿using System.Numerics;
+using Microsoft.Extensions.Logging;
 using ReadyM.Api.Idents;
-using UnrealEngine.Runtime;
-using WukongMp.Api;
-using WukongMp.PvP.Configuration;
-using WukongMp.Sdk;
-using WukongMp.Sdk.Api;
-using WukongMp.Sdk.Entities;
+using ReadyM.Relay.Server.Sdk.Ecs;
+using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.Wukong.Common.ECS.Components;
+using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.ECS;
 
-namespace WukongMp.PvP.ECS.Systems;
+namespace WukongMp.PvP.Serverside.Systems;
 
-public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
+public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) : ModSystemBase
 {
     private struct PlayerEngagementData
     {
-        public FVector LastPosition;
-        public FVector ForwardDirection;
+        public Vector3 LastPosition;
+        public Vector3 ForwardDirection;
         public int TeamId;
         public bool IsAttacking;
         public float CurrentHp;
@@ -51,10 +47,18 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
 
     protected override void OnUpdate(UpdateTick tick)
     {
-        if (!WukongApi.Sync.CurrentAreaId.HasValue || !WukongApi.PvP.OwnsPvpState || !WukongApi.PvP.AntiStallEnabled)
+        var queryState = (AntiStallEnabled: false, InPvP: false);
+
+        ecs.Query(ref queryState, static (ref PvpStateComponent pvp, ref (bool AntiStallEnabled, bool InPvP) state) =>
+        {
+            state.AntiStallEnabled = pvp.AntiStallEnabled;
+            state.InPvP = pvp.InPvP;
+        });
+
+        if (!queryState.AntiStallEnabled)
             return;
 
-        if (!WukongApi.PvP.InPvP)
+        if (!queryState.InPvP)
         {
             ResetState();
             return;
@@ -64,37 +68,31 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
 
         if (_tickCounter++ % TickInterval != 0)
         {
-            _elapsedTime += tick.deltaTime;
+            _elapsedTime += tick.DeltaTime;
             return;
         }
 
-        foreach (var playerId in WukongApi.Sync.AreaPlayers)
+        ecs.Query<MainCharacterComponent, TransformComponent, HpComponent, TeamComponent>((ref main, ref trans, ref hp, ref team) =>
         {
-            if (!WukongApi.Sync.TryGetPlayerInfoById(playerId, out _, out var team))
-                continue;
-
-            if (!_playerEngagement.TryGetValue(playerId, out var data))
+            if (!_playerEngagement.TryGetValue(main.PlayerId, out var data))
             {
                 data = new PlayerEngagementData();
-                _playerEngagement[playerId] = data;
+                _playerEngagement[main.PlayerId] = data;
             }
 
-            var main = WukongApi.Sync.GetMainCharacterByPlayerId(playerId);
-            if (!main.HasValue || main.Value.IsSpectator)
-                continue;
+            if (main.IsSpectator)
+                return;
 
-            if (main.Value.Pawn is { } pawn)
-            {
-                data.LastPosition = pawn.GetActorLocation();
-                data.ForwardDirection = pawn.GetActorForwardVector();
-                data.TeamId = team.Value;
-                data.IsAttacking = BGUFunctionLibraryCS.BGUHasUnitState(pawn, EBGUUnitState.Attacking);
-                data.PrevHp = data.CurrentHp;
-                data.CurrentHp = BGU_DataUtil.GetReadOnlyData<IBUC_AttrContainer, BUC_AttrContainer>(pawn).GetFloatValue(EBGUAttrFloat.Hp);
-            }
+            data.LastPosition = trans.Position;
+            data.ForwardDirection = trans.Rotation; // TODO: Is this actually the forward direction?
+            data.TeamId = team.TeamId;
+            // TODO: Set this in PvP component or sth
+            // data.IsAttacking = BGUFunctionLibraryCS.BGUHasUnitState(pawn, EBGUUnitState.Attacking);
+            data.PrevHp = data.CurrentHp;
+            data.CurrentHp = hp.Hp;
 
-            _playerEngagement[playerId] = data;
-        }
+            _playerEngagement[main.PlayerId] = data;
+        });
 
         UpdatePlayerMultipliers();
         UpdateEngagementScore();
@@ -132,15 +130,15 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
                 _roomEngagementScore += _elapsedTime * AntiStallConfig.AttackRoomEngagementScore;
             }
 
-            if (!data.CurrentHp.Equals(data.PrevHp, PvpConstants.FloatComparisonTolerance))
+            if (!Equals(data.PrevHp, CommonConstants.FloatComparisonTolerance))
             {
                 _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
             }
         }
 
-        _roomEngagementScore = FMath.Min(_roomEngagementScore, AntiStallConfig.MaxRoomEngagementScore);
+        _roomEngagementScore = Math.Min(_roomEngagementScore, AntiStallConfig.MaxRoomEngagementScore);
         _roomEngagementScore -= _elapsedTime * AntiStallConfig.RoomEngagementDecayScore;
-        _roomEngagementScore = FMath.Max(_roomEngagementScore, 0f);
+        _roomEngagementScore = Math.Max(_roomEngagementScore, 0f);
     }
 
     private void UpdatePlayerMultipliers()
@@ -181,10 +179,10 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
                 if (dataA.TeamId == dataB.TeamId)
                     continue;
 
-                var dirAtoB = Vector3.Normalize(dataB.LastPosition.ToVector3() - dataA.LastPosition.ToVector3());
+                var dirAtoB = Vector3.Normalize(dataB.LastPosition - dataA.LastPosition);
                 var dirBtoA = -dirAtoB;
-                float facingA = Vector3.Dot(dataA.ForwardDirection.ToVector3(), dirAtoB);
-                float facingB = Vector3.Dot(dataB.ForwardDirection.ToVector3(), dirBtoA);
+                float facingA = Vector3.Dot(dataA.ForwardDirection, dirAtoB);
+                float facingB = Vector3.Dot(dataB.ForwardDirection, dirBtoA);
                 if (facingA > AntiStallConfig.PlayersFacingThreshold)
                 {
                     _playerFacingDictionary[idA] = true;
@@ -196,8 +194,7 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
                 }
             }
 
-            if (!_playerFacingDictionary.ContainsKey(idA))
-                _playerFacingDictionary[idA] = false;
+            _playerFacingDictionary.TryAdd(idA, false);
         }
 
         return _playerFacingDictionary;
@@ -219,21 +216,21 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
     private void SetMonitoringState()
     {
         _state = AntiStallState.Monitoring;
-        rpc.SendHideAntiStall();
+        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendHideAntiStall(main.PlayerId); });
     }
 
     private void SetWarningState()
     {
         _state = AntiStallState.Warning;
         _warningTimer = 0f;
-        rpc.SendShowAntiStallWarning(AntiStallConfig.WarningDuration);
+        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendShowAntiStallWarning(main.PlayerId, AntiStallConfig.WarningDuration); });
     }
 
     private void SetActiveState()
     {
         _state = AntiStallState.Active;
         _activeTimer = 0f;
-        rpc.SendShowAntiStallAction();
+        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendShowAntiStallAction(main.PlayerId); });
         var baseDecayRate = AntiStallConfig.BaseAttributeDecayRate + AntiStallConfig.AttributeDecayMultiplier * _decayRounds;
         foreach (var kvp in _playerEngagementMultipliers)
         {
@@ -241,7 +238,7 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
             var multiplier = kvp.Value;
             var randomCoefficient = GetRandomCoefficient();
             var scaledDecay = baseDecayRate * multiplier * AntiStallConfig.ActiveDuration * randomCoefficient;
-            Logging.LogDebug("Applying anti-stall decay to player {0}: baseDecayRate={1}, multiplier={2}, random={3}, scaledDecay={4}", playerId, baseDecayRate, multiplier, randomCoefficient, scaledDecay);
+            logger.LogDebug("Applying anti-stall decay to player {0}: baseDecayRate={1}, multiplier={2}, random={3}, scaledDecay={4}", playerId, baseDecayRate, multiplier, randomCoefficient, scaledDecay);
             rpc.SendStallDamage(playerId, (float)scaledDecay);
         }
     }
@@ -262,6 +259,7 @@ public class PvpAntiStallSystem(PvpRpc rpc) : ModSystemBase
         _roomEngagementScore = AntiStallConfig.MaxRoomEngagementScore;
         _playerEngagementMultipliers.Clear();
         _playerEngagement.Clear();
-        rpc.SendHideAntiStall();
+
+        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendHideAntiStall(main.PlayerId); });
     }
 }

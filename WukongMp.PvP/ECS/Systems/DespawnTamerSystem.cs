@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using b1;
+using JetBrains.Annotations;
 using WukongMp.Api;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
@@ -8,6 +9,7 @@ using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.ECS.Systems;
 
+[UsedImplicitly]
 public class DespawnTamerSystem : ModSystemBase, IDisposable
 {
     private readonly Queue<BUTamerActor?> _pendingDeleteEvents = [];

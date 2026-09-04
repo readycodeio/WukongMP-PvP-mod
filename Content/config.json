@@ -1,0 +1,23 @@
+{
+    // Initial values for the PvP world state. Server side only: clients receive these by replication.
+    // Every key is optional, and an unknown key fails the mod load rather than being ignored.
+
+    // Arena to start on, see LevelSpawnConfig.
+    "LevelId": 0,
+
+    // Rounds in a tournament. A team wins by taking more than half of them.
+    "TournamentRounds": 3,
+
+    "GourdAllowed": true,
+    "ConsumablesAllowed": true,
+    "ImmobilizeAllowed": true,
+    "PhantomRushAllowed": true,
+
+    "CheatsAllowed": false,
+
+    // Ends a round that has stalled instead of letting it run forever.
+    "AntiStallEnabled": true,
+
+    // New Game Plus level applied to spawned enemies, 0 for none.
+    "EnemiesNgPlusLevel": 0
+}

@@ -1,4 +1,5 @@
 ﻿using b1;
+using WukongMp.Api;
 using WukongMp.Api.WukongUtils;
 
 namespace WukongMp.PvP.GameMode;
@@ -9,7 +10,7 @@ public static class HostilityUtils
     {
         if (team1 == team2) return;
 
-        var teamRelationData = (BGC_TeamRelationData)BGU_DataUtil.GetGameStateReadonlyData<IBGC_TeamRelationData, BGC_TeamRelationData>(GameUtils.GetWorld());
+        if (GetTeamRelationData() is not { } teamRelationData) return;
 
         EnsureTeamRelationExists(teamRelationData, team1);
         EnsureTeamRelationExists(teamRelationData, team2);
@@ -30,7 +31,7 @@ public static class HostilityUtils
 
     public static void UnregisterTeamHostility(int team1, int team2)
     {
-        var teamRelationData = (BGC_TeamRelationData)BGU_DataUtil.GetGameStateReadonlyData<IBGC_TeamRelationData, BGC_TeamRelationData>(GameUtils.GetWorld());
+        if (GetTeamRelationData() is not { } teamRelationData) return;
 
         EnsureTeamRelationExists(teamRelationData, team1);
         EnsureTeamRelationExists(teamRelationData, team2);
@@ -42,6 +43,19 @@ public static class HostilityUtils
         team2RelationInfo.HostileTeamIDs.Remove(team1);
     }
 
+
+    /// Null while a level is still coming up, since the game state does not exist yet.
+    private static BGC_TeamRelationData? GetTeamRelationData()
+    {
+        var teamRelationData = BGU_DataUtil.GetGameStateReadonlyData<IBGC_TeamRelationData, BGC_TeamRelationData>(GameUtils.GetWorld()) as BGC_TeamRelationData;
+
+        if (teamRelationData == null)
+        {
+            Logging.LogWarning("No team relation data available, team hostility unchanged");
+        }
+
+        return teamRelationData;
+    }
 
     private static void EnsureTeamRelationExists(BGC_TeamRelationData teamRelationData, int teamId)
     {
