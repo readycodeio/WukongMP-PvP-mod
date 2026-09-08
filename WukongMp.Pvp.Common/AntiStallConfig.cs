@@ -9,7 +9,6 @@ public static class AntiStallConfig
     public const float MaxRoomEngagementScore = 100f;
     public const float RoomEngagementDecayScore = 7f;
     public const float DamageRoomEngagementScore = 25f;
-    public const float AttackRoomEngagementScore = 12f;
 
     public const float BaseAttributeDecayRate = 7f; // % per second
     public const float AttributeDecayMultiplier = 5f;

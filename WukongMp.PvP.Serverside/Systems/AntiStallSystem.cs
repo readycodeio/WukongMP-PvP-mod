@@ -16,7 +16,6 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         public Vector3 LastPosition;
         public Vector3 ForwardDirection;
         public int TeamId;
-        public bool IsAttacking;
         public float CurrentHp;
         public float PrevHp;
     }
@@ -84,10 +83,8 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
                 return;
 
             data.LastPosition = trans.Position;
-            data.ForwardDirection = trans.Rotation; // TODO: Is this actually the forward direction?
+            data.ForwardDirection = trans.Rotation;
             data.TeamId = team.TeamId;
-            // TODO: Set this in PvP component or sth
-            // data.IsAttacking = BGUFunctionLibraryCS.BGUHasUnitState(pawn, EBGUUnitState.Attacking);
             data.PrevHp = data.CurrentHp;
             data.CurrentHp = hp.Hp;
 
@@ -125,12 +122,8 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         foreach (var kvp in _playerEngagement)
         {
             var data = kvp.Value;
-            if (data.IsAttacking)
-            {
-                _roomEngagementScore += _elapsedTime * AntiStallConfig.AttackRoomEngagementScore;
-            }
 
-            if (!Equals(data.PrevHp, CommonConstants.FloatComparisonTolerance))
+            if (Math.Abs(data.PrevHp - data.CurrentHp) > CommonConstants.FloatComparisonTolerance)
             {
                 _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
             }
