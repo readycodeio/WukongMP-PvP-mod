@@ -16,7 +16,6 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         public Vector3 LastPosition;
         public Vector3 ForwardDirection;
         public int TeamId;
-        public bool IsAttacking;
         public float CurrentHp;
         public float PrevHp;
     }
@@ -42,6 +41,12 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
     private readonly Dictionary<PlayerId, double> _playerEngagementMultipliers = [];
     private readonly Dictionary<PlayerId, PlayerEngagementData> _playerEngagement = [];
     private readonly Random _rng = new();
+
+    // Bots count towards activity, but don't get stall damage
+    private readonly List<(Vector3 Position, int TeamId)> _botCombatants = [];
+    
+    private float _botHpPrevious;
+    private float _botHpCurrent;
 
     private int _decayRounds;
 
@@ -74,24 +79,35 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
 
         ecs.Query<MainCharacterComponent, TransformComponent, HpComponent, TeamComponent>((ref main, ref trans, ref hp, ref team) =>
         {
+            if (main.IsSpectator)
+            {
+                _playerEngagement.Remove(main.PlayerId);
+                _playerEngagementMultipliers.Remove(main.PlayerId);
+                return;
+            }
+
             if (!_playerEngagement.TryGetValue(main.PlayerId, out var data))
             {
                 data = new PlayerEngagementData();
-                _playerEngagement[main.PlayerId] = data;
             }
 
-            if (main.IsSpectator)
-                return;
-
             data.LastPosition = trans.Position;
-            data.ForwardDirection = trans.Rotation; // TODO: Is this actually the forward direction?
+            data.ForwardDirection = trans.Rotation;
             data.TeamId = team.TeamId;
-            // TODO: Set this in PvP component or sth
-            // data.IsAttacking = BGUFunctionLibraryCS.BGUHasUnitState(pawn, EBGUUnitState.Attacking);
             data.PrevHp = data.CurrentHp;
             data.CurrentHp = hp.Hp;
 
             _playerEngagement[main.PlayerId] = data;
+        });
+        
+        _botCombatants.Clear();
+        _botHpPrevious = _botHpCurrent;
+        _botHpCurrent = 0f;
+
+        ecs.Query<TamerComponent, TransformComponent, HpComponent, TeamComponent>((ref tamer, ref trans, ref hp, ref team) =>
+        {
+            _botCombatants.Add((trans.Position, team.TeamId));
+            _botHpCurrent += hp.Hp;
         });
 
         UpdatePlayerMultipliers();
@@ -125,15 +141,16 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         foreach (var kvp in _playerEngagement)
         {
             var data = kvp.Value;
-            if (data.IsAttacking)
-            {
-                _roomEngagementScore += _elapsedTime * AntiStallConfig.AttackRoomEngagementScore;
-            }
 
-            if (!Equals(data.PrevHp, CommonConstants.FloatComparisonTolerance))
+            if (Math.Abs(data.PrevHp - data.CurrentHp) > CommonConstants.FloatComparisonTolerance)
             {
                 _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
             }
+        }
+        
+        if (_botCombatants.Count > 0 && Math.Abs(_botHpPrevious - _botHpCurrent) > CommonConstants.FloatComparisonTolerance)
+        {
+            _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
         }
 
         _roomEngagementScore = Math.Min(_roomEngagementScore, AntiStallConfig.MaxRoomEngagementScore);
@@ -163,41 +180,47 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
 
     private Dictionary<PlayerId, bool> CalculatePlayerFacing()
     {
-        var _playerFacingDictionary = new Dictionary<PlayerId, bool>();
-        var playerIds = new List<PlayerId>(_playerEngagement.Keys);
-        for (int i = 0; i < playerIds.Count; i++)
+        var facing = new Dictionary<PlayerId, bool>();
+
+        foreach (var player in _playerEngagement)
         {
-            var idA = playerIds[i];
-            var dataA = _playerEngagement[idA];
-            if (_playerFacingDictionary.TryGetValue(idA, out bool isFacingEnemyA) && isFacingEnemyA)
-                continue;
-
-            for (int j = i + 1; j < playerIds.Count; j++)
-            {
-                var idB = playerIds[j];
-                var dataB = _playerEngagement[idB];
-                if (dataA.TeamId == dataB.TeamId)
-                    continue;
-
-                var dirAtoB = Vector3.Normalize(dataB.LastPosition - dataA.LastPosition);
-                var dirBtoA = -dirAtoB;
-                float facingA = Vector3.Dot(dataA.ForwardDirection, dirAtoB);
-                float facingB = Vector3.Dot(dataB.ForwardDirection, dirBtoA);
-                if (facingA > AntiStallConfig.PlayersFacingThreshold)
-                {
-                    _playerFacingDictionary[idA] = true;
-                }
-
-                if (facingB > AntiStallConfig.PlayersFacingThreshold)
-                {
-                    _playerFacingDictionary[idB] = true;
-                }
-            }
-
-            _playerFacingDictionary.TryAdd(idA, false);
+            facing[player.Key] = IsFacingAnEnemy(player.Value);
         }
 
-        return _playerFacingDictionary;
+        return facing;
+    }
+    
+    private bool IsFacingAnEnemy(PlayerEngagementData player)
+    {
+        foreach (var other in _playerEngagement.Values)
+        {
+            if (other.TeamId != player.TeamId && IsFacing(player, other.LastPosition))
+            {
+                return true;
+            }
+        }
+
+        foreach (var bot in _botCombatants)
+        {
+            if (bot.TeamId != player.TeamId && IsFacing(player, bot.Position))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsFacing(PlayerEngagementData from, Vector3 target)
+    {
+        var toTarget = target - from.LastPosition;
+
+        if (toTarget.LengthSquared() <= float.Epsilon)
+        {
+            return false;
+        }
+
+        return Vector3.Dot(from.ForwardDirection, Vector3.Normalize(toTarget)) > AntiStallConfig.PlayersFacingThreshold;
     }
 
     private void UpdateState()
@@ -259,6 +282,9 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         _roomEngagementScore = AntiStallConfig.MaxRoomEngagementScore;
         _playerEngagementMultipliers.Clear();
         _playerEngagement.Clear();
+        _botCombatants.Clear();
+        _botHpPrevious = 0f;
+        _botHpCurrent = 0f;
 
         ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendHideAntiStall(main.PlayerId); });
     }

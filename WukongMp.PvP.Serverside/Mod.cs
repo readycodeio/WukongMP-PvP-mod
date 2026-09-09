@@ -1,6 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using ReadyM.Relay.Server.Sdk;
+using ReadyM.Relay.Server.Sdk.Ecs;
 using ReadyM.Relay.Server.Sdk.Ecs.Components;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.ECS;
@@ -32,11 +33,16 @@ public class Mod : ServerModBase
 
         Services.RegisterSingleton<RpcHandlers>();
 
+        var logger = Services.Resolve<ILogger>();
+
+        // Watch for settings file change
+        Services.RegisterSingleton(new RoomConfigApplier(Services.Resolve<EcsApi>(), Services.Resolve<PvpConfig>(), ModDirectory, logger));
+
         Services.RegisterSystem<RoundStartTimerSystem>();
         Services.RegisterSystem<RoundEndSystem>();
         Services.RegisterSystem<AntiStallSystem>();
+        Services.RegisterSystem<RoomConfigSystem>();
 
-        var logger = Services.Resolve<ILogger>();
         logger.LogInformation("Serverside PvP mod initialized");
     }
 }
