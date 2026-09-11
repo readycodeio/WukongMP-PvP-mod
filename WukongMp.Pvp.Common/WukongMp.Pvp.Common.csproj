@@ -23,7 +23,7 @@
     <!-- The Common package carries ReadyM.Wukong.Common's assembly and the generator, so the
          three references above all come from this one. -->
     <ItemGroup Condition="'$(UseSdkProjectReferences)' == 'false'">
-        <PackageReference Include="ReadyM.SDK.Wukong.Common" Version="0.4.0" />
+        <PackageReference Include="ReadyM.SDK.Wukong.Common" Version="0.4.1" />
     </ItemGroup>
 
 </Project>

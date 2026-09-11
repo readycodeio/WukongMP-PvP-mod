@@ -1,6 +1,6 @@
 # WukongMP PvP 模组
 
-![SDK](https://img.shields.io/badge/SDK-0.4.0-green)
+![SDK](https://img.shields.io/badge/SDK-0.4.1-green)
 
 <img src="https://flagcdn.com/gb.svg" width="18" alt="Chinese"/> [English](README.md)
 
