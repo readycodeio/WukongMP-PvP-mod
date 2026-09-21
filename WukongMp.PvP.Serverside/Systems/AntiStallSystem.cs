@@ -2,10 +2,12 @@
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.Idents;
 using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
@@ -82,10 +84,16 @@ public sealed class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger
             {
                 data = new PlayerEngagementData();
             }
+            
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+            {
+                logger.LogWarning("Player {Player} not found in entities", main.PlayerId);
+                continue;
+            }
 
             data.LastPosition = main.Position;
             data.ForwardDirection = main.Rotation;
-            data.TeamId = main.TeamId;
+            data.TeamId = player.TeamId;
             data.PrevHp = data.CurrentHp;
             data.CurrentHp = main.Hp;
 

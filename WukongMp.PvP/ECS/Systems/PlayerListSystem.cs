@@ -14,7 +14,7 @@ public class PlayerListSystem(PvpWidgetManager widgetManager) : ModSystemBase
 
     protected override void OnUpdate(UpdateTick tick)
     {
-        if (!WukongApi.Sync.CurrentAreaId.HasValue)
+        if (!WukongApi.Entities.CurrentArea.HasValue)
             return;
 
         if (_timer.Elapsed < TimeSpan.FromSeconds(1))

@@ -16,7 +16,7 @@ public class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities ent
 
     protected override void OnUpdate(UpdateTick tick)
     {
-        if (!WukongApi.Sync.CurrentAreaId.HasValue || entities.World.InTournament)
+        if (!WukongApi.Entities.CurrentArea.HasValue || entities.World.InTournament)
             return;
 
         var players = 0;

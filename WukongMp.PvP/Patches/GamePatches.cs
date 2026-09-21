@@ -25,9 +25,9 @@ public static class PatchGetNewGamePlusCount
 {
     public static bool Prefix(ref int __result)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
-        if (WukongApi.Sync.CurrentAreaId == null)
+        if (WukongApi.Entities.CurrentArea == null)
             return true;
 
         __result = WukongApi.Services.Resolve<IEntities>().World.EnemiesNgPlusLevel + 1;
@@ -51,7 +51,7 @@ public class TamerResetPatch
 
     public static bool Prefix(BGUCharacterCS ___OwnerAsCharacterCS)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         var teamId = ___OwnerAsCharacterCS.GetTeamIDInCS();
@@ -84,7 +84,7 @@ public class FixTransformCameraLockToOriginPatch
 
     public static void Prefix(BUS_PlayerCameraCompImpl __instance)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return;
 
         TargetGetter ??= AccessTools.PropertyGetter(typeof(BUS_PlayerCameraCompImpl), "Target");
@@ -151,7 +151,7 @@ public static class PatchDoPoleDrink
 
     public static bool Prefix()
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         return WukongApi.Services.Resolve<IEntities>().World.GourdAllowed;
@@ -165,7 +165,7 @@ public static class PatchOnTriggerPhantomRush
 {
     public static bool Prefix()
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
         
         return WukongApi.Services.Resolve<IEntities>().World.PhantomRushAllowed;

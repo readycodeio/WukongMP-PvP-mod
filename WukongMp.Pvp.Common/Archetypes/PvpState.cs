@@ -1,7 +1,6 @@
 ﻿using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using Yooni.Native.Container;
-using Yooni.Native.LowLevel;
 
 namespace WukongMp.Pvp.Common.Archetypes;
 
@@ -28,9 +27,9 @@ public readonly partial struct PvpState
     /// Only one player team is competing, so the tournament is decided by a single round.
     public partial bool IsSingleRoundTournament { get; set; }
 
-    public partial NativeList<int> RoundWinners { get; set; }
+    private partial NativeList<int> RoundWinners { get; set; }
 
-    public int CurrentRound => RoundWinners.Count + 1;
+    public int CurrentRound => RoundWinnersCount + 1;
 
     public int DisplayedRound => IsSingleRoundTournament ? 1 : CurrentRound;
 
@@ -38,14 +37,8 @@ public readonly partial struct PvpState
 
     public void SetLastRoundWinnerTeam(int teamId)
     {
-        // TODO: Generate accessors
-        // AddRoundWinners(teamId);
+        AddRoundWinners(teamId);
     }
 
-    public void Init(AllocatorKind allocatorKind)
-    {
-        RoundWinners = new NativeList<int>(5, allocatorKind);
-    }
-    
     // TODO: OnCreated handler using the initial config values
 }

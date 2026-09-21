@@ -2,12 +2,14 @@
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer;
 using ReadyM.Relay.Server.Sdk.Rpc;
+using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Components;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
 using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside;
 
@@ -40,8 +42,7 @@ public partial class RpcHandlers(IEntities entities, PvpConfig config) : ServerR
         state.InPvP = false;
         state.InTournament = false;
         state.LevelId = levelId;
-        // state.ClearRoundWinners();
-        // TODO: Generate accessors
+        state.ClearRoundWinners();
 
         foreach (var main in entities.Query<MainCharacter>())
         {
@@ -73,7 +74,7 @@ public partial class RpcHandlers(IEntities entities, PvpConfig config) : ServerR
         var customPositions = levelData.CustomTeamSpawns;
 
         var playerTeams = new Dictionary<PlayerId, int>();
-        foreach (var main in entities.Query<MainCharacter>())
+        foreach (var main in entities.Query<Player>())
         {
             playerTeams.Add(main.PlayerId, main.TeamId);
         }

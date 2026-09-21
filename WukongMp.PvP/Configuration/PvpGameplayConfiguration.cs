@@ -17,7 +17,6 @@ internal class PvpGameplayConfiguration(IWukongConfigurationApi configuration, I
         configuration.EnableCustomCameraArmLength = true;
         configuration.DisableCutscenes = true;
         configuration.SyncTamerTeamFromGameToEcs = false;
-        configuration.OverrideLocalPlayerTeamFromGlobalEntity = true;
         configuration.DeleteDestroyedTamersFromEcs = true;
 
         configuration.SetDisableTamerAttackQuery(ShouldDisableTamerAttack);

@@ -29,7 +29,7 @@ public class PvpChatter(CheatManager cheatManager, IEntities entities, IGameEven
         if (!entities.World.InPvP || !attacker.HasValue)
             return;
 
-        if (victim.PlayerId != WukongApi.Sync.LocalPlayerId)
+        if (victim.PlayerId != WukongApi.Entities.LocalPlayer?.PlayerId)
             return;
         
         AActor? pawn = attacker.Value.TryAs<MappedCharacter>(out var attackerMain) ? attackerMain.Pawn : 

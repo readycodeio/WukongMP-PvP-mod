@@ -5,35 +5,41 @@ using JetBrains.Annotations;
 using WukongMp.Api;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
+using WukongMp.Sdk.Archetypes.Extensions;
+using WukongMp.Sdk.Archetypes.Mixins;
+using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Entities;
+using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.ECS.Systems;
 
 [UsedImplicitly]
 public class DespawnTamerSystem : ModSystemBase, IDisposable
 {
+    private readonly IGameEvents _gameEvents;
     private readonly Queue<BUTamerActor?> _pendingDeleteEvents = [];
 
-    public DespawnTamerSystem()
+    public DespawnTamerSystem(IGameEvents gameEvents)
     {
-        WukongApi.Events.OnMonsterDestroyed += OnEntityDeleteHandler;
+        _gameEvents = gameEvents;
+        _gameEvents.OnMonsterDestroyed += OnEntityDeleteHandler;
     }
 
     public void Dispose()
     {
-        WukongApi.Events.OnMonsterDestroyed -= OnEntityDeleteHandler;
+        _gameEvents.OnMonsterDestroyed -= OnEntityDeleteHandler;
     }
 
-    private void OnEntityDeleteHandler(ReadyTamer tamer)
+    private void OnEntityDeleteHandler(Tamer tamer)
     {
-        if (WukongApi.Sync.LocalPlayerId == null)
+        if (WukongApi.Entities.LocalMainCharacter == null)
         {
             Logging.LogWarning("Local player ID is null, cannot despawn monster.");
             return;
         }
 
-        tamer.HideMarker();
-        _pendingDeleteEvents.Enqueue(tamer.Tamer);
+        tamer.As<Character>().HideMarker();
+        _pendingDeleteEvents.Enqueue(tamer.TamerActor);
     }
 
     protected override void OnUpdate(UpdateTick _)

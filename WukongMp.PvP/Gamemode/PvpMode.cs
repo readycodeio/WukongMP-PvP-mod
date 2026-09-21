@@ -64,7 +64,7 @@ public partial class PvpMode(
         {
             foreach (var main in WukongApi.Entities.AreaMainCharacters)
             {
-                if (main.PlayerId != WukongApi.Sync.LocalPlayerId)
+                if (main.PlayerId != WukongApi.Entities.LocalPlayer?.PlayerId)
                 {
                     yield return main;
                 }
@@ -342,7 +342,7 @@ public partial class PvpMode(
 
         foreach (var playerEntity in AllPlayers)
         {
-            if (playerEntity.PlayerId == WukongApi.Sync.LocalPlayerId)
+            if (playerEntity.PlayerId == WukongApi.Entities.LocalPlayer?.PlayerId)
                 continue;
 
             var assignedTeamId = playerEntity.TeamId;
@@ -376,11 +376,11 @@ public partial class PvpMode(
 
     private void SetInitialTeam()
     {
-        if (WukongApi.Entities.LocalMainCharacter is not { } main)
+        if (WukongApi.Entities.LocalPlayer is not { } player)
             return;
 
-        main.TeamId = GetSmallerTeamId();
-        Logging.LogDebug("Assigned team {Id} for player", main.TeamId);
+        player.TeamId = GetSmallerTeamId();
+        Logging.LogDebug("Assigned team {Id} for player", player.TeamId);
     }
 
     public void ResetPlayer(MainCharacter mainCharacter)

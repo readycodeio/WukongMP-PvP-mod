@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics;
 using ReadyM.Relay.Server.Sdk.Ecs;
 using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
@@ -94,8 +96,7 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
 
             var state = entities.World;
             
-            // TODO: Generate accessors
-            // state.ClearRoundWinners();
+            state.ClearRoundWinners();
             state.IsSingleRoundTournament = singleRound;
             state.InPvP = true;
             state.InTournament = true;
@@ -126,8 +127,11 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
                 continue;
 
             readyCount++;
+            
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+                continue;
 
-            switch (main.TeamId)
+            switch (player.TeamId)
             {
                 case CommonConstants.BlueTeamId:
                     blueAnyReady = true;
@@ -149,8 +153,11 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
         {
             if (!IsCompeting(main))
                 continue;
+            
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+                continue;
 
-            teams.Add(main.TeamId);
+            teams.Add(player.TeamId);
         }
 
         return teams.Count;

@@ -20,7 +20,7 @@ internal static class PatchAttributeCheats
             return true;
         }
 
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         var owner = __instance.GetOwner();
@@ -87,7 +87,7 @@ internal static class PatchSkillCooldownTime
 {
     public static void Postfix(ref float __result)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return;
 
         var cheats = WukongApi.Services.Resolve<CheatManager>();

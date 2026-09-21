@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
@@ -50,8 +52,11 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
 
             if (main is { IsDead: true, IsTransformed: false })
                 continue;
+            
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+                continue;
 
-            aliveTeamIds.Add(main.TeamId);
+            aliveTeamIds.Add(player.TeamId);
         }
 
         List<int> aliveMonsters = [];
@@ -101,7 +106,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
     {
         // set last round winner
 
-        entities.World.RoundWinners.Add(winningTeamId); // TODO: This does not replicate
+        entities.World.AddRoundWinners(winningTeamId);
         entities.World.SetInPvP(false);
 
         // send round end RPC to all players
@@ -163,15 +168,19 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
 
             if (!main.IsSpectator || main.SpectatorReason == SpectatorReason.Death)
             {
-                nonObserverTeams.Add(main.TeamId);
+                if (!entities.TryLookup(main.PlayerId, out Player player))
+                    continue;
+                
+                nonObserverTeams.Add(player.TeamId);
             }
         }
 
         // start new round or end tournament
 
         Dictionary<int, int> teamWins = [];
-        foreach (var w in state.RoundWinners)
+        for (var i = 0; i < state.RoundWinnersCount; i++)
         {
+            var w = state.GetRoundWinners(i);
             if (w == CommonConstants.DrawTeamId)
                 continue;
 
