@@ -11,6 +11,7 @@ using GSE.GSUI;
 using HarmonyLib;
 using PreludeLib.Attributes;
 using ReadyM.Api.Multiplayer.Protocol;
+using ReadyM.SDK.Client.Entities;
 using ResB1;
 using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
@@ -18,6 +19,7 @@ using WukongMp.Api;
 using WukongMp.Api.Configuration;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
@@ -238,7 +240,7 @@ public class PatchIsShowSettingUiOnly
         if (!WukongApi.Sync.InArea)
             return true;
 
-        if (WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
+        if (WukongApi.Services.Resolve<IEntities>().World.InTournament)
         {
             __result = true;
             return false;

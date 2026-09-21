@@ -2,28 +2,29 @@
 using b1;
 using ReadyM.Api.Command;
 using ReadyM.Api.DI;
+using ReadyM.SDK.Client.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Configuration;
-using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
-using WukongMp.Sdk.Entities;
+using WukongMp.Sdk.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Command;
 
 public class PvpCommandHandler(
     IWukongConsoleApi consoleApi,
     IWukongChatApi chatApi,
-    WukongPvpApi pvpApi,
     PvpMode pvpMode,
     CheatManager cheatManager,
-    IWukongSynchronizationApi syncApi
+    IWukongEntityApi entityApi,
+    IEntities entities
 ) : IHostedService
 {
     public void OnScopeStart()
@@ -46,7 +47,7 @@ public class PvpCommandHandler(
 
     private void RequestSpawn(string unitName, int count = 1)
     {
-        if (syncApi.LocalMainCharacter is not { } player)
+        if (WukongApi.Entities.LocalMainCharacter is not { } player)
             return;
 
         var myTeam = player.TeamId;
@@ -57,7 +58,7 @@ public class PvpCommandHandler(
 
         var location = CalculateSpawnLocation(playerPawn.GetActorLocation(), playerPawn.GetActorForwardVector());
 
-        syncApi.SpawnEnemy(new TamerKind(unitName), location.ToVector3(), count, teamId);
+        entityApi.SpawnEnemy(new TamerKind(unitName), location.ToVector3(), count, teamId);
 
         var message = string.Format(PvpTexts.PlayerSpawned, player.Nickname, count, unitName);
         chatApi.SendServerMessage(message);
@@ -83,55 +84,55 @@ public class PvpCommandHandler(
 
     private void SetSpectatorStatus()
     {
-        if (syncApi.LocalMainCharacter is not { } player)
+        if (WukongApi.Entities.LocalMainCharacter is not { } player)
             return;
 
-        if (!pvpApi.InPvpTournament)
+        if (!entities.World.InTournament)
         {
             if (!player.IsSpectator)
             {
-                syncApi.EnableSpectatorMode(player, SpectatorReason.Api);
+                entityApi.EnableSpectatorMode(player, SpectatorReason.Api);
             }
             else
             {
-                syncApi.DisableSpectatorMode(player);
+                entityApi.DisableSpectatorMode(player);
             }
         }
     }
 
     public void TeleportToArena()
     {
-        if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
+        if (WukongApi.Entities.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
+        if (entityApi.InArea && !mainEntity.IsSpectator && !entities.World.InTournament)
         {
             var levelData = PvpUtils.GetCurrentLevelSpawnData();
-            mainEntity.Location = levelData.PvpStartingLocation;
+            mainEntity.Position = levelData.PvpStartingLocation;
         }
     }
 
     public void TeleportToShrine()
     {
-        if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
+        if (WukongApi.Entities.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !entities.World.InTournament)
         {
             var levelData = PvpUtils.GetCurrentLevelSpawnData();
             UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointId, out var shrineTransform);
 
-            mainEntity.Location = shrineTransform.Translation.ToVector3();
+            mainEntity.Position = shrineTransform.Translation.ToVector3();
             mainEntity.Rotation = shrineTransform.Rotation.Rotator().ToVector3();
         }
     }
 
     private void TeleportToPvpLevel(int pvpLevelId)
     {
-        if (WukongApi.Sync.LocalMainCharacter is not { } mainEntity)
+        if (WukongApi.Entities.LocalMainCharacter is not { } mainEntity)
             return;
 
-        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !pvpApi.InPvpTournament)
+        if (WukongApi.Sync.InArea && !mainEntity.IsSpectator && !entities.World.InTournament)
         {
             if (pvpLevelId < 0)
             {

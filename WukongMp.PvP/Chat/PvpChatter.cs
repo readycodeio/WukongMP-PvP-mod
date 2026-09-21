@@ -1,37 +1,45 @@
 ﻿using ReadyM.Api.DI;
+using ReadyM.SDK.Client.Entities;
+using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
-using WukongMp.Api.Resources;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
-using WukongMp.Sdk.Entities;
+using WukongMp.Sdk.Archetypes.Mixins;
+using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.Chat;
 
-public class PvpChatter(CheatManager cheatManager) : IHostedService
+public class PvpChatter(CheatManager cheatManager, IEntities entities, IGameEvents events) : IHostedService
 {
     public void OnScopeStart()
     {
-        WukongApi.Events.OnPlayerDead += OnPlayerDead;
-        WukongApi.Events.OnLoadingScreenClose += OnLoadingScreenClose;
+        events.OnPlayerDead += OnPlayerDead;
+        events.OnLoadingScreenClose += OnLoadingScreenClose;
     }
 
     public void Dispose()
     {
-        WukongApi.Events.OnPlayerDead -= OnPlayerDead;
+        events.OnPlayerDead -= OnPlayerDead;
     }
 
-    private void OnPlayerDead(ReadyMainCharacter victim, ReadyCharacter? attacker)
+    private void OnPlayerDead(MainCharacter victim, Character? attacker)
     {
-        if (!WukongApi.Services.Resolve<WukongPvpApi>().InPvP || !attacker.HasValue)
+        if (!entities.World.InPvP || !attacker.HasValue)
             return;
 
         if (victim.PlayerId != WukongApi.Sync.LocalPlayerId)
             return;
+        
+        AActor? pawn = attacker.Value.TryAs<MappedCharacter>(out var attackerMain) ? attackerMain.Pawn : 
+            attacker.Value.TryAs<MappedMonster>(out var attackerTamer) ? attackerTamer.Pawn
+            : null;
 
-        if (victim.Pawn == attacker.Value.Pawn)
+        if (victim.Pawn == pawn)
             return;
 
-        if (WukongApi.Sync.GetPlayerEntityByActor(attacker.Value.Pawn) is not { } attackerEntity)
+        if (WukongApi.Entities.GetPlayerEntityByActor(pawn) is not { } attackerEntity)
             return;
 
         var msg = string.Format(PvpTexts.PlayerKilledPlayer, attackerEntity.Nickname, victim.Nickname);

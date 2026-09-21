@@ -1,8 +1,8 @@
-﻿using WukongMp.Pvp.Common.ECS;
+﻿using WukongMp.Pvp.Common.Archetypes;
 
 namespace WukongMp.Pvp.Common;
 
-/// Initial values for <see cref="PvpStateComponent" />.
+/// Initial values for <see cref="PvpState" />.
 public sealed class PvpConfig
 {
     public int LevelId { get; set; }
@@ -15,16 +15,16 @@ public sealed class PvpConfig
     public bool AntiStallEnabled { get; set; } = true;
     public int EnemiesNgPlusLevel { get; set; }
 
-    public PvpStateComponent ToInitialState() => new()
+    public void ToInitialState(PvpState data)
     {
-        LevelId = LevelId,
-        TournamentRounds = TournamentRounds,
-        GourdAllowed = GourdAllowed,
-        ConsumablesAllowed = ConsumablesAllowed,
-        ImmobilizeAllowed = ImmobilizeAllowed,
-        PhantomRushAllowed = PhantomRushAllowed,
-        CheatsEnabled = false,
-        AntiStallEnabled = AntiStallEnabled,
-        EnemiesNgPlusLevel = EnemiesNgPlusLevel,
-    };
+        data.LevelId = LevelId;
+        data.TournamentRounds = TournamentRounds;
+        data.GourdAllowed = GourdAllowed;
+        data.ConsumablesAllowed = ConsumablesAllowed;
+        data.ImmobilizeAllowed = ImmobilizeAllowed;
+        data.PhantomRushAllowed = PhantomRushAllowed;
+        data.CheatsEnabled = false;
+        data.AntiStallEnabled = AntiStallEnabled;
+        data.EnemiesNgPlusLevel = EnemiesNgPlusLevel;
+    }
 }

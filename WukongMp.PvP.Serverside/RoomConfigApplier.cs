@@ -2,9 +2,10 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
-using ReadyM.Relay.Server.Sdk.Ecs;
+using ReadyM.SDK.Core;
+using ReadyM.SDK.Server.Entities;
 using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
+using WukongMp.Pvp.Common.Archetypes;
 
 namespace WukongMp.PvP.Serverside;
 
@@ -27,7 +28,7 @@ public sealed class RoomConfigApplier
         TypeInfoResolver = new DefaultJsonTypeInfoResolver(),
     };
 
-    private readonly EcsApi _ecs;
+    private readonly IEntities _entities;
     private readonly PvpConfig _config;
     private readonly ILogger _logger;
     private readonly string _configPath;
@@ -35,9 +36,9 @@ public sealed class RoomConfigApplier
     private DateTime _configStamp;
     private float _nextPoll;
 
-    public RoomConfigApplier(EcsApi ecs, PvpConfig config, string modDirectory, ILogger logger)
+    public RoomConfigApplier(IEntities entities, PvpConfig config, string modDirectory, ILogger logger)
     {
-        _ecs = ecs;
+        _entities = entities;
         _config = config;
         _logger = logger;
         _configPath = Path.Combine(modDirectory, ConfigFile);
@@ -91,11 +92,15 @@ public sealed class RoomConfigApplier
 
     private bool MatchInProgress()
     {
-        var running = false;
-        _ecs.Query<PvpStateComponent>((ref state) => { running = state.InPvP || state.InTournament; });
-        return running;
+        // TODO: Singleton getter for World
+        foreach (var world in _entities.Query<World>())
+        {
+            return world.InPvP || world.InTournament;
+        }
+
+        return false;
     }
-    
+
     private bool TryRead(out PvpConfig config)
     {
         config = new PvpConfig();
@@ -116,7 +121,7 @@ public sealed class RoomConfigApplier
             return false;
         }
     }
-    
+
     private static void CopyInto(PvpConfig target, PvpConfig source)
     {
         target.LevelId = source.LevelId;
@@ -129,21 +134,21 @@ public sealed class RoomConfigApplier
         target.PhantomRushAllowed = source.PhantomRushAllowed;
         target.AntiStallEnabled = source.AntiStallEnabled;
     }
-    
+
     private void PushToState()
     {
         // The component owns a NativeList that the host allocated when
         // the entity was created, so assigning the whole struct would drop it.
-        _ecs.Query<PvpStateComponent>((ref state) =>
+        foreach (var world in _entities.Query<World>())
         {
-            state.LevelId = _config.LevelId;
-            state.TournamentRounds = _config.TournamentRounds;
-            state.EnemiesNgPlusLevel = _config.EnemiesNgPlusLevel;
-            state.GourdAllowed = _config.GourdAllowed;
-            state.ConsumablesAllowed = _config.ConsumablesAllowed;
-            state.ImmobilizeAllowed = _config.ImmobilizeAllowed;
-            state.PhantomRushAllowed = _config.PhantomRushAllowed;
-            state.AntiStallEnabled = _config.AntiStallEnabled;
-        });
+            world.SetLevelId(_config.LevelId);
+            world.SetTournamentRounds(_config.TournamentRounds);
+            world.SetEnemiesNgPlusLevel(_config.EnemiesNgPlusLevel);
+            world.SetGourdAllowed(_config.GourdAllowed);
+            world.SetConsumablesAllowed(_config.ConsumablesAllowed);
+            world.SetImmobilizeAllowed(_config.ImmobilizeAllowed);
+            world.SetPhantomRushAllowed(_config.PhantomRushAllowed);
+            world.SetAntiStallEnabled(_config.AntiStallEnabled);
+        }
     }
 }

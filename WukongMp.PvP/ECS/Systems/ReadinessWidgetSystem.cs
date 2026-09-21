@@ -1,34 +1,34 @@
 ﻿using JetBrains.Annotations;
-using WukongMp.Pvp.Common.ECS;
+using ReadyM.SDK.Client.Entities;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
+using WukongMp.Sdk.Archetypes.Extensions;
 
 namespace WukongMp.PvP.ECS.Systems;
 
 [UsedImplicitly]
-public class ReadinessWidgetSystem(PvpWidgetManager widgetManager) : ModSystemBase
+public class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities entities) : ModSystemBase
 {
     private int lastReadyCount = -1;
     private int lastTotalCount = -1;
 
     protected override void OnUpdate(UpdateTick tick)
     {
-        if (!WukongApi.Sync.CurrentAreaId.HasValue || WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
+        if (!WukongApi.Sync.CurrentAreaId.HasValue || entities.World.InTournament)
             return;
 
         var players = 0;
         var readyCount = 0;
 
-        foreach (var character in WukongApi.Sync.AreaMainCharacters)
+        foreach (var character in WukongApi.Entities.AreaMainCharacters)
         {
-            var pvp = character.Get<PvPComponent>();
-
             if (character.IsObserver)
                 continue;
 
             players++;
-            if (pvp.IsReadyForPvP)
+            if (character.IsReadyForPvP)
             {
                 readyCount++;
             }

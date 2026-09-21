@@ -1,14 +1,16 @@
 ﻿using System.Diagnostics;
 using ReadyM.Relay.Server.Sdk.Ecs;
 using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
+using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
-public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
+public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSystemBase
 {
     private readonly Stopwatch _roundStartStopwatch = new();
     private bool _shownWarning;
@@ -16,9 +18,7 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
     protected override void OnUpdate(UpdateTick tick)
     {
         // exit if we're already in a tournament
-        var inTournament = false;
-        ecs.Query<PvpStateComponent>((ref state) => { inTournament = state.InTournament; });
-
+        var inTournament = entities.World.InTournament;
         if (inTournament)
             return;
 
@@ -29,9 +29,9 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
         if (!_roundStartStopwatch.IsRunning)
         {
             // does any team container monsters? if so, they are always considered ready
-            ecs.Query<TamerComponent, TeamComponent>((ref _, ref team) =>
+            foreach (var tamer in entities.Query<Tamer>())
             {
-                switch (team.TeamId)
+                switch (tamer.TeamId)
                 {
                     case CommonConstants.BlueTeamId:
                         blueTeamAnyReady = true;
@@ -40,21 +40,29 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
                         redTeamAnyReady = true;
                         break;
                 }
-            });
+            }
 
             // send RPC and begin countdown
             if (allReady)
             {
                 if (blueTeamAnyReady && redTeamAnyReady)
                 {
-                    ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendRoundCountdown(main.PlayerId, true, CommonConstants.RoundCountdownSeconds); });
+                    foreach (var main in entities.Query<MainCharacter>())
+                    {
+                        rpc.SendRoundCountdown(main.PlayerId, true, CommonConstants.RoundCountdownSeconds);
+                    }
+
                     _roundStartStopwatch.Restart();
                     _shownWarning = false;
                 }
                 else if (!_shownWarning)
                 {
                     // show a message that both teams need at least one ready player
-                    ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendPlayerReadinessWarning(main.PlayerId); });
+                    foreach (var main in entities.Query<MainCharacter>())
+                    {
+                        rpc.SendPlayerReadinessWarning(main.PlayerId);
+                    }
+
                     _shownWarning = true;
                 }
             }
@@ -65,7 +73,11 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
         // check if we should cancel the countdown if a competitor is not ready anymore
         if (!allReady)
         {
-            ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendRoundCountdown(main.PlayerId, false, 0); });
+            foreach (var main in entities.Query<MainCharacter>())
+            {
+                rpc.SendRoundCountdown(main.PlayerId, false, 0);
+            }
+
             _roundStartStopwatch.Reset();
             _shownWarning = false;
             return;
@@ -80,20 +92,20 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
 
             var singleRound = CountCompetingPlayerTeams() <= 1;
 
-            ecs.Query<PvpStateComponent>((ref state) =>
-            {
-                state.ClearRoundWinners();
-                state.IsSingleRoundTournament = singleRound;
-                state.InPvP = true;
-                state.InTournament = true;
-            });
+            var state = entities.World;
+            
+            // TODO: Generate accessors
+            // state.ClearRoundWinners();
+            state.IsSingleRoundTournament = singleRound;
+            state.InPvP = true;
+            state.InTournament = true;
 
             rpc.SendRoundStartToAll();
         }
     }
 
     /// Spectators are never ready, so every readiness test has to skip them.
-    private static bool IsCompeting(in MainCharacterComponent main)
+    private static bool IsCompeting(in MainCharacter main)
         => !main.IsSpectator || main.SpectatorReason == SpectatorReason.Death;
 
     private (int NonObservers, int ReadyCount, bool BlueAnyReady, bool RedAnyReady) SurveyPlayerReadiness()
@@ -103,19 +115,19 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
         var blueAnyReady = false;
         var redAnyReady = false;
 
-        ecs.Query<MainCharacterComponent, PvPComponent, TeamComponent>((ref main, ref pvp, ref team) =>
+        foreach (var main in entities.Query<MainCharacter>())
         {
             if (!IsCompeting(main))
-                return;
+                continue;
 
             nonObservers++;
 
-            if (!pvp.IsReadyForPvP)
-                return;
+            if (!main.IsReadyForPvP)
+                continue;
 
             readyCount++;
 
-            switch (team.TeamId)
+            switch (main.TeamId)
             {
                 case CommonConstants.BlueTeamId:
                     blueAnyReady = true;
@@ -124,7 +136,7 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
                     redAnyReady = true;
                     break;
             }
-        });
+        }
 
         return (nonObservers, readyCount, blueAnyReady, redAnyReady);
     }
@@ -133,13 +145,13 @@ public class RoundStartTimerSystem(EcsApi ecs, RpcHandlers rpc) : ModSystemBase
     {
         HashSet<int> teams = [];
 
-        ecs.Query<MainCharacterComponent, TeamComponent>((ref main, ref team) =>
+        foreach (var main in entities.Query<MainCharacter>())
         {
             if (!IsCompeting(main))
-                return;
+                continue;
 
-            teams.Add(team.TeamId);
-        });
+            teams.Add(main.TeamId);
+        }
 
         return teams.Count;
     }

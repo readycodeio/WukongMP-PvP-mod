@@ -3,9 +3,11 @@ using BtlShare;
 using JetBrains.Annotations;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
+using WukongMp.PvP.Archetypes;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
+using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.ECS.Systems;
@@ -23,11 +25,10 @@ public class UpdateCooldownSystem(CheatManager cheats) : ModSystemBase
         if (!cheats.CheatsEnabled)
             return;
 
-        if (WukongApi.Sync.LocalMainCharacter is not { } player)
+        if (WukongApi.Entities.LocalMainCharacter is not { } player)
             return;
 
-        ref var cheatsComponent = ref player.Get<CheatsComponent>();
-        if (!cheatsComponent.SpiritCooldownEnabled)
+        if (!player.SpiritCooldownEnabled)
             return;
 
         var localPawn = player.Pawn;
@@ -49,24 +50,24 @@ public class UpdateCooldownSystem(CheatManager cheats) : ModSystemBase
         }
 
         var events = BUS_EventCollectionCS.Get(localPawn);
-        if (cheatsComponent.SpiritCooldownTime.Equals(0, PvpConstants.FloatComparisonTolerance))
+        if (player.SpiritCooldownTime.Equals(0, PvpConstants.FloatComparisonTolerance))
         {
-            cheatsComponent.ShouldSetSpiritCooldown = true;
+            player.ShouldSetSpiritCooldown = true;
             events?.Evt_SetAttrFloat.Invoke(EBGUAttrFloat.VigorEnergy, BGUFunctionLibraryCS.BGUGetFloatAttr(localPawn, EBGUAttrFloat.VigorEnergyMax));
-            cheatsComponent.ShouldSetSpiritCooldown = false;
+            player.ShouldSetSpiritCooldown = false;
             return;
         }
 
-        if (_vigorRegenAccumulator > cheatsComponent.SpiritCooldownTime)
+        if (_vigorRegenAccumulator > player.SpiritCooldownTime)
             return;
 
         _vigorRegenAccumulator += tick.deltaTime;
-        var newVigorValue = FMath.Lerp(0, BGUFunctionLibraryCS.BGUGetFloatAttr(localPawn, EBGUAttrFloat.VigorEnergyMax), FMath.Clamp(_vigorRegenAccumulator / cheatsComponent.SpiritCooldownTime, 0f, 1f));
+        var newVigorValue = FMath.Lerp(0, BGUFunctionLibraryCS.BGUGetFloatAttr(localPawn, EBGUAttrFloat.VigorEnergyMax), FMath.Clamp(_vigorRegenAccumulator / player.SpiritCooldownTime, 0f, 1f));
         if (newVigorValue > currentVigorValue)
         {
-            cheatsComponent.ShouldSetSpiritCooldown = true;
+            player.ShouldSetSpiritCooldown = true;
             events?.Evt_SetAttrFloat.Invoke(EBGUAttrFloat.VigorEnergy, newVigorValue);
-            cheatsComponent.ShouldSetSpiritCooldown = false;
+            player.ShouldSetSpiritCooldown = false;
         }
     }
 }

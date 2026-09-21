@@ -1,0 +1,51 @@
+﻿using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Core;
+using Yooni.Native.Container;
+using Yooni.Native.LowLevel;
+
+namespace WukongMp.Pvp.Common.Archetypes;
+
+[ArchetypeMixin]
+[Extends(typeof(World))]
+[Replicated]
+public readonly partial struct PvpState
+{
+    // settings
+    public partial bool CheatsEnabled { get; set; }
+    public partial int LevelId { get; set; }
+    public partial int TournamentRounds { get; set; }
+    public partial bool GourdAllowed { get; set; }
+    public partial bool ConsumablesAllowed { get; set; }
+    public partial bool ImmobilizeAllowed { get; set; }
+    public partial bool PhantomRushAllowed { get; set; }
+    public partial int EnemiesNgPlusLevel { get; set; }
+    public partial bool AntiStallEnabled { get; set; }
+
+    // in-game state
+    public partial bool InPvP { get; set; }
+    public partial bool InTournament { get; set; }
+
+    /// Only one player team is competing, so the tournament is decided by a single round.
+    public partial bool IsSingleRoundTournament { get; set; }
+
+    public partial NativeList<int> RoundWinners { get; set; }
+
+    public int CurrentRound => RoundWinners.Count + 1;
+
+    public int DisplayedRound => IsSingleRoundTournament ? 1 : CurrentRound;
+
+    public int DisplayedTournamentRounds => IsSingleRoundTournament ? 1 : TournamentRounds;
+
+    public void SetLastRoundWinnerTeam(int teamId)
+    {
+        // TODO: Generate accessors
+        // AddRoundWinners(teamId);
+    }
+
+    public void Init(AllocatorKind allocatorKind)
+    {
+        RoundWinners = new NativeList<int>(5, allocatorKind);
+    }
+    
+    // TODO: OnCreated handler using the initial config values
+}

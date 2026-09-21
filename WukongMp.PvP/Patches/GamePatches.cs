@@ -3,10 +3,12 @@ using System.Reflection;
 using b1;
 using HarmonyLib;
 using PreludeLib.Attributes;
+using ReadyM.SDK.Client.Entities;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
 using WukongMp.Api.Configuration;
 using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
@@ -28,7 +30,7 @@ public static class PatchGetNewGamePlusCount
         if (WukongApi.Sync.CurrentAreaId == null)
             return true;
 
-        __result = WukongApi.Services.Resolve<WukongPvpApi>().EnemiesNgPlusLevel + 1;
+        __result = WukongApi.Services.Resolve<IEntities>().World.EnemiesNgPlusLevel + 1;
         return false;
     }
 }
@@ -152,7 +154,7 @@ public static class PatchDoPoleDrink
         if (!WukongApi.Sync.InArea)
             return true;
 
-        return WukongApi.Services.Resolve<WukongPvpApi>().GourdAllowed;
+        return WukongApi.Services.Resolve<IEntities>().World.GourdAllowed;
     }
 }
 
@@ -166,6 +168,6 @@ public static class PatchOnTriggerPhantomRush
         if (!WukongApi.Sync.InArea)
             return true;
         
-        return WukongApi.Services.Resolve<WukongPvpApi>().PhantomRushAllowed;
+        return WukongApi.Services.Resolve<IEntities>().World.PhantomRushAllowed;
     }
 }

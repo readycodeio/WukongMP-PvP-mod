@@ -5,20 +5,23 @@ using B1UI.GSUI;
 using ReadyM.Api.DI;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer.Protocol;
+using ReadyM.SDK.Client.Entities;
+using ReadyM.SDK.Core;
 using WukongMp.Api;
-using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
-using WukongMp.PvP.Resources;
 using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
-using WukongMp.Sdk.Entities;
+using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
+using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.UI;
 
-public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
+public class PvpWidgetManager(IEntities entities, IGameEvents gameEvents) : IHostedService
 {
     private readonly Lazy<LobbyStatusWidget> _lobbyStatusWidget = new();
     private readonly Lazy<GameMessageWidget> _gameMessageWidget = new();
@@ -30,36 +33,36 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     public void OnScopeStart()
     {
-        WukongApi.Events.OnJoinedArea += OnAreaChange;
-        WukongApi.Events.OnLeftArea += OnAreaChange;
-        WukongApi.Events.OnOtherPlayerInsideArea += OnPlayerAreaChange;
-        WukongApi.Events.OnOtherPlayerOutsideArea += OnPlayerAreaChange;
+        gameEvents.OnJoinedArea += OnAreaChange;
+        gameEvents.OnLeftArea += OnAreaChange;
+        gameEvents.OnOtherPlayerInsideArea += OnPlayerAreaChange;
+        gameEvents.OnOtherPlayerOutsideArea += OnPlayerAreaChange;
 
-        WukongApi.Events.OnLevelLoaded += OnLevelLoaded;
-        WukongApi.Events.OnExitLevel += OnExitLevel;
-        WukongApi.Events.OnLoadingScreenClose += OnLoadingScreenClose;
+        gameEvents.OnLevelLoaded += OnLevelLoaded;
+        gameEvents.OnExitLevel += OnExitLevel;
+        gameEvents.OnLoadingScreenClose += OnLoadingScreenClose;
 
-        WukongApi.Events.OnPlayerChangedTeam += UpdatePlayerTeam;
-        WukongApi.Events.OnLocalPlayerChangedSpectator += OnLocalPlayerChangedSpectator;
+        gameEvents.OnPlayerChangedTeam += UpdatePlayerTeam;
+        gameEvents.OnLocalPlayerChangedSpectator += OnLocalPlayerChangedSpectator;
 
-        WukongApi.Events.OnDisconnected += OnDisconnected;
+        gameEvents.OnDisconnected += OnDisconnected;
     }
 
     public void Dispose()
     {
-        WukongApi.Events.OnJoinedArea -= OnAreaChange;
-        WukongApi.Events.OnLeftArea -= OnAreaChange;
-        WukongApi.Events.OnOtherPlayerInsideArea -= OnPlayerAreaChange;
-        WukongApi.Events.OnOtherPlayerOutsideArea -= OnPlayerAreaChange;
+        gameEvents.OnJoinedArea -= OnAreaChange;
+        gameEvents.OnLeftArea -= OnAreaChange;
+        gameEvents.OnOtherPlayerInsideArea -= OnPlayerAreaChange;
+        gameEvents.OnOtherPlayerOutsideArea -= OnPlayerAreaChange;
 
-        WukongApi.Events.OnLevelLoaded -= OnLevelLoaded;
-        WukongApi.Events.OnExitLevel -= OnExitLevel;
-        WukongApi.Events.OnLoadingScreenClose -= OnLoadingScreenClose;
+        gameEvents.OnLevelLoaded -= OnLevelLoaded;
+        gameEvents.OnExitLevel -= OnExitLevel;
+        gameEvents.OnLoadingScreenClose -= OnLoadingScreenClose;
 
-        WukongApi.Events.OnPlayerChangedTeam -= UpdatePlayerTeam;
-        WukongApi.Events.OnLocalPlayerChangedSpectator -= OnLocalPlayerChangedSpectator;
+        gameEvents.OnPlayerChangedTeam -= UpdatePlayerTeam;
+        gameEvents.OnLocalPlayerChangedSpectator -= OnLocalPlayerChangedSpectator;
 
-        WukongApi.Events.OnDisconnected -= OnDisconnected;
+        gameEvents.OnDisconnected -= OnDisconnected;
     }
 
     /// The SDK's disconnect message lands on top of these.
@@ -69,7 +72,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
         _countdownWidget.Value.SetVisibility(false);
     }
 
-    private void UpdatePlayerTeam(ReadyMainCharacter _)
+    private void UpdatePlayerTeam(MainCharacter _)
     {
         RefreshPlayerLists();
         RefreshWidgets();
@@ -81,21 +84,21 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
         List<string> blueTeamList = [];
         List<string> spectatorsList = [];
 
-        foreach (var areaPlayer in WukongApi.Sync.AreaPlayers)
+        foreach (var areaPlayer in WukongApi.Entities.AreaPlayers)
         {
-            if (!WukongApi.Sync.TryGetPlayerInfoById(areaPlayer, out var nickname, out var team))
+            if (!entities.TryLookup(areaPlayer, out Player player))
                 continue;
 
-            switch (team)
+            switch (player.TeamId)
             {
                 case CommonConstants.RedTeamId:
-                    redTeamList.Add(nickname);
+                    redTeamList.Add(player.Nickname.ToString());
                     break;
                 case CommonConstants.BlueTeamId:
-                    blueTeamList.Add(nickname);
+                    blueTeamList.Add(player.Nickname.ToString());
                     break;
                 case CommonConstants.SpectatorTeamId:
-                    spectatorsList.Add(nickname);
+                    spectatorsList.Add(player.Nickname.ToString());
                     break;
             }
         }
@@ -160,7 +163,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
         if (!isOnGameplayLevel)
             return;
 
-        if (WukongApi.Sync.LocalMainCharacter is not { } player)
+        if (WukongApi.Entities.LocalMainCharacter is not { } player)
             return;
 
         ShowInGameWidgets();
@@ -170,7 +173,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
         {
             SetupLobbyUi();
         }
-        else if (pvp.InPvpTournament)
+        else if (entities.World.InTournament)
         {
             SetupSpectatorWaitForEndUi();
         }
@@ -178,11 +181,11 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     private void OnLocalPlayerChangedSpectator(bool enabled)
     {
-        if (enabled && pvp.InPvpTournament)
+        if (enabled && entities.World.InTournament)
         {
             SetupSpectatorWaitForEndUi();
         }
-        else if (!WukongApi.Services.Resolve<WukongPvpApi>().InPvP)
+        else if (!entities.World.InPvP)
         {
             SetupLobbyUi();
         }
@@ -204,7 +207,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     public void RefreshWidgets()
     {
-        _lobbyStatusWidget.Value.SetConnectedCount(WukongApi.Sync.AreaPlayers.Count);
+        _lobbyStatusWidget.Value.SetConnectedCount(WukongApi.Entities.AreaPlayers.Count);
     }
 
     public void HideGameMessageWidget()
@@ -217,7 +220,7 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
     public void SwitchReadyState(bool isReady)
     {
         _gameMessageWidget.Value.SetThirdText(isReady ? PvpTexts.YouAreReady : PvpTexts.PressToSwitchTeam);
-        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, isReady));
+        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Entities.AllPlayers.Count, isReady));
     }
 
     public bool UpdateReadyCount(int readyCount, int maxCount)
@@ -228,22 +231,22 @@ public class PvpWidgetManager(WukongPvpApi pvp) : IHostedService
 
     public void SetupLobbyUi()
     {
-        if (!_isAfterLoadingScreen || !WukongApi.Sync.IsConnected)
+        if (!_isAfterLoadingScreen || !WukongApi.Entities.IsConnected)
             return;
 
-        if (WukongApi.Sync.LocalMainCharacter is not { } player)
+        if (WukongApi.Entities.LocalMainCharacter is not { } player)
             return;
 
         _gameMessageWidget.Value.SetVisibility(true);
         _gameMessageWidget.Value.SetMainText(PvpTexts.InMultiplayer);
-        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Sync.AllPlayers.Count, player.Get<PvPComponent>().IsReadyForPvP));
+        _gameMessageWidget.Value.SetSecondText(TextUtils.GetReadyText(WukongApi.Entities.AllPlayers.Count, player.IsReadyForPvP));
         _gameMessageWidget.Value.SetThirdText(PvpTexts.PressToSwitchTeam);
         _lobbyStatusWidget.Value.SetVisibility(true);
     }
 
     private void SetupSpectatorWaitForEndUi()
     {
-        if (!_isAfterLoadingScreen || !WukongApi.Sync.IsConnected)
+        if (!_isAfterLoadingScreen || !WukongApi.Entities.IsConnected)
             return;
 
         _gameMessageWidget.Value.SetVisibility(true);

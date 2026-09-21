@@ -1,23 +1,24 @@
 ﻿using System.Numerics;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer;
-using ReadyM.Relay.Server.Sdk.Ecs;
 using ReadyM.Relay.Server.Sdk.Rpc;
+using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Components;
 using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
-using WukongMp.Pvp.Common.ECS;
+using WukongMp.Sdk.Common.Archetypes;
 
 namespace WukongMp.PvP.Serverside;
 
 [ServerRpcFor(typeof(PvpRpcContracts))]
-public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandlersBase
+public partial class RpcHandlers(IEntities entities, PvpConfig config) : ServerRpcHandlersBase
 {
     partial void OnEnableCheats(RpcContext context, bool enabled)
     {
         if (config.CheatsAllowed)
         {
-            ecs.Query<PvpStateComponent>((ref state) => { state.CheatsEnabled = enabled; });
+            entities.World.SetCheatsEnabled(enabled);
             SendCheatsEnabledResponse(context.Sender, enabled ? CheatsStatus.Enabled : CheatsStatus.Disabled);
         }
         else
@@ -31,36 +32,31 @@ public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandle
         if (!LevelSpawnConfig.IsValidLevel(levelId))
             return;
 
-        var inTournament = false;
-        ecs.Query<PvpStateComponent>((ref state) => { inTournament = state.InTournament; });
+        var state = entities.World;
 
-        if (inTournament)
+        if (state.InTournament)
             return;
 
-        ecs.Query<PvpStateComponent>((ref state) =>
-        {
-            state.InPvP = false;
-            state.InTournament = false;
-            state.LevelId = levelId;
-            state.ClearRoundWinners();
-        });
+        state.InPvP = false;
+        state.InTournament = false;
+        state.LevelId = levelId;
+        // state.ClearRoundWinners();
+        // TODO: Generate accessors
 
-        ecs.Query<MainCharacterComponent>((ref player) => { SendChangeLevel(player.PlayerId, levelId); });
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            SendChangeLevel(main.PlayerId, levelId);
+        }
     }
 
     /// Calculate placement of each player and send round start RPC.
     public void SendRoundStartToAll()
     {
-        var levelId = 0;
-        var round = 1;
-        var totalRounds = 1;
+        var state = entities.World.As<PvpState>();
 
-        ecs.Query<PvpStateComponent>((ref state) =>
-        {
-            levelId = state.LevelId;
-            round = state.DisplayedRound;
-            totalRounds = state.DisplayedTournamentRounds;
-        });
+        var levelId = state.LevelId;
+        var round = state.DisplayedRound;
+        var totalRounds = state.DisplayedTournamentRounds;
 
         var levelData = LevelSpawnConfig.GetLevelSpawnData(levelId);
         foreach (var (player, placement) in PlacePlayers(levelData))
@@ -77,13 +73,16 @@ public partial class RpcHandlers(EcsApi ecs, PvpConfig config) : ServerRpcHandle
         var customPositions = levelData.CustomTeamSpawns;
 
         var playerTeams = new Dictionary<PlayerId, int>();
-        ecs.Query<MainCharacterComponent, TeamComponent>((ref main, ref team) => { playerTeams.Add(main.PlayerId, team.TeamId); });
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            playerTeams.Add(main.PlayerId, main.TeamId);
+        }
 
         var teamsIds = playerTeams.Values.Distinct().ToList();
         var teamsCount = teamsIds.Count;
         var teamAngleStep = 2 * MathF.PI / teamsCount;
 
-        var entityOffsetAngle = 0.15f;
+        const float entityOffsetAngle = 0.15f;
         var teamMemberIndex = new Dictionary<int, int>();
         var teamIndex = new Dictionary<int, int>();
         for (var i = 0; i < teamsIds.Count; i++)

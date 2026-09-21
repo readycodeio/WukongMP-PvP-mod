@@ -1,14 +1,9 @@
 ﻿using CSharpModBase.Input;
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
-using ReadyM.Api.ECS.Registry;
-using ReadyM.Api.Multiplayer.ECS.Registry;
 using WukongMp.PvP.Chat;
 using WukongMp.PvP.Command;
-using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
 using WukongMp.PvP.Configuration;
-using WukongMp.PvP.ECS;
 using WukongMp.PvP.GameMode;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
@@ -24,27 +19,8 @@ public class Mod : ModBase
     protected override void Initialize(IDependencyContainer services)
     {
         Logger.LogInformation("Initializing {PluginName}", Name);
-
-        services.Resolve<IComponentRegistry>()
-            .RegisterComponent<PvPComponent>()
-            .RegisterComponent<PvpStateComponent>();
-        
-        RegisterArchetypes(registry =>
-        {
-            registry.ModifyArchetype(WukongApi.Archetypes.MainCharacterArchetype, b =>
-            {
-                b.Add<PvPComponent>();
-                b.Add<CheatsComponent>();
-            });
-
-            registry.ModifyArchetype(WukongApi.Archetypes.WorldArchetype, b =>
-            {
-                b.Add<PvpStateComponent>();
-            });
-        });
         
         services.RegisterSingleton<CheatManager>();
-        services.RegisterSingleton<WukongPvpApi>();
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpChatter>();
         services.RegisterSingleton<PvpGameplayConfiguration>();

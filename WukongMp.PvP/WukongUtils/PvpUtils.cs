@@ -2,6 +2,7 @@
 using System.Numerics;
 using WukongMp.PvP.Resources;
 using b1;
+using ReadyM.SDK.Client.Entities;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
@@ -9,6 +10,7 @@ using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
 using WukongMp.Pvp.Common;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
 using WukongMp.Sdk.Api;
@@ -22,7 +24,7 @@ public static class PvpUtils
 
     public static LevelSpawnData GetCurrentLevelSpawnData()
     {
-        var level = WukongApi.Services.Resolve<WukongPvpApi>().State?.LevelId ?? 0;
+        var level = WukongApi.Services.Resolve<IEntities>().World.LevelId;
         return LevelSpawnConfig.GetLevelSpawnData(level);
     }
 
@@ -71,7 +73,7 @@ public static class PvpUtils
     public static Vector3 AdjustSpawnLocation(BGUCharacterCS? pawn, Vector3 InTargetLocation)
     {
         // For Heart of Birthstone map adjustment resulted in falling - invisible collision. So it is disabled for now.
-        if (WukongApi.Services.Resolve<WukongPvpApi>().LevelId == 0)
+        if (WukongApi.Services.Resolve<IEntities>().World.LevelId == 0)
         {
             return InTargetLocation;
         }
