@@ -14,6 +14,8 @@ using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
+using ReadyM.SDK.Client;
 using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 
@@ -109,7 +111,7 @@ public class PvpCommandHandler(
         if (entityApi.InArea && !mainEntity.IsSpectator && !entities.World.InTournament)
         {
             var levelData = PvpUtils.GetCurrentLevelSpawnData();
-            mainEntity.Position = levelData.PvpStartingLocation;
+            mainEntity.Override(Transform.Field.Position, levelData.PvpStartingLocation);
         }
     }
 
@@ -123,8 +125,8 @@ public class PvpCommandHandler(
             var levelData = PvpUtils.GetCurrentLevelSpawnData();
             UBGWFunctionLibraryCS.GetRebirthPointTransform(GameUtils.GetWorld(), levelData.BirthPointId, out var shrineTransform);
 
-            mainEntity.Position = shrineTransform.Translation.ToVector3();
-            mainEntity.Rotation = shrineTransform.Rotation.Rotator().ToVector3();
+            mainEntity.Override(Transform.Field.Position, shrineTransform.Translation.ToVector3());
+            mainEntity.Override(Transform.Field.Rotation, shrineTransform.Rotation.Rotator().ToVector3());
         }
     }
 

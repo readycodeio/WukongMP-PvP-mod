@@ -1,4 +1,5 @@
-﻿using ReadyM.Api.DI;
+﻿using b1;
+using ReadyM.Api.DI;
 using ReadyM.SDK.Client.Entities;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
@@ -33,13 +34,13 @@ public class PvpChatter(CheatManager cheatManager, IEntities entities, IGameEven
             return;
         
         AActor? pawn = attacker.Value.TryAs<MappedCharacter>(out var attackerMain) ? attackerMain.Pawn : 
-            attacker.Value.TryAs<MappedMonster>(out var attackerTamer) ? attackerTamer.Pawn
+            attacker.Value.TryAs<MappedTamer>(out var attackerTamer) ? attackerTamer.Pawn
             : null;
 
         if (victim.Pawn == pawn)
             return;
 
-        if (WukongApi.Entities.GetPlayerEntityByActor(pawn) is not { } attackerEntity)
+        if (!WukongApi.Entities.TryGetByActor(pawn, out MainCharacter attackerEntity))
             return;
 
         var msg = string.Format(PvpTexts.PlayerKilledPlayer, attackerEntity.Nickname, victim.Nickname);

@@ -435,7 +435,7 @@ public partial class PvpMode(
             return;
 
         var tamerClass = victim.TamerActor?.GetClass();
-        var character = victim.As<MappedMonster>().Pawn;
+        var character = victim.As<MappedTamer>().Pawn;
         if (character != null && tamerClass != null && tamerClass.PathName == UnitPathUtils.GetUnitPathName(TamerKinds.DaSheng))
         {
             var teamId = character.GetTeamIDInCS();
