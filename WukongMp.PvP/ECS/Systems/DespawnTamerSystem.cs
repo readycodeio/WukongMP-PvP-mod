@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using b1;
-using JetBrains.Annotations;
+using ReadyM.SDK.Attributes;
 using WukongMp.Api;
-using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
-using WukongMp.Sdk.Entities;
 using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.ECS.Systems;
 
-[UsedImplicitly]
-public class DespawnTamerSystem : ModSystemBase, IDisposable
+[System]
+public partial class DespawnTamerSystem : IDisposable
 {
     private readonly IGameEvents _gameEvents;
     private readonly Queue<BUTamerActor?> _pendingDeleteEvents = [];
@@ -30,6 +28,7 @@ public class DespawnTamerSystem : ModSystemBase, IDisposable
         _gameEvents.OnMonsterDestroyed -= OnEntityDeleteHandler;
     }
 
+    // TODO: [DeleteHandler]
     private void OnEntityDeleteHandler(Tamer tamer)
     {
         if (WukongApi.Entities.LocalMainCharacter == null)
@@ -42,7 +41,7 @@ public class DespawnTamerSystem : ModSystemBase, IDisposable
         _pendingDeleteEvents.Enqueue(tamer.TamerActor);
     }
 
-    protected override void OnUpdate(UpdateTick _)
+    private void Update()
     {
         if (!WukongApi.Local.IsGameplayLevel)
             return;

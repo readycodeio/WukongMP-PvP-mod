@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Diagnostics;
-using JetBrains.Annotations;
+using ReadyM.SDK.Attributes;
 using WukongMp.PvP.UI;
-using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.ECS.Systems;
 
-[UsedImplicitly]
-public class PlayerListSystem(PvpWidgetManager widgetManager) : ModSystemBase
+[System]
+public partial class PlayerListSystem(PvpWidgetManager widgetManager)
 {
     private readonly Stopwatch _timer = Stopwatch.StartNew();
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
         if (!WukongApi.Entities.CurrentArea.HasValue)
             return;

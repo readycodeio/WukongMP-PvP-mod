@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using ReadyM.Relay.Server.Sdk.Ecs;
-using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
-using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
@@ -12,12 +10,13 @@ using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
-public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSystemBase
+[System]
+public partial class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc)
 {
     private readonly Stopwatch _roundStartStopwatch = new();
     private bool _shownWarning;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
         // exit if we're already in a tournament
         var inTournament = entities.World.InTournament;
@@ -95,7 +94,7 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
             var singleRound = CountCompetingPlayerTeams() <= 1;
 
             var state = entities.World;
-            
+
             state.ClearRoundWinners();
             state.IsSingleRoundTournament = singleRound;
             state.InPvP = true;
@@ -127,7 +126,7 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
                 continue;
 
             readyCount++;
-            
+
             if (!entities.TryLookup(main.PlayerId, out Player player))
                 continue;
 
@@ -153,7 +152,7 @@ public class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc) : ModSys
         {
             if (!IsCompeting(main))
                 continue;
-            
+
             if (!entities.TryLookup(main.PlayerId, out Player player))
                 continue;
 

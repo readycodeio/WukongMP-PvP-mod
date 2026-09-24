@@ -4,7 +4,6 @@ using ReadyM.Api.Multiplayer;
 using ReadyM.Relay.Server.Sdk.Rpc;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
-using ReadyM.Wukong.Common.ECS.Components;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;

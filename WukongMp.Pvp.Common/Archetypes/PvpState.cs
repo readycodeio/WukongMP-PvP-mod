@@ -5,8 +5,9 @@ using Yooni.Native.Container;
 namespace WukongMp.Pvp.Common.Archetypes;
 
 [ArchetypeMixin]
-[Extends(typeof(World))]
+[Propagates(Propagation.ServerAuthoritative)]
 [Replicated]
+[Extends(typeof(World))]
 public readonly partial struct PvpState
 {
     // settings
@@ -35,10 +36,23 @@ public readonly partial struct PvpState
 
     public int DisplayedTournamentRounds => IsSingleRoundTournament ? 1 : TournamentRounds;
 
-    public void SetLastRoundWinnerTeam(int teamId)
+    [CreateHandler]
+    public void InitializeFromConfig(PvpConfig config)
     {
-        AddRoundWinners(teamId);
-    }
+        CheatsEnabled = config.CheatsAllowed;
+        LevelId = config.LevelId;
+        TournamentRounds = config.TournamentRounds;
+        GourdAllowed = config.GourdAllowed;
+        ConsumablesAllowed = config.ConsumablesAllowed;
+        ImmobilizeAllowed = config.ImmobilizeAllowed;
+        PhantomRushAllowed = config.PhantomRushAllowed;
+        AntiStallEnabled = config.AntiStallEnabled;
+        EnemiesNgPlusLevel = config.EnemiesNgPlusLevel;
 
-    // TODO: OnCreated handler using the initial config values
+        InPvP = false;
+        InTournament = false;
+        IsSingleRoundTournament = false;
+
+        ClearRoundWinners();
+    }
 }

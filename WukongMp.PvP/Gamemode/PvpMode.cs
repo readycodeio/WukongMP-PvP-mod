@@ -10,6 +10,7 @@ using HarmonyLib;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer;
 using ReadyM.Api.Multiplayer.RPC;
+using ReadyM.SDK.Client;
 using ReadyM.SDK.Client.Entities;
 using ReadyM.SDK.Core;
 using ReadyM.Wukong.Common.ECS.Values;
@@ -30,7 +31,6 @@ using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
-using WukongMp.Sdk.Entities;
 using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.GameMode;
@@ -201,7 +201,7 @@ public partial class PvpMode(
         if (WukongApi.Entities.LocalMainCharacter is not { } main)
             return;
 
-        main.IsReadyForPvP = isReady;
+        main.Override(PvpStateData.Field.IsReadyForPvP, isReady);
     }
 
     public void SwitchReadyStateMulti()
@@ -379,7 +379,7 @@ public partial class PvpMode(
         if (WukongApi.Entities.LocalPlayer is not { } player)
             return;
 
-        player.TeamId = GetSmallerTeamId();
+        player.Override(PlayerData.Field.TeamId, GetSmallerTeamId());
         Logging.LogDebug("Assigned team {Id} for player", player.TeamId);
     }
 

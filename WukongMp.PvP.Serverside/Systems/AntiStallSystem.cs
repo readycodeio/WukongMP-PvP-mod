@@ -1,9 +1,10 @@
 ﻿using System.Numerics;
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.Idents;
-using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
+using ReadyM.SDK.Systems;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes;
@@ -11,7 +12,8 @@ using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
-public sealed class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger logger) : ModSystemBase
+[System]
+public partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private struct PlayerEngagementData
     {
@@ -32,7 +34,6 @@ public sealed class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger
     private AntiStallState _state = AntiStallState.Monitoring;
 
     private const ulong TickInterval = 10; // Check every 10 ticks
-    private ulong _tickCounter;
     private float _elapsedTime;
     private bool _isReset;
 
@@ -52,7 +53,7 @@ public sealed class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger
 
     private int _decayRounds;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update(Tick tick)
     {
         if (!entities.World.AntiStallEnabled)
             return;
@@ -65,7 +66,7 @@ public sealed class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger
 
         _isReset = false;
 
-        if (_tickCounter++ % TickInterval != 0)
+        if (tick.Count % TickInterval != 0)
         {
             _elapsedTime += tick.DeltaTime;
             return;

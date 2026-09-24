@@ -5,8 +5,8 @@ using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Resources;
 using WukongMp.Api.UI;
-using WukongMp.PvP.Resources;
 using WukongMp.Pvp.Common;
+using WukongMp.PvP.Resources;
 
 namespace WukongMp.PvP.UI;
 

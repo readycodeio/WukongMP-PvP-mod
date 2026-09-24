@@ -1,23 +1,22 @@
 ﻿using b1;
 using BtlShare;
-using JetBrains.Annotations;
+using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Systems;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.PvP.Archetypes;
 using WukongMp.PvP.Configuration;
-using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Mixins;
-using WukongMp.Sdk.Entities;
 
 namespace WukongMp.PvP.ECS.Systems;
 
-[UsedImplicitly]
-public class UpdateCooldownSystem(CheatManager cheats) : ModSystemBase
+[System]
+public partial class UpdateCooldownSystem(CheatManager cheats)
 {
     private float _vigorRegenAccumulator;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update(Tick tick)
     {
         if (!WukongApi.Local.IsGameplayLevel)
             return;
@@ -61,7 +60,7 @@ public class UpdateCooldownSystem(CheatManager cheats) : ModSystemBase
         if (_vigorRegenAccumulator > player.SpiritCooldownTime)
             return;
 
-        _vigorRegenAccumulator += tick.deltaTime;
+        _vigorRegenAccumulator += tick.DeltaTime;
         var newVigorValue = FMath.Lerp(0, BGUFunctionLibraryCS.BGUGetFloatAttr(localPawn, EBGUAttrFloat.VigorEnergyMax), FMath.Clamp(_vigorRegenAccumulator / player.SpiritCooldownTime, 0f, 1f));
         if (newVigorValue > currentVigorValue)
         {

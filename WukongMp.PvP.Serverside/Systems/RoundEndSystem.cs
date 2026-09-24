@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
-using ReadyM.Wukong.Common.ECS.Components;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
@@ -12,7 +11,8 @@ using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
-public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger logger) : ModSystemBase
+[System]
+public partial class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private enum PostRoundPhase
     {
@@ -26,7 +26,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
     private PostRoundPhase _phase;
     private int _lastRoundWinner;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
         if (_phase != PostRoundPhase.None)
         {
@@ -44,7 +44,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
 
         // check if all combatants but one are dead
         List<int> aliveTeamIds = [];
-        
+
         foreach (var main in entities.Query<MainCharacter>())
         {
             if (main.IsSpectator && main.SpectatorReason != SpectatorReason.Death)
@@ -52,7 +52,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
 
             if (main is { IsDead: true, IsTransformed: false })
                 continue;
-            
+
             if (!entities.TryLookup(main.PlayerId, out Player player))
                 continue;
 
@@ -160,7 +160,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
     private void ResetStatsAndDecide()
     {
         var state = entities.World.As<PvpState>();
-        
+
         HashSet<int> nonObserverTeams = [];
         foreach (var main in entities.Query<MainCharacter>())
         {
@@ -170,7 +170,7 @@ public sealed class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger 
             {
                 if (!entities.TryLookup(main.PlayerId, out Player player))
                     continue;
-                
+
                 nonObserverTeams.Add(player.TeamId);
             }
         }

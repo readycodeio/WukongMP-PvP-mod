@@ -1,13 +1,12 @@
-﻿using ReadyM.Relay.Server.Sdk.Ecs.Systems;
+﻿using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Systems;
 
 namespace WukongMp.PvP.Serverside.Systems;
 
-/// <summary>
-/// Drives <see cref="RoomConfigApplier" />, which does its own rate limiting.
-/// </summary>
-public sealed class RoomConfigSystem(RoomConfigApplier applier) : ModSystemBase
+[System]
+public partial class RoomConfigSystem(RoomConfigApplier applier)
 {
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update(Tick tick)
     {
         applier.Poll(tick.Time);
     }

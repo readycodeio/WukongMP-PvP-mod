@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using WukongMp.PvP.Resources;
 using b1;
 using ReadyM.SDK.Client.Entities;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
 using WukongMp.Api;
-using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
+using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
 
 namespace WukongMp.PvP.WukongUtils;

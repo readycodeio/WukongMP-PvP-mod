@@ -1,20 +1,19 @@
-﻿using JetBrains.Annotations;
+﻿using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client.Entities;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.UI;
-using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 
 namespace WukongMp.PvP.ECS.Systems;
 
-[UsedImplicitly]
-public class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities entities) : ModSystemBase
+[System]
+public partial class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities entities)
 {
-    private int lastReadyCount = -1;
-    private int lastTotalCount = -1;
+    private int _lastReadyCount = -1;
+    private int _lastTotalCount = -1;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
         if (!WukongApi.Entities.CurrentArea.HasValue || entities.World.InTournament)
             return;
@@ -35,11 +34,11 @@ public class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities ent
         }
 
         // prevent spamming the widget with updates every frame when nothing has changed
-        if (readyCount == lastReadyCount && players == lastTotalCount)
+        if (readyCount == _lastReadyCount && players == _lastTotalCount)
             return;
 
         widgetManager.UpdateReadyCount(readyCount, players);
-        lastReadyCount = readyCount;
-        lastTotalCount = players;
+        _lastReadyCount = readyCount;
+        _lastTotalCount = players;
     }
 }
