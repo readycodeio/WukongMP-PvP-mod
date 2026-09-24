@@ -24,6 +24,7 @@ using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.Resources;
+using WukongMp.PvP.Services;
 using WukongMp.PvP.UI;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
@@ -33,11 +34,11 @@ using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 using WukongMp.Sdk.SDK;
 
-namespace WukongMp.PvP.GameMode;
+namespace WukongMp.PvP.Gamemode;
 
 [ServerRpcFor(typeof(PvpRpcContracts))]
 public partial class PvpMode(
-    PvpWidgetManager pvpWidgetManager,
+    WidgetUpdates widgetUpdates,
     TimerController timerController,
     IEntities entities,
     IGameEvents gameEvents
@@ -222,7 +223,7 @@ public partial class PvpMode(
 
         var newIsReady = !main.IsReadyForPvP;
         SetReadyState(newIsReady);
-        pvpWidgetManager.SwitchReadyState(newIsReady);
+        widgetUpdates.SwitchReadyState(newIsReady);
 
         var message = string.Format(newIsReady ? PvpTexts.PlayerIsReady : PvpTexts.PlayerIsNotReady, main.Nickname);
         WukongApi.Chat.SendServerMessage(message);
@@ -357,7 +358,7 @@ public partial class PvpMode(
     {
         var readyForPvp = AllPlayers.Count(c => c is { IsObserver: false, IsReadyForPvP: true });
         var available = AllPlayers.Count(p => !p.IsObserver);
-        pvpWidgetManager.UpdateReadyCount(readyForPvp, available);
+        widgetUpdates.UpdateReadyCount(readyForPvp, available);
     }
 
     private static void DestroyTamersOnArena()
@@ -459,7 +460,7 @@ public partial class PvpMode(
     private void ClearLoobyCountdown()
     {
         _countdownTimer.Reset();
-        pvpWidgetManager.HideCountdown();
+        widgetUpdates.HideCountdown();
     }
 
     #endregion
@@ -486,12 +487,12 @@ public partial class PvpMode(
     {
         if (start)
         {
-            pvpWidgetManager.SetMainMessage(PvpTexts.StartingGame);
-            pvpWidgetManager.UpdateRoundCountdown(0, seconds);
-            pvpWidgetManager.ShowCountdown();
+            widgetUpdates.SetMainMessage(PvpTexts.StartingGame);
+            widgetUpdates.UpdateRoundCountdown(0, seconds);
+            widgetUpdates.ShowCountdown();
 
             _countdownTimer.SetTime(0, seconds);
-            _countdownTimer.Start(ClearLoobyCountdown, pvpWidgetManager.UpdateRoundCountdown);
+            _countdownTimer.Start(ClearLoobyCountdown, widgetUpdates.UpdateRoundCountdown);
         }
         else
         {
@@ -501,8 +502,8 @@ public partial class PvpMode(
             var isReady = main.IsReadyForPvP;
 
             ClearLoobyCountdown();
-            pvpWidgetManager.SetMainMessage(PvpTexts.InMultiplayer);
-            pvpWidgetManager.SwitchReadyState(isReady);
+            widgetUpdates.SetMainMessage(PvpTexts.InMultiplayer);
+            widgetUpdates.SwitchReadyState(isReady);
         }
     }
 
@@ -511,7 +512,7 @@ public partial class PvpMode(
         if (!WukongApi.Entities.InArea)
             return;
 
-        pvpWidgetManager.SetThirdText(PvpTexts.BothTeamsNeedReadyPlayers);
+        widgetUpdates.SetThirdText(PvpTexts.BothTeamsNeedReadyPlayers);
     }
 
     partial void OnStartRound(Vector3 placement, Vector3 lookAt, int round, int totalRounds)
@@ -524,7 +525,7 @@ public partial class PvpMode(
         PvpUtils.ShowPvpRoundStartMessage(round, totalRounds);
         ResetPlayer(main);
         ClearLoobyCountdown();
-        pvpWidgetManager.HideGameMessageWidget();
+        widgetUpdates.HideGameMessageWidget();
         EnableHostility();
         DisablePlayerImmunity();
 
@@ -588,7 +589,7 @@ public partial class PvpMode(
 
             RunOnGameThread(() =>
             {
-                pvpWidgetManager.SetupLobbyUi();
+                widgetUpdates.SetupLobbyUi();
                 EnablePlayerImmunity();
             });
         });

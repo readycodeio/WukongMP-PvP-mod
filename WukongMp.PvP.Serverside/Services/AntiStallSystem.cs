@@ -4,16 +4,15 @@ using ReadyM.Api.Idents;
 using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
-using ReadyM.SDK.Systems;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 
-namespace WukongMp.PvP.Serverside.Systems;
+namespace WukongMp.PvP.Serverside.Services;
 
-[System]
-public partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
+[Service]
+public sealed partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private struct PlayerEngagementData
     {
@@ -53,7 +52,7 @@ public partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogge
 
     private int _decayRounds;
 
-    private void Update(Tick tick)
+    private void Update()
     {
         if (!entities.World.AntiStallEnabled)
             return;
@@ -66,9 +65,9 @@ public partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogge
 
         _isReset = false;
 
-        if (tick.Count % TickInterval != 0)
+        if (Time.Ticks % TickInterval != 0)
         {
-            _elapsedTime += tick.DeltaTime;
+            _elapsedTime += Time.DeltaTime;
             return;
         }
 
@@ -164,7 +163,7 @@ public partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogge
         var playerFacingDictionary = CalculatePlayerFacing();
         foreach (var playerId in _playerEngagement.Keys)
         {
-            double current = _playerEngagementMultipliers.TryGetValue(playerId, out var val) ? val : 1.0;
+            double current = _playerEngagementMultipliers.GetValueOrDefault(playerId, 1.0);
 
             if (playerFacingDictionary.TryGetValue(playerId, out var isFacing) && isFacing)
             {

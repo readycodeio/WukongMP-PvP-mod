@@ -4,15 +4,15 @@ using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 
-namespace WukongMp.PvP.Serverside.Systems;
+namespace WukongMp.PvP.Serverside.Services;
 
-[System]
-public partial class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
+[Service]
+public sealed partial class RoundEndHandler(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private enum PostRoundPhase
     {
@@ -126,7 +126,7 @@ public partial class RoundEndSystem(IEntities entities, RpcHandlers rpc, ILogger
     }
 
     /// <summary>
-    /// Drives the post-round sequence from the tick. It used to run on a thread pool timer, where
+    /// Drives the post-round sequence from the update. It used to run on a thread pool timer, where
     /// ComponentWriteContext.Current is not the server authoring scope, so writes to player-owned
     /// components silently lost the authoritative API flag and never overrode their owner.
     /// </summary>

@@ -2,7 +2,7 @@
 using WukongMp.Api;
 using WukongMp.Api.WukongUtils;
 
-namespace WukongMp.PvP.GameMode;
+namespace WukongMp.PvP.Gamemode;
 
 public static class HostilityUtils
 {

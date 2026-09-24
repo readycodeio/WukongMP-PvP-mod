@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using b1;
 using ReadyM.SDK.Attributes;
 using WukongMp.Api;
@@ -9,24 +8,16 @@ using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.SDK;
 
-namespace WukongMp.PvP.ECS.Systems;
+namespace WukongMp.PvP.Services;
 
-[System]
-public partial class DespawnTamerSystem : IDisposable
+[Service]
+public sealed partial class DespawnTamers(IGameEvents gameEvents)
 {
-    private readonly IGameEvents _gameEvents;
     private readonly Queue<BUTamerActor?> _pendingDeleteEvents = [];
 
-    public DespawnTamerSystem(IGameEvents gameEvents)
-    {
-        _gameEvents = gameEvents;
-        _gameEvents.OnMonsterDestroyed += OnEntityDeleteHandler;
-    }
+    private void Start() => gameEvents.OnMonsterDestroyed += OnEntityDeleteHandler;
 
-    public void Dispose()
-    {
-        _gameEvents.OnMonsterDestroyed -= OnEntityDeleteHandler;
-    }
+    private void Stop() => gameEvents.OnMonsterDestroyed -= OnEntityDeleteHandler;
 
     // TODO: [DeleteHandler]
     private void OnEntityDeleteHandler(Tamer tamer)

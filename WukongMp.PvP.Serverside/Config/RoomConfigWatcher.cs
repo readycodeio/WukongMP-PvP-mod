@@ -4,17 +4,16 @@ using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 
-namespace WukongMp.PvP.Serverside;
+namespace WukongMp.PvP.Serverside.Config;
 
 /// <summary>
 /// Re-reads config.json every few seconds and applies it to the PvP world state.
 /// Used for the specific case of ReadyM-hosted servers in Europe / U.S. / Hong Kong,
 /// where these settings are set in the Launcher by the player who sets up a room.
 /// </summary>
-public sealed class RoomConfigApplier
+public sealed class RoomConfigWatcher
 {
     private const string ConfigFile = "config.json";
     private const float PollIntervalSeconds = 5f;
@@ -36,7 +35,7 @@ public sealed class RoomConfigApplier
     private DateTime _configStamp;
     private float _nextPoll;
 
-    public RoomConfigApplier(IEntities entities, PvpConfig config, string modDirectory, ILogger logger)
+    public RoomConfigWatcher(IEntities entities, PvpConfig config, string modDirectory, ILogger logger)
     {
         _entities = entities;
         _config = config;

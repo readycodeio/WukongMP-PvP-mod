@@ -1,14 +1,13 @@
 ﻿using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client.Entities;
 using WukongMp.Pvp.Common.Archetypes;
-using WukongMp.PvP.UI;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 
-namespace WukongMp.PvP.ECS.Systems;
+namespace WukongMp.PvP.Services;
 
-[System]
-public partial class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEntities entities)
+[Service]
+public sealed partial class ReadinessWidgetRefresh(WidgetUpdates widgetUpdates, IEntities entities)
 {
     private int _lastReadyCount = -1;
     private int _lastTotalCount = -1;
@@ -37,7 +36,7 @@ public partial class ReadinessWidgetSystem(PvpWidgetManager widgetManager, IEnti
         if (readyCount == _lastReadyCount && players == _lastTotalCount)
             return;
 
-        widgetManager.UpdateReadyCount(readyCount, players);
+        widgetUpdates.UpdateReadyCount(readyCount, players);
         _lastReadyCount = readyCount;
         _lastTotalCount = players;
     }

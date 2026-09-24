@@ -2,26 +2,28 @@
 using System.Collections.Generic;
 using B1UI;
 using B1UI.GSUI;
-using ReadyM.Api.DI;
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer.Protocol;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client.Entities;
 using ReadyM.SDK.Core;
 using WukongMp.Api;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.Resources;
+using WukongMp.PvP.UI;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 using WukongMp.Sdk.SDK;
 
-namespace WukongMp.PvP.UI;
+namespace WukongMp.PvP.Services;
 
-public class PvpWidgetManager(IEntities entities, IGameEvents gameEvents) : IHostedService
+[Service]
+public sealed partial class WidgetUpdates(IEntities entities, IGameEvents gameEvents)
 {
     private readonly Lazy<LobbyStatusWidget> _lobbyStatusWidget = new();
     private readonly Lazy<GameMessageWidget> _gameMessageWidget = new();
@@ -31,7 +33,7 @@ public class PvpWidgetManager(IEntities entities, IGameEvents gameEvents) : IHos
 
     private bool _isAfterLoadingScreen;
 
-    public void OnScopeStart()
+    private void Start()
     {
         gameEvents.OnJoinedArea += OnAreaChange;
         gameEvents.OnLeftArea += OnAreaChange;
@@ -48,7 +50,7 @@ public class PvpWidgetManager(IEntities entities, IGameEvents gameEvents) : IHos
         gameEvents.OnDisconnected += OnDisconnected;
     }
 
-    public void Dispose()
+    private void Stop()
     {
         gameEvents.OnJoinedArea -= OnAreaChange;
         gameEvents.OnLeftArea -= OnAreaChange;

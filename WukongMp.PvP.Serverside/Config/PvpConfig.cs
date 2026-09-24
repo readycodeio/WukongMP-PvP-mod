@@ -1,6 +1,8 @@
-﻿namespace WukongMp.Pvp.Common;
+﻿using WukongMp.Pvp.Common.Archetypes;
 
-/// Initial values for <see cref="Archetypes.PvpState" />.
+namespace WukongMp.PvP.Serverside.Config;
+
+/// Initial values for <see cref="PvpState" />.
 public sealed class PvpConfig
 {
     public int LevelId { get; set; }

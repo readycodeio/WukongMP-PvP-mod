@@ -7,7 +7,6 @@ using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
 using WukongMp.Api;
 using WukongMp.Api.WukongUtils;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
 using WukongMp.PvP.Configuration;

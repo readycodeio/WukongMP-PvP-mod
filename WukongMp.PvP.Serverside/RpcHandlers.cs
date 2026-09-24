@@ -7,6 +7,7 @@ using ReadyM.SDK.Server.Entities;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.Pvp.Common.Data;
+using WukongMp.PvP.Serverside.Config;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 

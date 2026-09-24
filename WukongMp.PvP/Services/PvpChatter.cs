@@ -1,4 +1,4 @@
-﻿using ReadyM.Api.DI;
+﻿using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client.Entities;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
@@ -9,18 +9,20 @@ using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.SDK;
 
-namespace WukongMp.PvP.Chat;
+namespace WukongMp.PvP.Services;
 
-public class PvpChatter(CheatManager cheatManager, IEntities entities, IGameEvents events) : IHostedService
+[Service]
+public sealed partial class PvpChatter(CheatManager cheatManager, IEntities entities, IGameEvents events)
 {
-    public void OnScopeStart()
+    private void Start()
     {
         events.OnPlayerDead += OnPlayerDead;
         events.OnLoadingScreenClose += OnLoadingScreenClose;
     }
 
-    public void Dispose()
+    private void Stop()
     {
+        events.OnLoadingScreenClose -= OnLoadingScreenClose;
         events.OnPlayerDead -= OnPlayerDead;
     }
 

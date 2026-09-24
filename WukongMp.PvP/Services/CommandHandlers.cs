@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using b1;
 using ReadyM.Api.Command;
-using ReadyM.Api.DI;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client;
 using ReadyM.SDK.Client.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
@@ -11,26 +11,27 @@ using WukongMp.Api.Configuration;
 using WukongMp.Api.WukongUtils;
 using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
-using WukongMp.PvP.GameMode;
 using WukongMp.PvP.Resources;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
+using PvpMode = WukongMp.PvP.Gamemode.PvpMode;
 
-namespace WukongMp.PvP.Command;
+namespace WukongMp.PvP.Services;
 
-public class PvpCommandHandler(
+[Service]
+public sealed partial class CommandHandlers(
     IWukongConsoleApi consoleApi,
     IWukongChatApi chatApi,
     PvpMode pvpMode,
     CheatManager cheatManager,
     IWukongEntityApi entityApi,
     IEntities entities
-) : IHostedService
+)
 {
-    public void OnScopeStart()
+    private void Start()
     {
         var allmonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
         consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn), allmonsterNames);
@@ -45,8 +46,6 @@ public class PvpCommandHandler(
         consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel));
         consoleApi.AddCommand("cheats", ConsoleCommand.Create(ToggleCheats));
     }
-
-    public void Dispose() { }
 
     private void RequestSpawn(string unitName, int count = 1)
     {

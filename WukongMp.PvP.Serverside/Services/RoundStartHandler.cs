@@ -3,15 +3,15 @@ using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
-using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
 
-namespace WukongMp.PvP.Serverside.Systems;
+namespace WukongMp.PvP.Serverside.Services;
 
-[System]
-public partial class RoundStartTimerSystem(IEntities entities, RpcHandlers rpc)
+[Service]
+public sealed partial class RoundStartHandler(IEntities entities, RpcHandlers rpc)
 {
     private readonly Stopwatch _roundStartStopwatch = new();
     private bool _shownWarning;

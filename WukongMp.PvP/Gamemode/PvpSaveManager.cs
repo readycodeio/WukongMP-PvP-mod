@@ -8,7 +8,7 @@ using WukongMp.PvP.Configuration;
 using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
 
-namespace WukongMp.PvP.GameMode;
+namespace WukongMp.PvP.Gamemode;
 
 public class PvpSaveManager
 {

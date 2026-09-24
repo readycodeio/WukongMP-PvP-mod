@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ReadyM.SDK.Server;
 using ReadyM.SDK.Server.Entities;
-using WukongMp.Pvp.Common;
+using WukongMp.PvP.Serverside.Config;
 
 namespace WukongMp.PvP.Serverside;
 
@@ -18,7 +18,7 @@ public class Mod : ServerMod
         var logger = Services.Resolve<ILogger>();
 
         // Watch for settings file change
-        Services.RegisterSingleton(new RoomConfigApplier(Services.Resolve<IEntities>(), Services.Resolve<PvpConfig>(), ModDirectory, logger));
+        Services.RegisterSingleton(new RoomConfigWatcher(Services.Resolve<IEntities>(), Services.Resolve<PvpConfig>(), ModDirectory, logger));
 
         logger.LogInformation("Serverside PvP mod initialized");
     }

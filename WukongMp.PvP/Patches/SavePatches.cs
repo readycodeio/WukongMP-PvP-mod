@@ -8,7 +8,7 @@ using PreludeLib.Attributes;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Configuration;
-using WukongMp.PvP.GameMode;
+using WukongMp.PvP.Gamemode;
 using WukongMp.Sdk.Api;
 
 // ReSharper disable InconsistentNaming

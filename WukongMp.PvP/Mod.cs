@@ -1,13 +1,13 @@
 ﻿using CSharpModBase.Input;
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.DI;
-using WukongMp.PvP.Chat;
-using WukongMp.PvP.Command;
 using WukongMp.PvP.Configuration;
-using WukongMp.PvP.GameMode;
+using WukongMp.PvP.Gamemode;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk;
 using WukongMp.Sdk.Api;
+using CommandHandlers = WukongMp.PvP.Services.CommandHandlers;
+using PvpMode = WukongMp.PvP.Gamemode.PvpMode;
 
 namespace WukongMp.PvP;
 
@@ -22,12 +22,9 @@ public class Mod : ModBase
         
         services.RegisterSingleton<CheatManager>();
         services.RegisterSingleton<TimerController>();
-        services.RegisterSingleton<PvpChatter>();
         services.RegisterSingleton<PvpGameplayConfiguration>();
         services.RegisterSingleton<PvpSaveManager>();
-        services.RegisterSingleton<PvpWidgetManager>();
         services.RegisterSingleton<PvpMode>();
-        services.RegisterSingleton<PvpCommandHandler>();
     }
 
     public override void LateInit()
@@ -48,8 +45,8 @@ public class Mod : ModBase
                 WukongApi.Services.Resolve<PvpMode>().SwitchTeam();
         });
 
-        WukongApi.Input.RegisterKeyBind(Key.F3, () => { WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToArena(); });
+        WukongApi.Input.RegisterKeyBind(Key.F3, () => { WukongApi.Services.Resolve<CommandHandlers>().TeleportToArena(); });
 
-        WukongApi.Input.RegisterKeyBind(Key.F4, () => { WukongApi.Services.Resolve<PvpCommandHandler>().TeleportToShrine(); });
+        WukongApi.Input.RegisterKeyBind(Key.F4, () => { WukongApi.Services.Resolve<CommandHandlers>().TeleportToShrine(); });
     }
 }
