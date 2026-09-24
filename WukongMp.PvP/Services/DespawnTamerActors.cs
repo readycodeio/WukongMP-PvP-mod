@@ -6,21 +6,16 @@ using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
-using WukongMp.Sdk.SDK;
 
 namespace WukongMp.PvP.Services;
 
 [Service]
-public sealed partial class DespawnTamers(IGameEvents gameEvents)
+public sealed partial class DespawnTamerActors
 {
     private readonly Queue<BUTamerActor?> _pendingDeleteEvents = [];
 
-    private void Start() => gameEvents.OnMonsterDestroyed += OnEntityDeleteHandler;
-
-    private void Stop() => gameEvents.OnMonsterDestroyed -= OnEntityDeleteHandler;
-
-    // TODO: [DeleteHandler]
-    private void OnEntityDeleteHandler(Tamer tamer)
+    [DeleteHandler(typeof(Tamer))]
+    private void OnTamerDeleted(Tamer tamer)
     {
         if (WukongApi.Entities.LocalMainCharacter == null)
         {
