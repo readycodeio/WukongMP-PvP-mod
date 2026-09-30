@@ -77,7 +77,7 @@ public sealed partial class AntiStallSystem(IEntities entities, RpcHandlers rpc,
             {
                 _playerEngagement.Remove(main.PlayerId);
                 _playerEngagementMultipliers.Remove(main.PlayerId);
-                return;
+                continue;
             }
 
             if (!_playerEngagement.TryGetValue(main.PlayerId, out var data))
