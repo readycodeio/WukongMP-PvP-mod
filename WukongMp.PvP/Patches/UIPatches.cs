@@ -87,7 +87,7 @@ public static class PatchStartGameUiPvp
                 Logging.LogDebug("Continue UI name desc: {Description}", GSB1UIUtil.GetUIWordDescFText(EUIWordID.CONTINUE_GAME));
 
                 var slot = GSE_SaveGameUtil.GetArchiveSlotName(SaveFileType.Archive, PvpConstants.CharacterArchiveId);
-                var savePath = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{slot}.sav");
+                var savePath = FPaths.Combine(WukongApi.Services.Resolve<Mod>().ModDirectory, $"{slot}.sav");
 
                 if (!hasPak || !isConnected || isMachmaking)
                 {
