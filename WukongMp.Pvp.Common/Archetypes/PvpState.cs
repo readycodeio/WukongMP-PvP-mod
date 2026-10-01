@@ -1,5 +1,6 @@
-﻿using ReadyM.SDK.Attributes;
-using ReadyM.SDK.Core;
+﻿using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Archetypes.Core;
 using Yooni.Native.Container;
 
 namespace WukongMp.Pvp.Common.Archetypes;

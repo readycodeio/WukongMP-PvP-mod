@@ -16,9 +16,6 @@ public sealed partial class Mod(
 {
     private void Start()
     {
-        services.RegisterSingleton<RpcHandlers>();
-
-        // Watch for settings file change
         services.RegisterSingleton(new RoomConfigWatcher(entities, config, ModDirectory, logger));
 
         logger.LogInformation("Serverside PvP mod initialized");

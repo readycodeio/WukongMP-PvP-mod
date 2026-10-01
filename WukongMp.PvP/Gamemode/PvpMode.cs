@@ -8,11 +8,10 @@ using b1;
 using BtlShare;
 using HarmonyLib;
 using ReadyM.Api.Idents;
-using ReadyM.Api.Multiplayer;
-using ReadyM.Api.Multiplayer.RPC;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client;
 using ReadyM.SDK.Client.Entities;
-using ReadyM.SDK.Core;
 using ReadyM.Wukong.Common.ECS.Values;
 using UnrealEngine.Engine;
 using UnrealEngine.Runtime;
@@ -32,20 +31,19 @@ using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
-using WukongMp.Sdk.SDK;
+using WukongMp.Sdk.Events;
 
 namespace WukongMp.PvP.Gamemode;
 
-[ServerRpcFor(typeof(PvpRpcContracts))]
+[RpcHandlersFor(typeof(PvpRpcContracts))]
 public partial class PvpMode(
     WidgetUpdates widgetUpdates,
     TimerController timerController,
     IEntities entities,
     IGameEvents gameEvents
-) : ServerRpcClient
+)
 {
-    private readonly HashSet<Tamer> spawnedDaSheng2 = [];
-
+    private readonly HashSet<Tamer> _spawnedDaSheng2 = [];
     private readonly CountdownTimer _countdownTimer = new(1, 5);
 
     public IEnumerable<MainCharacter> AllPlayers
@@ -442,7 +440,7 @@ public partial class PvpMode(
             var teamId = character.GetTeamIDInCS();
             var location = character.GetActorLocation();
 
-            if (spawnedDaSheng2.Add(victim))
+            if (_spawnedDaSheng2.Add(victim))
             {
                 _ = Task.Run(async () =>
                 {

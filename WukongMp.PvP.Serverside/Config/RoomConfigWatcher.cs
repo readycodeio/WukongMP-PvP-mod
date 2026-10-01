@@ -2,7 +2,8 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Logging;
-using ReadyM.SDK.Core;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Archetypes.Core;
 using ReadyM.SDK.Server.Entities;
 using WukongMp.Pvp.Common.Archetypes;
 

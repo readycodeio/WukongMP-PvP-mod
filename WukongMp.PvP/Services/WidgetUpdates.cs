@@ -6,7 +6,7 @@ using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer.Protocol;
 using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client.Entities;
-using ReadyM.SDK.Core;
+using ReadyM.SDK.Archetypes.Core;
 using WukongMp.Api;
 using WukongMp.Api.UI;
 using WukongMp.Api.WukongUtils;
@@ -18,7 +18,7 @@ using WukongMp.PvP.UI;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
-using WukongMp.Sdk.SDK;
+using WukongMp.Sdk.Events;
 
 namespace WukongMp.PvP.Services;
 

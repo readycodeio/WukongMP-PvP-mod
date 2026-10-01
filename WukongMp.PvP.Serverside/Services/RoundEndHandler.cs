@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using ReadyM.SDK.Archetypes.Core;
 using ReadyM.SDK.Attributes;
-using ReadyM.SDK.Core;
+using ReadyM.SDK.Archetypes.Core;
 using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
 using WukongMp.Pvp.Common.Archetypes;

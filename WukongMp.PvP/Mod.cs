@@ -4,10 +4,9 @@ using ReadyM.Api.DI;
 using ReadyM.SDK.Attributes;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.Gamemode;
+using WukongMp.PvP.Services;
 using WukongMp.PvP.UI;
 using WukongMp.Sdk.Api;
-using CommandHandlers = WukongMp.PvP.Services.CommandHandlers;
-using PvpMode = WukongMp.PvP.Gamemode.PvpMode;
 
 namespace WukongMp.PvP;
 
@@ -22,7 +21,6 @@ public sealed partial class Mod(IDependencyContainer services, ILogger logger)
         services.RegisterSingleton<TimerController>();
         services.RegisterSingleton<PvpGameplayConfiguration>();
         services.RegisterSingleton<PvpSaveManager>();
-        services.RegisterSingleton<PvpMode>();
 
         WukongApi.Input.RegisterKeyBind(Key.J, () =>
         {
@@ -38,9 +36,15 @@ public sealed partial class Mod(IDependencyContainer services, ILogger logger)
                 WukongApi.Services.Resolve<PvpMode>().SwitchTeam();
         });
 
-        WukongApi.Input.RegisterKeyBind(Key.F3, () => { WukongApi.Services.Resolve<CommandHandlers>().TeleportToArena(); });
+        WukongApi.Input.RegisterKeyBind(Key.F3, () =>
+        {
+            WukongApi.Services.Resolve<CommandHandlers>().TeleportToArena();
+        });
 
-        WukongApi.Input.RegisterKeyBind(Key.F4, () => { WukongApi.Services.Resolve<CommandHandlers>().TeleportToShrine(); });
+        WukongApi.Input.RegisterKeyBind(Key.F4, () =>
+        {
+            WukongApi.Services.Resolve<CommandHandlers>().TeleportToShrine();
+        });
         
         logger.LogInformation("Initialized PvP mod");
     }

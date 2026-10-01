@@ -7,7 +7,7 @@ using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Mixins;
 using WukongMp.Sdk.Common.Archetypes;
-using WukongMp.Sdk.SDK;
+using WukongMp.Sdk.Events;
 
 namespace WukongMp.PvP.Services;
 

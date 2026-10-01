@@ -2,7 +2,9 @@
 using ReadyM.Api.Idents;
 using ReadyM.Api.Multiplayer;
 using ReadyM.Relay.Server.Sdk.Rpc;
-using ReadyM.SDK.Core;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Server.Entities;
 using WukongMp.Pvp.Common;
 using WukongMp.Pvp.Common.Archetypes;
@@ -13,8 +15,8 @@ using WukongMp.Sdk.Common.Archetypes.Mixins;
 
 namespace WukongMp.PvP.Serverside;
 
-[ServerRpcFor(typeof(PvpRpcContracts))]
-public partial class RpcHandlers(IEntities entities, PvpConfig config) : ServerRpcHandlersBase
+[RpcHandlersFor(typeof(PvpRpcContracts))]
+public partial class RpcHandlers(IEntities entities, PvpConfig config)
 {
     partial void OnEnableCheats(RpcContext context, bool enabled)
     {
