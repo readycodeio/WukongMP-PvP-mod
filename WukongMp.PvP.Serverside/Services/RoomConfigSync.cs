@@ -7,6 +7,7 @@ namespace WukongMp.PvP.Serverside.Services;
 [Service]
 public sealed partial class RoomConfigSync(RoomConfigWatcher watcher, PvpConfig config)
 {
+    [UpdateOrder(0)]
     private void Update()
     {
         watcher.Poll(Time.Elapsed);
