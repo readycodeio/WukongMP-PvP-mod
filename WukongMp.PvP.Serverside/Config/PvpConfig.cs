@@ -1,9 +1,11 @@
-﻿using WukongMp.Pvp.Common.Archetypes;
+﻿using ReadyM.SDK.Attributes;
+using WukongMp.Pvp.Common.Archetypes;
 
 namespace WukongMp.PvP.Serverside.Config;
 
 /// Initial values for <see cref="PvpState" />.
-public sealed class PvpConfig
+[ModConfig]
+public sealed partial class PvpConfig
 {
     public int LevelId { get; set; }
     public int TournamentRounds { get; set; } = 3;
