@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using b1;
+using Friflo.Json.Fliox.Transform.Query.Ops;
 using ReadyM.Api.Command;
 using ReadyM.SDK.Attributes;
 using ReadyM.SDK.Client;
@@ -16,7 +17,9 @@ using WukongMp.PvP.WukongUtils;
 using WukongMp.Sdk.Api;
 using WukongMp.Sdk.Archetypes.Extensions;
 using WukongMp.Sdk.Archetypes.Mixins;
+using WukongMp.Sdk.Common.Archetypes;
 using WukongMp.Sdk.Common.Archetypes.Mixins;
+using WukongMp.Sdk.Services;
 using PvpMode = WukongMp.PvP.Gamemode.PvpMode;
 
 namespace WukongMp.PvP.Services;
@@ -33,8 +36,8 @@ public sealed partial class CommandHandlers(
 {
     private void Start()
     {
-        var allmonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
-        consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn), allmonsterNames);
+        var allMonsterNames = TamerKinds.GetAllValidTamerKinds().Select(x => x.Name);
+        consoleApi.AddCommand("spawn", ConsoleCommand.Create(RequestSpawn), allMonsterNames);
         consoleApi.AddCommand("spectator", ConsoleCommand.Create(SetSpectatorStatus));
         consoleApi.AddCommand("instant_cooldown", ConsoleCommand.Create(cheatManager.ToggleNoSkillsCooldown));
         consoleApi.AddCommand("infinite_mana", ConsoleCommand.Create(cheatManager.ToggleInfiniteMana));
@@ -45,6 +48,7 @@ public sealed partial class CommandHandlers(
         consoleApi.AddCommand("shrine", ConsoleCommand.Create(TeleportToShrine));
         consoleApi.AddCommand("pvp_level", ConsoleCommand.Create(TeleportToPvpLevel));
         consoleApi.AddCommand("cheats", ConsoleCommand.Create(ToggleCheats));
+        consoleApi.AddCommand("toggle_bot_markers", ConsoleCommand.Create(ToggleBotMarkers));
     }
 
     private void RequestSpawn(string unitName, int count = 1)
@@ -150,5 +154,27 @@ public sealed partial class CommandHandlers(
     {
         var enabledAlready = cheatManager.CheatsEnabled;
         pvpMode.SendEnableCheats(!enabledAlready);
+    }
+
+    private bool _markersEnabled = true;
+
+    private void ToggleBotMarkers()
+    {
+        if (_markersEnabled)
+        {
+            foreach (var tamer in entities.Query<Tamer>())
+            {
+                tamer.As<Character>().HideMarker();
+            }
+        }
+        else
+        {
+            foreach (var tamer in entities.Query<Tamer>())
+            {
+                tamer.As<Character>().SetMarkerMessage(tamer.Nickname.ToString(), PvpUtils.GetTeamColorString(tamer.TeamId));
+            }
+        }
+
+        _markersEnabled = !_markersEnabled;
     }
 }
