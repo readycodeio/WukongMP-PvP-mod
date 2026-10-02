@@ -11,6 +11,7 @@ using GSE.GSUI;
 using HarmonyLib;
 using PreludeLib.Attributes;
 using ReadyM.Api.Multiplayer.Protocol;
+using ReadyM.SDK.Client.Entities;
 using ResB1;
 using UnrealEngine.Runtime;
 using UnrealEngine.UMG;
@@ -18,6 +19,7 @@ using WukongMp.Api;
 using WukongMp.Api.Configuration;
 using WukongMp.Api.Resources;
 using WukongMp.Api.WukongUtils;
+using WukongMp.Pvp.Common.Archetypes;
 using WukongMp.PvP.Configuration;
 using WukongMp.PvP.Resources;
 using WukongMp.Sdk.Api;
@@ -41,7 +43,7 @@ public static class PatchStartGameUiPvp
     {
         var playerMarkerActorClass = BGW_PreloadAssetMgr.Get(GameUtils.GetWorld()).TryGetCachedResourceObj<UClass>(PvpConstants.PlayerMarkerPath, ELoadResourceType.SyncLoadAndCache);
         var hasPak = playerMarkerActorClass != null;
-        var isConnected = WukongApi.Sync.IsConnected;
+        var isConnected = WukongApi.Entities.IsConnected;
         var isMachmaking = bool.TryParse(WukongApi.Configuration.GetLaunchParameter("USE_SHARED_SAVE", "false"), out var flag) && flag;
 
         if (!hasPak)
@@ -85,7 +87,7 @@ public static class PatchStartGameUiPvp
                 Logging.LogDebug("Continue UI name desc: {Description}", GSB1UIUtil.GetUIWordDescFText(EUIWordID.CONTINUE_GAME));
 
                 var slot = GSE_SaveGameUtil.GetArchiveSlotName(SaveFileType.Archive, PvpConstants.CharacterArchiveId);
-                var savePath = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{slot}.sav");
+                var savePath = FPaths.Combine(WukongApi.Services.Resolve<Mod>().ModDirectory, $"{slot}.sav");
 
                 if (!hasPak || !isConnected || isMachmaking)
                 {
@@ -164,7 +166,7 @@ public class PatchOnClickOpenMapUI
 {
     public static bool Prefix()
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         return false;
@@ -184,7 +186,7 @@ public class PatchShrineRegisterFunc
 
     public static bool Prefix(int FuncId)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         InteractionFuncDesc interactionFuncDesc = GameDBRuntime.GetInteractionFuncDesc(FuncId);
@@ -200,7 +202,7 @@ public class PatchGetCanTeleportGroupMapList
 {
     public static bool Prefix(ref List<int> __result)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
         __result = [];
@@ -235,10 +237,10 @@ public class PatchIsShowSettingUiOnly
 {
     public static bool Prefix(ref bool __result)
     {
-        if (!WukongApi.Sync.InArea)
+        if (!WukongApi.Entities.InArea)
             return true;
 
-        if (WukongApi.Services.Resolve<WukongPvpApi>().InPvpTournament)
+        if (WukongApi.Services.Resolve<IEntities>().World.InTournament)
         {
             __result = true;
             return false;
@@ -255,7 +257,7 @@ public class PatchOnClickOpenEquipUI
 {
     public static bool Prefix()
     {
-        return WukongApi.Sync.LocalMainCharacter?.IsSpectator is not true;
+        return WukongApi.Entities.LocalMainCharacter?.IsSpectator is not true;
     }
 }
 

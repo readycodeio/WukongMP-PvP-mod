@@ -1,15 +1,19 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
-using ReadyM.Relay.Server.Sdk.Ecs;
-using ReadyM.Relay.Server.Sdk.Ecs.Systems;
-using ReadyM.Wukong.Common.ECS.Components;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Server.Entities;
 using ReadyM.Wukong.Common.ECS.Values;
-using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
+using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
+using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
-namespace WukongMp.PvP.Serverside.Systems;
+namespace WukongMp.PvP.Serverside.Services;
 
-public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) : ModSystemBase
+[Service]
+public sealed partial class RoundEndHandler(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private enum PostRoundPhase
     {
@@ -23,7 +27,7 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
     private PostRoundPhase _phase;
     private int _lastRoundWinner;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
         if (_phase != PostRoundPhase.None)
         {
@@ -31,8 +35,7 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
             return;
         }
 
-        var inPvp = false;
-        ecs.Query<PvpStateComponent>((ref pvp) => { inPvp = pvp.InPvP; });
+        var inPvp = entities.World.InPvP;
 
         if (!inPvp)
             return;
@@ -42,26 +45,30 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
 
         // check if all combatants but one are dead
         List<int> aliveTeamIds = [];
-        ecs.Query<MainCharacterComponent, HpComponent, TeamComponent>((ref main, ref hp, ref team) =>
+
+        foreach (var main in entities.Query<MainCharacter>())
         {
             if (main.IsSpectator && main.SpectatorReason != SpectatorReason.Death)
-                return;
+                continue;
 
-            if (hp.IsDead && !main.IsTransformed)
-                return;
+            if (main is { IsDead: true, IsTransformed: false })
+                continue;
 
-            aliveTeamIds.Add(team.TeamId);
-        });
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+                continue;
+
+            aliveTeamIds.Add(player.TeamId);
+        }
 
         List<int> aliveMonsters = [];
 
-        ecs.Query<TamerComponent, HpComponent, TeamComponent>((ref _, ref hp, ref team) =>
+        foreach (var tamer in entities.Query<Tamer>())
         {
-            if (hp.IsDead || !CommonConstants.CompetingTeamIds.Contains(team.TeamId))
-                return;
+            if (tamer.IsDead || !CommonConstants.CompetingTeamIds.Contains(tamer.TeamId))
+                continue;
 
-            aliveMonsters.Add(team.TeamId);
-        });
+            aliveMonsters.Add(tamer.TeamId);
+        }
 
         var alivePlayersTeams = aliveTeamIds.Concat(aliveMonsters).ToList();
 
@@ -99,17 +106,15 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
     private void SendEndRound(int winningTeamId)
     {
         // set last round winner
-        ecs.Query<PvpStateComponent>((ref state) =>
-        {
-            state.SetLastRoundWinnerTeam(winningTeamId);
-            state.InPvP = false;
-        });
+
+        entities.World.AddRoundWinners(winningTeamId);
+        entities.World.SetInPvP(false);
 
         // send round end RPC to all players
-        ecs.Query<MainCharacterComponent>((ref player) =>
+        foreach (var main in entities.Query<MainCharacter>())
         {
-            rpc.SendEndRound(player.PlayerId, winningTeamId);
-        });
+            rpc.SendEndRound(main.PlayerId, winningTeamId);
+        }
 
         _lastRoundWinner = winningTeamId;
         EnterPhase(PostRoundPhase.EndDelay);
@@ -122,7 +127,7 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
     }
 
     /// <summary>
-    /// Drives the post-round sequence from the tick. It used to run on a thread pool timer, where
+    /// Drives the post-round sequence from the update. It used to run on a thread pool timer, where
     /// ComponentWriteContext.Current is not the server authoring scope, so writes to player-owned
     /// components silently lost the authoritative API flag and never overrode their owner.
     /// </summary>
@@ -155,20 +160,23 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
 
     private void ResetStatsAndDecide()
     {
-        HashSet<int> nonObserverTeams = [];
-        ecs.Query<MainCharacterComponent, TeamComponent>((ref player, ref team) =>
-        {
-            rpc.SendResetStats(player.PlayerId);
+        var state = entities.World.As<PvpState>();
 
-            if (!player.IsSpectator || player.SpectatorReason == SpectatorReason.Death)
+        HashSet<int> nonObserverTeams = [];
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            rpc.SendResetStats(main.PlayerId);
+
+            if (!main.IsSpectator || main.SpectatorReason == SpectatorReason.Death)
             {
-                nonObserverTeams.Add(team.TeamId);
+                if (!entities.TryLookup(main.PlayerId, out Player player))
+                    continue;
+
+                nonObserverTeams.Add(player.TeamId);
             }
-        });
+        }
 
         // start new round or end tournament
-        PvpStateComponent state = default;
-        ecs.Query<PvpStateComponent>((ref s) => { state = s; });
 
         Dictionary<int, int> teamWins = [];
         for (var i = 0; i < state.RoundWinnersCount; i++)
@@ -235,16 +243,20 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
 
     private void EndTournament(int winner)
     {
-        ecs.Query<PvpStateComponent>((ref s) => { s.InTournament = false; });
-        ecs.Query<PvPComponent>((ref pvp) => { pvp.IsReadyForPvP = false; });
-        ecs.Query<MainCharacterComponent>((ref player) => { rpc.SendEndTournament(player.PlayerId, winner); });
+        entities.World.SetInTournament(false);
+
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            main.SetIsReadyForPvP(false);
+            rpc.SendEndTournament(main.PlayerId, winner);
+        }
 
         EnterPhase(PostRoundPhase.None);
     }
 
     private void StartNextRound()
     {
-        ecs.Query<PvpStateComponent>((ref s) => { s.InPvP = true; });
+        entities.World.SetInPvP(true);
         rpc.SendRoundStartToAll();
 
         EnterPhase(PostRoundPhase.None);
@@ -255,14 +267,14 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
     {
         var dead = 0;
 
-        ecs.Query<MainCharacterComponent, HpComponent>((ref main, ref hp) =>
+        foreach (var main in entities.Query<MainCharacter>())
         {
             if (main.IsSpectator && main.SpectatorReason != SpectatorReason.Death)
-                return;
+                continue;
 
-            if (hp.IsDead && !main.IsTransformed)
+            if (main is { IsDead: true, IsTransformed: false })
                 dead++;
-        });
+        }
 
         return dead;
     }
@@ -273,11 +285,11 @@ public sealed class RoundEndSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) 
     {
         var present = false;
 
-        ecs.Query<TamerComponent>((ref tamer) =>
+        foreach (var tamer in entities.Query<Tamer>())
         {
             if (tamer.UnitPath == CommonConstants.DaShengPhaseOneUnitPath)
                 present = true;
-        });
+        }
 
         return present;
     }

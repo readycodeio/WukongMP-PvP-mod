@@ -1,4 +1,4 @@
-﻿namespace WukongMp.Pvp.Common;
+﻿namespace WukongMp.Pvp.Common.Data;
 
 public static class CommonConstants
 {

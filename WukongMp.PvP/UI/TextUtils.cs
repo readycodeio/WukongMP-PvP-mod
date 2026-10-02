@@ -1,5 +1,4 @@
-﻿using WukongMp.Api.Resources;
-using WukongMp.PvP.Resources;
+﻿using WukongMp.PvP.Resources;
 
 namespace WukongMp.PvP.UI;
 

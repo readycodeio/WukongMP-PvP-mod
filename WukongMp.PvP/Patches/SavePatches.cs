@@ -8,7 +8,7 @@ using PreludeLib.Attributes;
 using UnrealEngine.Runtime;
 using WukongMp.Api;
 using WukongMp.Api.Configuration;
-using WukongMp.PvP.GameMode;
+using WukongMp.PvP.Gamemode;
 using WukongMp.Sdk.Api;
 
 // ReSharper disable InconsistentNaming
@@ -29,7 +29,7 @@ public class PatchWindowsSaveGame
         if (!SlotName.StartsWith("ArchiveSaveFile"))
             return true;
 
-        __result = FPaths.Combine(WukongApi.Files.GetModDirectory<Mod>(), $"{SlotName}.sav");
+        __result = FPaths.Combine(WukongApi.Services.Resolve<Mod>().ModDirectory, $"{SlotName}.sav");
         return false;
     }
 }
