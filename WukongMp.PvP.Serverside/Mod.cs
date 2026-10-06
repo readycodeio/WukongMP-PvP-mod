@@ -1,47 +1,22 @@
-﻿using JetBrains.Annotations;
-using Microsoft.Extensions.Logging;
-using ReadyM.Relay.Server.Sdk;
-using ReadyM.Relay.Server.Sdk.Ecs;
-using ReadyM.Relay.Server.Sdk.Ecs.Components;
-using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
-using WukongMp.PvP.Serverside.Systems;
-using WukongMp.Sdk.Serverside;
+﻿using Microsoft.Extensions.Logging;
+using ReadyM.Api.DI;
+using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Server.Entities;
+using WukongMp.PvP.Serverside.Config;
 
 namespace WukongMp.PvP.Serverside;
 
-[UsedImplicitly]
-public class Mod : ServerModBase
+[ModEntry]
+public sealed partial class Mod(
+    IDependencyContainer services,
+    IEntities entities,
+    PvpConfig config,
+    ILogger logger
+)
 {
-    protected override void RegisterComponents(IComponentRegistry registry)
+    private void Init()
     {
-        registry.RegisterComponent<PvPComponent>();
-        registry.RegisterComponent<PvpStateComponent>();
-    }
-
-    protected override void Init()
-    {
-        RegisterConfig<PvpConfig>();
-        var initialPvpState = Services.Resolve<PvpConfig>().ToInitialState();
-
-        RegisterArchetypes(registry =>
-        {
-            registry.ModifyArchetype(WukongArchetypes.MainCharacterArchetype, b => { b.Add<PvPComponent>(); });
-
-            registry.ModifyArchetype(WukongArchetypes.WorldArchetype, b => b.Add(initialPvpState));
-        });
-
-        Services.RegisterSingleton<RpcHandlers>();
-
-        var logger = Services.Resolve<ILogger>();
-
-        // Watch for settings file change
-        Services.RegisterSingleton(new RoomConfigApplier(Services.Resolve<EcsApi>(), Services.Resolve<PvpConfig>(), ModDirectory, logger));
-
-        Services.RegisterSystem<RoundStartTimerSystem>();
-        Services.RegisterSystem<RoundEndSystem>();
-        Services.RegisterSystem<AntiStallSystem>();
-        Services.RegisterSystem<RoomConfigSystem>();
+        services.RegisterSingleton(new RoomConfigWatcher(entities, config, ModDirectory, logger));
 
         logger.LogInformation("Serverside PvP mod initialized");
     }

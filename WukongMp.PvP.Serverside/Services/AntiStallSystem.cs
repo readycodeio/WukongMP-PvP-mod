@@ -1,15 +1,19 @@
 ﻿using System.Numerics;
 using Microsoft.Extensions.Logging;
 using ReadyM.Api.Idents;
-using ReadyM.Relay.Server.Sdk.Ecs;
-using ReadyM.Relay.Server.Sdk.Ecs.Systems;
-using ReadyM.Wukong.Common.ECS.Components;
-using WukongMp.Pvp.Common;
-using WukongMp.Pvp.Common.ECS;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Attributes;
+using ReadyM.SDK.Archetypes.Core;
+using ReadyM.SDK.Server.Entities;
+using WukongMp.Pvp.Common.Archetypes;
+using WukongMp.Pvp.Common.Data;
+using WukongMp.Sdk.Common.Archetypes;
+using WukongMp.Sdk.Common.Archetypes.Mixins;
 
-namespace WukongMp.PvP.Serverside.Systems;
+namespace WukongMp.PvP.Serverside.Services;
 
-public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger) : ModSystemBase
+[Service]
+public sealed partial class AntiStallSystem(IEntities entities, RpcHandlers rpc, ILogger logger)
 {
     private struct PlayerEngagementData
     {
@@ -30,7 +34,6 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
     private AntiStallState _state = AntiStallState.Monitoring;
 
     private const ulong TickInterval = 10; // Check every 10 ticks
-    private ulong _tickCounter;
     private float _elapsedTime;
     private bool _isReset;
 
@@ -44,26 +47,18 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
 
     // Bots count towards activity, but don't get stall damage
     private readonly List<(Vector3 Position, int TeamId)> _botCombatants = [];
-    
+
     private float _botHpPrevious;
     private float _botHpCurrent;
 
     private int _decayRounds;
 
-    protected override void OnUpdate(UpdateTick tick)
+    private void Update()
     {
-        var queryState = (AntiStallEnabled: false, InPvP: false);
-
-        ecs.Query(ref queryState, static (ref PvpStateComponent pvp, ref (bool AntiStallEnabled, bool InPvP) state) =>
-        {
-            state.AntiStallEnabled = pvp.AntiStallEnabled;
-            state.InPvP = pvp.InPvP;
-        });
-
-        if (!queryState.AntiStallEnabled)
+        if (!entities.World.AntiStallEnabled)
             return;
 
-        if (!queryState.InPvP)
+        if (!entities.World.InPvP)
         {
             ResetState();
             return;
@@ -71,44 +66,50 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
 
         _isReset = false;
 
-        if (_tickCounter++ % TickInterval != 0)
+        if (Time.Ticks % TickInterval != 0)
         {
-            _elapsedTime += tick.DeltaTime;
+            _elapsedTime += Time.DeltaTime;
             return;
         }
 
-        ecs.Query<MainCharacterComponent, TransformComponent, HpComponent, TeamComponent>((ref main, ref trans, ref hp, ref team) =>
+        foreach (var main in entities.Query<MainCharacter>())
         {
             if (main.IsSpectator)
             {
                 _playerEngagement.Remove(main.PlayerId);
                 _playerEngagementMultipliers.Remove(main.PlayerId);
-                return;
+                continue;
             }
 
             if (!_playerEngagement.TryGetValue(main.PlayerId, out var data))
             {
                 data = new PlayerEngagementData();
             }
+            
+            if (!entities.TryLookup(main.PlayerId, out Player player))
+            {
+                logger.LogWarning("Player {Player} not found in entities", main.PlayerId);
+                continue;
+            }
 
-            data.LastPosition = trans.Position;
-            data.ForwardDirection = trans.Rotation;
-            data.TeamId = team.TeamId;
+            data.LastPosition = main.Position;
+            data.ForwardDirection = main.Rotation;
+            data.TeamId = player.TeamId;
             data.PrevHp = data.CurrentHp;
-            data.CurrentHp = hp.Hp;
+            data.CurrentHp = main.Hp;
 
             _playerEngagement[main.PlayerId] = data;
-        });
-        
+        }
+
         _botCombatants.Clear();
         _botHpPrevious = _botHpCurrent;
         _botHpCurrent = 0f;
 
-        ecs.Query<TamerComponent, TransformComponent, HpComponent, TeamComponent>((ref tamer, ref trans, ref hp, ref team) =>
+        foreach (var tamer in entities.Query<Tamer>())
         {
-            _botCombatants.Add((trans.Position, team.TeamId));
-            _botHpCurrent += hp.Hp;
-        });
+            _botCombatants.Add((tamer.Position, tamer.TeamId));
+            _botHpCurrent += tamer.Hp;
+        }
 
         UpdatePlayerMultipliers();
         UpdateEngagementScore();
@@ -147,7 +148,7 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
                 _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
             }
         }
-        
+
         if (_botCombatants.Count > 0 && Math.Abs(_botHpPrevious - _botHpCurrent) > CommonConstants.FloatComparisonTolerance)
         {
             _roomEngagementScore += AntiStallConfig.DamageRoomEngagementScore;
@@ -163,7 +164,7 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         var playerFacingDictionary = CalculatePlayerFacing();
         foreach (var playerId in _playerEngagement.Keys)
         {
-            double current = _playerEngagementMultipliers.TryGetValue(playerId, out var val) ? val : 1.0;
+            double current = _playerEngagementMultipliers.GetValueOrDefault(playerId, 1.0);
 
             if (playerFacingDictionary.TryGetValue(playerId, out var isFacing) && isFacing)
             {
@@ -189,7 +190,7 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
 
         return facing;
     }
-    
+
     private bool IsFacingAnEnemy(PlayerEngagementData player)
     {
         foreach (var other in _playerEngagement.Values)
@@ -239,26 +240,35 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
     private void SetMonitoringState()
     {
         _state = AntiStallState.Monitoring;
-        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendHideAntiStall(main.PlayerId); });
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            rpc.SendHideAntiStall(main.PlayerId);
+        }
     }
 
     private void SetWarningState()
     {
         _state = AntiStallState.Warning;
         _warningTimer = 0f;
-        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendShowAntiStallWarning(main.PlayerId, AntiStallConfig.WarningDuration); });
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            rpc.SendShowAntiStallWarning(main.PlayerId, AntiStallConfig.WarningDuration);
+        }
     }
 
     private void SetActiveState()
     {
         _state = AntiStallState.Active;
         _activeTimer = 0f;
-        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendShowAntiStallAction(main.PlayerId); });
-        var baseDecayRate = AntiStallConfig.BaseAttributeDecayRate + AntiStallConfig.AttributeDecayMultiplier * _decayRounds;
-        foreach (var kvp in _playerEngagementMultipliers)
+
+        foreach (var main in entities.Query<MainCharacter>())
         {
-            var playerId = kvp.Key;
-            var multiplier = kvp.Value;
+            rpc.SendShowAntiStallAction(main.PlayerId);
+        }
+
+        var baseDecayRate = AntiStallConfig.BaseAttributeDecayRate + AntiStallConfig.AttributeDecayMultiplier * _decayRounds;
+        foreach (var (playerId, multiplier) in _playerEngagementMultipliers)
+        {
             var randomCoefficient = GetRandomCoefficient();
             var scaledDecay = baseDecayRate * multiplier * AntiStallConfig.ActiveDuration * randomCoefficient;
             logger.LogDebug("Applying anti-stall decay to player {0}: baseDecayRate={1}, multiplier={2}, random={3}, scaledDecay={4}", playerId, baseDecayRate, multiplier, randomCoefficient, scaledDecay);
@@ -286,6 +296,9 @@ public sealed class AntiStallSystem(EcsApi ecs, RpcHandlers rpc, ILogger logger)
         _botHpPrevious = 0f;
         _botHpCurrent = 0f;
 
-        ecs.Query<MainCharacterComponent>((ref main) => { rpc.SendHideAntiStall(main.PlayerId); });
+        foreach (var main in entities.Query<MainCharacter>())
+        {
+            rpc.SendHideAntiStall(main.PlayerId);
+        }
     }
 }

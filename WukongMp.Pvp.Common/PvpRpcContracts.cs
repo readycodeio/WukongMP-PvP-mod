@@ -1,9 +1,10 @@
 ﻿using System.Numerics;
 using ReadyM.Api.Multiplayer;
+using ReadyM.SDK.Attributes;
 
 namespace WukongMp.Pvp.Common;
 
-[ServerRpcContracts]
+[RpcContracts]
 public static partial class PvpRpcContracts
 {
     [ClientToServer] public static partial void EnableCheats(bool enabled);
