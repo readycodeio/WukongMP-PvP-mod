@@ -14,7 +14,7 @@ public sealed partial class Mod(
     ILogger logger
 )
 {
-    private void Start()
+    private void Init()
     {
         services.RegisterSingleton(new RoomConfigWatcher(entities, config, ModDirectory, logger));
 

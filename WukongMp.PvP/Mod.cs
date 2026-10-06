@@ -13,7 +13,7 @@ namespace WukongMp.PvP;
 [ModEntry]
 public sealed partial class Mod(IDependencyContainer services, ILogger logger)
 {
-    private void Start()
+    private void Init()
     {
         logger.LogInformation("Initializing PvP mod");
 
