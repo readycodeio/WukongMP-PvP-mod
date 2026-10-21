@@ -5,9 +5,7 @@ using Yooni.Native.Container;
 
 namespace WukongMp.Pvp.Common.Archetypes;
 
-[ArchetypeMixin]
-[Replicated]
-[Propagates(Propagation.ServerAuthoritative)]
+[ArchetypeMixin(Replication.ServerAuthoritative)]
 [Extends(typeof(World))]
 public readonly partial struct PvpState
 {

@@ -3,9 +3,7 @@ using WukongMp.Sdk.Common.Archetypes;
 
 namespace WukongMp.Pvp.Common.Archetypes;
 
-[ArchetypeMixin]
-[Replicated]
-[Propagates(Propagation.OwnershipBased)]
+[ArchetypeMixin(Replication.OwnershipBased)]
 [Extends(typeof(MainCharacter))]
 public readonly partial struct PvpStateData
 {

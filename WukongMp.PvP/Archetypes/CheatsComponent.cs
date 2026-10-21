@@ -3,7 +3,7 @@ using WukongMp.Sdk.Common.Archetypes;
 
 namespace WukongMp.PvP.Archetypes;
 
-[ArchetypeMixin]
+[ArchetypeMixin(Replication.None)]
 [Extends(typeof(MainCharacter))]
 public partial struct CheatSettings
 {
